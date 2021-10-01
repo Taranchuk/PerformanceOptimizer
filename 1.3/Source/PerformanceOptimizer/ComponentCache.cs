@@ -19,7 +19,7 @@ namespace PerformanceOptimizer
 		{
 			//dictStopwatch.Restart();
 			var type = typeof(T);
-			if (!cachedThingComps.TryGetValue(type, out var thingComp) || thingComp is null)
+			if (!cachedThingComps.TryGetValue(type, out var thingComp))
 			{
 				cachedThingComps[type] = thingComp = thingWithComps.GetComp<T>();
 			}
@@ -73,7 +73,7 @@ namespace PerformanceOptimizer
 		public static T GetMapComponent<T>(this Map map) where T : MapComponent
 		{
 			var type = typeof(T);
-			if (!cachedMapComps.TryGetValue(type, out var mapComp) || mapComp is null)
+			if (!cachedMapComps.TryGetValue(type, out var mapComp))
 			{
 				cachedMapComps[type] = mapComp = map.GetComponent<T>();
 			}
@@ -85,7 +85,7 @@ namespace PerformanceOptimizer
 		public static T GetWorldComponent<T>(this World world) where T : WorldComponent
 		{
 			var type = typeof(T);
-			if (!cachedWorldComps.TryGetValue(type, out var worldComp) || worldComp is null)
+			if (!cachedWorldComps.TryGetValue(type, out var worldComp))
 			{
 				cachedWorldComps[type] = worldComp = world.GetComponent<T>();
 			}
@@ -97,7 +97,7 @@ namespace PerformanceOptimizer
 		public static T GetGameComponent<T>(this Game game) where T : GameComponent
 		{
 			var type = typeof(T);
-			if (!cachedGameComps.TryGetValue(type, out var gameComp) || gameComp is null)
+			if (!cachedGameComps.TryGetValue(type, out var gameComp))
 			{
 				cachedGameComps[type] = gameComp = game.GetComponent<T>();
 			}

@@ -22,7 +22,7 @@ namespace PerformanceOptimizer
 
         public static HashSet<string> typesToSkip = new HashSet<string>
         {
-            "ICSharpCode", "Newtonsoft", "TranspilerExplorer", "Ionic",
+            "ICSharpCode", "Newtonsoft", "TranspilerExplorer", "Ionic"
         };
         private static List<Type> types;
         public static List<Type> GetTypesToParse()
