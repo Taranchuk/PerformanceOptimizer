@@ -49,6 +49,7 @@ namespace PerformanceOptimizer
         static GetCompPatches()
         {
             harmony = new Harmony("PerformanceOptimizer.Patches");
+            harmony.PatchAll();
             total.Restart();
             var methodsCallingMapGetComp = new HashSet<MethodInfo>();
             var methodsCallingWorldGetComp = new HashSet<MethodInfo>();
@@ -185,6 +186,46 @@ namespace PerformanceOptimizer
             var elapsed = (float)total.ElapsedTicks / Stopwatch.Frequency;
             Log.Message("Parsed and Transpiled for get comp replacement: " + elapsed);
             total.Stop();
+        }
+
+        [HarmonyPatch(typeof(MapComponentUtility), "FinalizeInit")]
+        public class FinalizeInit_Patch
+        {
+            public static void Postfix(Map map)
+            {
+                Log.Message("Loaded map: " + map + ", it has " + map.components.Count + " comps");
+            }
+        }
+        [HarmonyPatch(typeof(WorldComponentUtility), "FinalizeInit")]
+        public class World_Patch
+        {
+            public static void Postfix(World world)
+            {
+                Log.Message("Loaded world: " + world + ", it has " + world.components.Count + " comps");
+            }
+        }
+
+        [HarmonyPatch(typeof(GameComponentUtility), "FinalizeInit")]
+        public class GameComponentUtility_Patch
+        {
+            public static void Postfix()
+            {
+                Log.Message("Loaded game: " + Current.Game + ", it has " + Current.Game.components.Count + " comps");
+            }
+        }
+
+        [HarmonyPatch(typeof(ThingWithComps), "SpawnSetup")]
+        public static class Thing_SpawnSetup_Patch
+        {
+            public static HashSet<ThingDef> reportedDefs = new HashSet<ThingDef>();
+            public static void Postfix(ThingWithComps __instance)
+            {
+                if (__instance.comps?.Count > 0 && !reportedDefs.Contains(__instance.def))
+                {
+                    reportedDefs.Add(__instance.def);
+                    Log.Message("Loaded ThingWithComps: " + __instance.def + ", it has " + __instance.comps?.Count + " comps");
+                }
+            }
         }
 
         private static void Patch(HashSet<MethodInfo> methodsToPatch, HarmonyMethod transpiler)
