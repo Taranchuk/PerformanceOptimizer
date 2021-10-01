@@ -11,31 +11,46 @@ namespace PerformanceOptimizer
 {
 	public static class CompsOfType<T>
 	{
-		public static Dictionary<int, T> compsByThing = new Dictionary<int, T>();
+		public static Dictionary<ThingWithComps, T> thingCompsByThing = new Dictionary<ThingWithComps, T>();
+		public static Dictionary<Map, T> mapCompsByMap = new Dictionary<Map, T>();
 	}
 	[StaticConstructorOnStartup]
 	public static class ComponentCache
 	{
 		private static Stopwatch dictStopwatch = new Stopwatch();
 
-		private struct ThingKey
-        {
-
-        }
+		public static Dictionary<Type, ThingComp>[] thingCompsByThings = new Dictionary<Type, ThingComp>[999999];
 
 		public static Dictionary<int, ThingComp> cachedThingComps = new Dictionary<int, ThingComp>();
 		public static T GetThingCompDict<T>(this ThingWithComps thingWithComps) where T : ThingComp
 		{
 			//dictStopwatch.Restart();
-			var type = typeof(T);
-			var combinedHash = type.GetHashCode() + thingWithComps.GetHashCode();
-			if (!cachedThingComps.TryGetValue(combinedHash, out var thingComp))
-			{
-				cachedThingComps[combinedHash] = thingComp = thingWithComps.GetComp<T>();
+			//var thingComps = thingCompsByThings[thingWithComps.thingIDNumber];
+			//if (thingComps is null)
+            //{
+			//	var dict = new Dictionary<Type, ThingComp>();
+			//	if (thingWithComps.comps != null)
+            //    {
+			//		foreach (var comp in thingWithComps.comps)
+			//		{
+			//			dict[comp.GetType()] = comp;
+			//		}
+			//	}
+			//	thingCompsByThings[thingWithComps.thingIDNumber] = thingComps = dict;
+			//}
+			//var type = typeof(T);
+			//if (!thingComps.TryGetValue(type, out var thingComp))
+            //{
+			//	thingComps[type] = thingComp = thingWithComps.GetComp<T>();
+			//}
+
+			if (!CompsOfType<T>.thingCompsByThing.TryGetValue(thingWithComps, out T thingComp))
+            {
+				CompsOfType<T>.thingCompsByThing[thingWithComps] = thingComp = thingWithComps.GetComp<T>();
 			}
 			//dictStopwatch.LogTime("Dict approach: ");
 			//Log.Message("Returning thing comp: " + thingComp + ", total count of thing comps is " + (thingWithComps.comps?.Count ?? 0));
-			return thingComp as T;
+			return thingComp;
 		}
 
 		private static Stopwatch vanillaStopwatch = new Stopwatch();
@@ -82,11 +97,9 @@ namespace PerformanceOptimizer
 		private static Dictionary<int, MapComponent> cachedMapComps = new Dictionary<int, MapComponent>();
 		public static T GetMapComponent<T>(this Map map) where T : MapComponent
 		{
-			var type = typeof(T);
-			var combinedHash = type.GetHashCode() + map.GetHashCode();
-			if (!cachedMapComps.TryGetValue(combinedHash, out var mapComp))
+			if (!CompsOfType<T>.mapCompsByMap.TryGetValue(map, out T mapComp))
 			{
-				cachedMapComps[combinedHash] = mapComp = map.GetComponent<T>();
+				CompsOfType<T>.mapCompsByMap[map] = mapComp = map.GetComponent<T>();
 			}
 			//Log.Message("Returning map comp: " + mapComp + ", total count of map comps is " + map.components.Count);
 			return mapComp as T;
