@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31410.357
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceOptimizer", "PerformanceOptimizer.csproj", "{4BCCC822-6A50-4E3C-832F-1959CD1EE2AD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4BCCC822-6A50-4E3C-832F-1959CD1EE2AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BCCC822-6A50-4E3C-832F-1959CD1EE2AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BCCC822-6A50-4E3C-832F-1959CD1EE2AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BCCC822-6A50-4E3C-832F-1959CD1EE2AD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {23A75FBD-43D5-4C90-A967-652310D2813C}
+	EndGlobalSection
+EndGlobal
