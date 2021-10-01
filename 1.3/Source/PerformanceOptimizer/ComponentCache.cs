@@ -27,7 +27,7 @@ namespace PerformanceOptimizer
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T GetThingCompDict<T>(this ThingWithComps thingWithComps) where T : ThingComp
 		{
-			//dictStopwatch.Restart();
+			dictStopwatch.Restart();
 			//var thingComps = thingCompsByThings[thingWithComps.thingIDNumber];
 			//if (thingComps is null)
             //{
@@ -51,7 +51,7 @@ namespace PerformanceOptimizer
             {
 				CompsOfType<T>.thingCompsByThing[thingWithComps] = thingComp = thingWithComps.GetComp<T>();
 			}
-			//dictStopwatch.LogTime("Dict approach: ");
+			dictStopwatch.LogTime("Dict approach: ");
 			//Log.Message("Returning thing comp: " + thingComp + ", total count of thing comps is " + (thingWithComps.comps?.Count ?? 0));
 			return thingComp;
 		}

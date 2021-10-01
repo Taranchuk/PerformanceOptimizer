@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Verse;
@@ -275,6 +276,7 @@ namespace PerformanceOptimizer
         }
 
         private static Dictionary<Stopwatch, StopwatchData> stopwatches = new Dictionary<Stopwatch, StopwatchData>();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LogTime(this Stopwatch stopwatch, string log)
         {
             if (!stopwatches.TryGetValue(stopwatch, out var stats))
