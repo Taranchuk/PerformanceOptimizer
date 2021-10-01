@@ -9,19 +9,29 @@ using Verse;
 
 namespace PerformanceOptimizer
 {
+	public static class CompsOfType<T>
+	{
+		public static Dictionary<int, T> compsByThing = new Dictionary<int, T>();
+	}
 	[StaticConstructorOnStartup]
 	public static class ComponentCache
 	{
 		private static Stopwatch dictStopwatch = new Stopwatch();
 
-		public static Dictionary<Type, ThingComp> cachedThingComps = new Dictionary<Type, ThingComp>();
+		private struct ThingKey
+        {
+
+        }
+
+		public static Dictionary<int, ThingComp> cachedThingComps = new Dictionary<int, ThingComp>();
 		public static T GetThingCompDict<T>(this ThingWithComps thingWithComps) where T : ThingComp
 		{
 			//dictStopwatch.Restart();
 			var type = typeof(T);
-			if (!cachedThingComps.TryGetValue(type, out var thingComp))
+			var combinedHash = type.GetHashCode() + thingWithComps.GetHashCode();
+			if (!cachedThingComps.TryGetValue(combinedHash, out var thingComp))
 			{
-				cachedThingComps[type] = thingComp = thingWithComps.GetComp<T>();
+				cachedThingComps[combinedHash] = thingComp = thingWithComps.GetComp<T>();
 			}
 			//dictStopwatch.LogTime("Dict approach: ");
 			//Log.Message("Returning thing comp: " + thingComp + ", total count of thing comps is " + (thingWithComps.comps?.Count ?? 0));
@@ -69,13 +79,14 @@ namespace PerformanceOptimizer
 			return thingWithComps.GetCompVanilla<T>();
 		}
 
-		private static Dictionary<Type, MapComponent> cachedMapComps = new Dictionary<Type, MapComponent>();
+		private static Dictionary<int, MapComponent> cachedMapComps = new Dictionary<int, MapComponent>();
 		public static T GetMapComponent<T>(this Map map) where T : MapComponent
 		{
 			var type = typeof(T);
-			if (!cachedMapComps.TryGetValue(type, out var mapComp))
+			var combinedHash = type.GetHashCode() + map.GetHashCode();
+			if (!cachedMapComps.TryGetValue(combinedHash, out var mapComp))
 			{
-				cachedMapComps[type] = mapComp = map.GetComponent<T>();
+				cachedMapComps[combinedHash] = mapComp = map.GetComponent<T>();
 			}
 			//Log.Message("Returning map comp: " + mapComp + ", total count of map comps is " + map.components.Count);
 			return mapComp as T;
