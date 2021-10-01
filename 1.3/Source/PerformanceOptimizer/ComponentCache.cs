@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Verse;
@@ -22,6 +23,8 @@ namespace PerformanceOptimizer
 		public static Dictionary<Type, ThingComp>[] thingCompsByThings = new Dictionary<Type, ThingComp>[999999];
 
 		public static Dictionary<int, ThingComp> cachedThingComps = new Dictionary<int, ThingComp>();
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T GetThingCompDict<T>(this ThingWithComps thingWithComps) where T : ThingComp
 		{
 			//dictStopwatch.Restart();
@@ -74,6 +77,7 @@ namespace PerformanceOptimizer
 			return null;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T TryGetCompDict<T>(this Thing thing) where T : ThingComp
 		{
 			ThingWithComps thingWithComps = thing as ThingWithComps;
@@ -95,6 +99,8 @@ namespace PerformanceOptimizer
 		}
 
 		private static Dictionary<int, MapComponent> cachedMapComps = new Dictionary<int, MapComponent>();
+		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T GetMapComponent<T>(this Map map) where T : MapComponent
 		{
 			if (!CompsOfType<T>.mapCompsByMap.TryGetValue(map, out T mapComp))
@@ -106,6 +112,7 @@ namespace PerformanceOptimizer
 		}
 
 		private static Dictionary<Type, WorldComponent> cachedWorldComps = new Dictionary<Type, WorldComponent>();
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T GetWorldComponent<T>(this World world) where T : WorldComponent
 		{
 			var type = typeof(T);
@@ -118,6 +125,7 @@ namespace PerformanceOptimizer
 		}
 
 		private static Dictionary<Type, GameComponent> cachedGameComps = new Dictionary<Type, GameComponent>();
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T GetGameComponent<T>(this Game game) where T : GameComponent
 		{
 			var type = typeof(T);
