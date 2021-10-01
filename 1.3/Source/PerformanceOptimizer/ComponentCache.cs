@@ -19,7 +19,7 @@ namespace PerformanceOptimizer
 		{
 			//dictStopwatch.Restart();
 			var type = typeof(T);
-			if (!cachedThingComps.TryGetValue(type, out var thingComp))
+			if (!cachedThingComps.TryGetValue(type, out var thingComp) || thingComp is null)
 			{
 				cachedThingComps[type] = thingComp = thingWithComps.GetComp<T>();
 			}
