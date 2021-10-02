@@ -35,10 +35,10 @@ namespace PerformanceOptimizer
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T GetThingCompDict<T>(this ThingWithComps thingWithComps) where T : ThingComp
 		{
-			dictStopwatch.Restart();
+			//dictStopwatch.Restart();
 			if (thingWithComps.comps == null)
             {
-				dictStopwatch.LogTime("Dict approach: ");
+				//dictStopwatch.LogTime("Dict approach: ");
 				return default(T);
 			}
 			for (int i = 0; i < thingWithComps.comps.Count; i++)
@@ -46,7 +46,7 @@ namespace PerformanceOptimizer
 				if (thingWithComps.comps[i].GetType() == typeof(T))
 				{
 					//RegisterComp(thingWithComps.comps[i].GetType());
-					dictStopwatch.LogTime("Dict approach: ");
+					//dictStopwatch.LogTime("Dict approach: ");
 					return thingWithComps.comps[i] as T;
 				}
 			}
@@ -56,7 +56,7 @@ namespace PerformanceOptimizer
 				if (thingWithComps.comps[i].GetType() is T)
 				{
 					//RegisterComp(typeof(T));
-					dictStopwatch.LogTime("Dict approach: ");
+					//dictStopwatch.LogTime("Dict approach: ");
 					return thingWithComps.comps[i] as T;
 				}
 			}
