@@ -90,6 +90,129 @@ namespace PerformanceOptimizer
         }
     }
 
+    [HarmonyPatch(typeof(AlertsReadout), "AlertsReadoutUpdate")]
+    public static class AlertsReadoutUpdate_Prefix
+    {
+    
+        [HarmonyPriority(Priority.First)]
+        public static bool Prefix(AlertsReadout __instance)
+        {
+            if (Event.current.mousePosition.x < (UI.screenWidth - AlertsReadoutOnGUI_Prefix.xTest))
+            {
+                AlertsReadoutUpdate_Mini(__instance);
+                return false;
+            }
+            return true;
+        }
+
+        public static void AlertsReadoutUpdate_Mini(AlertsReadout __instance)
+        {
+            __instance.curAlertIndex++;
+            if (__instance.curAlertIndex >= 24)
+            {
+                __instance.curAlertIndex = 0;
+            }
+            var alerts = __instance.AllAlerts.Where(x => x.Priority == AlertPriority.Critical || x.Priority == AlertPriority.High).ToList();
+            for (int i = __instance.curAlertIndex; i < alerts.Count; i += 24)
+            {
+                __instance.CheckAddOrRemoveAlert(alerts[i]);
+            }
+
+            for (int num3 = alerts.Count - 1; num3 >= 0; num3--)
+            {
+                Alert alert = alerts[num3];
+                try
+                {
+                    alerts[num3].AlertActiveUpdate();
+                }
+                catch (Exception ex)
+                {
+                    Log.ErrorOnce("Exception updating alert " + alert.ToString() + ": " + ex.ToString(), 743575);
+                    alerts.RemoveAt(num3);
+                }
+            }
+        }
+    }
+
+
+    [HarmonyPatch(typeof(AlertsReadout), "AlertsReadoutOnGUI")]
+    public static class AlertsReadoutOnGUI_Prefix
+    {
+        [TweakValue("0", 0, 2000)] public static float xTest = 154;
+        [HarmonyPriority(Priority.First)]
+        public static bool Prefix(AlertsReadout __instance)
+        {
+            if (Event.current.mousePosition.x < (UI.screenWidth - xTest))
+            {
+                AlertsReadoutOnGUI_Mini(__instance);
+                return false;
+            }
+            return true;
+        }
+
+        private static float lastFinalY;
+        public static void AlertsReadoutOnGUI_Mini(AlertsReadout __instance)
+        {
+            if (Event.current.type == EventType.Layout || Event.current.type == EventType.MouseDrag || __instance.activeAlerts.Count == 0)
+            {
+                return;
+            }
+            Alert alert = null;
+            AlertPriority alertPriority = AlertPriority.Critical;
+            bool flag = false;
+            float num = 0f;
+            var activeAlerts = __instance.activeAlerts.Where(x => x.Priority == AlertPriority.Critical || x.Priority == AlertPriority.High).ToList();
+            for (int i = 0; i < activeAlerts.Count; i++)
+            {
+                num += activeAlerts[i].Height;
+            }
+            float num2 = Find.LetterStack.LastTopY - num;
+            Rect rect = new Rect((float)UI.screenWidth - 154f, num2, 154f, lastFinalY - num2);
+            float num3 = GenUI.BackgroundDarkAlphaForText();
+            if (num3 > 0.001f)
+            {
+                GUI.color = new Color(1f, 1f, 1f, num3);
+                Widgets.DrawShadowAround(rect);
+                GUI.color = Color.white;
+            }
+            float num4 = num2;
+            if (num4 < 0f)
+            {
+                num4 = 0f;
+            }
+            for (int j = 0; j < __instance.PriosInDrawOrder.Count; j++)
+            {
+                AlertPriority alertPriority2 = __instance.PriosInDrawOrder[j];
+                for (int k = 0; k < activeAlerts.Count; k++)
+                {
+                    Alert alert2 = activeAlerts[k];
+                    if (alert2.Priority == alertPriority2)
+                    {
+                        if (!flag)
+                        {
+                            alertPriority = alertPriority2;
+                            flag = true;
+                        }
+                        Rect rect2 = alert2.DrawAt(num4, alertPriority2 != alertPriority);
+                        if (Mouse.IsOver(rect2))
+                        {
+                            alert = alert2;
+                            __instance.mouseoverAlertIndex = k;
+                        }
+                        num4 += rect2.height;
+                    }
+                }
+            }
+            lastFinalY = num4;
+            UIHighlighter.HighlightOpportunity(rect, "Alerts");
+            if (alert != null)
+            {
+                alert.DrawInfoPane();
+                PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Alerts, KnowledgeAmount.FrameDisplayed);
+                __instance.CheckAddOrRemoveAlert(alert);
+            }
+        }
+    }
 
     [HarmonyPatch(typeof(MainButtonsRoot), "DoButtons")]
     public static class MainButtonsRoot_DoButtons
