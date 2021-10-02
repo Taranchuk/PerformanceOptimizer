@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ComponentCache.cs" />
+    <Compile Include="UIPatches.cs" />
     <Compile Include="GetCompPatches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

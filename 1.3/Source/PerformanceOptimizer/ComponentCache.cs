@@ -12,7 +12,6 @@ namespace PerformanceOptimizer
 {
 	public static class CompsOfType<T>
 	{
-		public static Dictionary<ThingWithComps, T> thingCompsByThing = new Dictionary<ThingWithComps, T>();
 		public static Dictionary<Map, T> mapCompsByMap = new Dictionary<Map, T>();
 	}
 	[StaticConstructorOnStartup]
@@ -20,40 +19,48 @@ namespace PerformanceOptimizer
 	{
 		private static Stopwatch dictStopwatch = new Stopwatch();
 
-		public static Dictionary<Type, ThingComp>[] thingCompsByThings = new Dictionary<Type, ThingComp>[999999];
+		public static Dictionary<Type, int> calledStats = new Dictionary<Type, int>();
 
-		public static Dictionary<int, ThingComp> cachedThingComps = new Dictionary<int, ThingComp>();
-
+		private static void RegisterComp(Type type)
+        {
+			if (calledStats.ContainsKey(type))
+            {
+				calledStats[type]++;
+			}
+			else
+            {
+				calledStats[type] = 1;
+			}
+        }
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T GetThingCompDict<T>(this ThingWithComps thingWithComps) where T : ThingComp
 		{
-			//dictStopwatch.Restart();
-			//var thingComps = thingCompsByThings[thingWithComps.thingIDNumber];
-			//if (thingComps is null)
-            //{
-			//	var dict = new Dictionary<Type, ThingComp>();
-			//	if (thingWithComps.comps != null)
-            //    {
-			//		foreach (var comp in thingWithComps.comps)
-			//		{
-			//			dict[comp.GetType()] = comp;
-			//		}
-			//	}
-			//	thingCompsByThings[thingWithComps.thingIDNumber] = thingComps = dict;
-			//}
-			//var type = typeof(T);
-			//if (!thingComps.TryGetValue(type, out var thingComp))
-            //{
-			//	thingComps[type] = thingComp = thingWithComps.GetComp<T>();
-			//}
-
-			if (!CompsOfType<T>.thingCompsByThing.TryGetValue(thingWithComps, out T thingComp))
+			dictStopwatch.Restart();
+			if (thingWithComps.comps == null)
             {
-				CompsOfType<T>.thingCompsByThing[thingWithComps] = thingComp = thingWithComps.GetComp<T>();
+				dictStopwatch.LogTime("Dict approach: ");
+				return default(T);
 			}
-			//dictStopwatch.LogTime("Dict approach: ");
-			//Log.Message("Returning thing comp: " + thingComp + ", total count of thing comps is " + (thingWithComps.comps?.Count ?? 0));
-			return thingComp;
+			for (int i = 0; i < thingWithComps.comps.Count; i++)
+			{
+				if (thingWithComps.comps[i].GetType() == typeof(T))
+				{
+					//RegisterComp(thingWithComps.comps[i].GetType());
+					dictStopwatch.LogTime("Dict approach: ");
+					return thingWithComps.comps[i] as T;
+				}
+			}
+			
+			for (int i = 0; i < thingWithComps.comps.Count; i++)
+			{
+				if (thingWithComps.comps[i].GetType() is T)
+				{
+					//RegisterComp(typeof(T));
+					dictStopwatch.LogTime("Dict approach: ");
+					return thingWithComps.comps[i] as T;
+				}
+			}
+			return default(T);
 		}
 
 		private static Stopwatch vanillaStopwatch = new Stopwatch();
@@ -98,7 +105,6 @@ namespace PerformanceOptimizer
 			return thingWithComps.GetCompVanilla<T>();
 		}
 
-		private static Dictionary<int, MapComponent> cachedMapComps = new Dictionary<int, MapComponent>();
 		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T GetMapComponent<T>(this Map map) where T : MapComponent
@@ -138,10 +144,8 @@ namespace PerformanceOptimizer
 		}
 		public static void ResetComps()
 		{
-			cachedMapComps.Clear();
 			cachedWorldComps.Clear();
 			cachedGameComps.Clear();
-			cachedThingComps.Clear();
 		}
 	}
 }

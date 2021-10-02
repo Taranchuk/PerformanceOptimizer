@@ -16,6 +16,49 @@ namespace PerformanceOptimizer
     [StaticConstructorOnStartup]
     public static class GetCompPatches
     {
+        public static HashSet<string> mostCalledComps = new HashSet<string>
+        {
+            "RimWorld.CompQuality",
+            "Verse.CompAttachBase",
+            "Verse.CompEquippable",
+            "AlienRace.AlienPartGenerator+AlienComp",
+            "RimWorld.CompForbiddable",
+            "RimWorld.CompRottable",
+            "aRandomKiwi.GFM.Comp_Guard",
+            "RimWorld.CompBreakdownable",
+            "CaravanAdventures.CaravanStory.CompTalk",
+            "RimWorld.CompStyleable",
+            "LWM.DeepStorage.CompDeepStorage",
+            "RimWorld.CompPowerTrader",
+            "RimWorld.CompFlickable",
+            "VFECore.Abilities.CompAbilities",
+            "RimWorld.CompFacility",
+            "BestMix.CompBestMix",
+            "RimWorld.CompBiocodable",
+            "CombatExtended.CompAmmoUser",
+            "VFESecurity.CompPawnTracker",
+            "RimWorld.CompCanBeDormant",
+            "CombatExtended.CompInventory",
+            "RimWorld.CompIngredients",
+            "VFEV.Facepaint.CompFacepaint",
+            "RimWorld.CompDrug",
+            "RimWorld.CompEggLayer",
+            "RimWorld.CompAffectedByFacilities",
+            "RimWorld.CompSpawnSubplant",
+            "Verse.CompColorable",
+            "RimWorld.CompArt",
+            "PickUpAndHaul.CompHauledToInventory",
+            "CommonSense.CompUnloadChecker",
+            "Dark.Signs.Comp_Sign",
+            "Locks2.Core.LockComp",
+            "RimWorld.CompBecomeBuilding",
+            "Hospitality.CompGuest",
+            "CombatExtended.CompTacticalManager",
+            "RimWorld.CompReloadable",
+            "RimWorld.CompTransporter",
+            "DubsBadHygiene.CompBlockage",
+        };
+
         public static HashSet<string> assembliesToSkip = new HashSet<string>
         {
             "System", "Cecil", "Multiplayer", "Prepatcher", "HeavyMelee", "0Harmony", "UnityEngine", "mscorlib", "ICSharpCode", "Newtonsoft", "TranspilerExplorer"
@@ -228,6 +271,26 @@ namespace PerformanceOptimizer
             }
         }
 
+        [HarmonyPatch(typeof(ThingWithComps), "InitializeComps")]
+        public static class Thing_InitializeComps_Patch
+        {
+            public static void Postfix(ThingWithComps __instance)
+            {
+                if (__instance.comps != null)
+                {
+                    __instance.comps = __instance.comps.OrderBy(delegate(ThingComp x) 
+                    {
+                        var index = mostCalledComps.FirstIndexOf(y => y == x.GetType().ToString());
+                        if (index == -1)
+                        {
+                            return 99999;
+                        }
+                        return index;
+                    }).ToList();
+                }
+            }
+        }
+
         private static void Patch(HashSet<MethodInfo> methodsToPatch, HarmonyMethod transpiler)
         {
             foreach (var method in methodsToPatch)
@@ -332,6 +395,10 @@ namespace PerformanceOptimizer
             if (stats.count > 999999)
             {
                 Log.Message(log + "it took (" + stats.count + "): " + stats.total);
+                foreach (var data in ComponentCache.calledStats.OrderByDescending(x => x.Value))
+                {
+                    Log.Message("Called: " + data.Key + " - " + data.Value);
+                }
                 stats.total = 0;
                 stats.count = 0;
             }
