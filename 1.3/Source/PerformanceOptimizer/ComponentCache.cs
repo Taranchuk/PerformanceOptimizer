@@ -109,7 +109,7 @@ namespace PerformanceOptimizer
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T GetMapComponent<T>(this Map map) where T : MapComponent
 		{
-			if (!CompsOfType<T>.mapCompsByMap.TryGetValue(map, out T mapComp))
+			if (!CompsOfType<T>.mapCompsByMap.TryGetValue(map, out T mapComp) || mapComp is null)
 			{
 				CompsOfType<T>.mapCompsByMap[map] = mapComp = map.GetComponent<T>();
 			}
@@ -122,11 +122,11 @@ namespace PerformanceOptimizer
 		public static T GetWorldComponent<T>(this World world) where T : WorldComponent
 		{
 			var type = typeof(T);
-			if (!cachedWorldComps.TryGetValue(type, out var worldComp))
+			if (!cachedWorldComps.TryGetValue(type, out var worldComp) || worldComp is null)
 			{
 				cachedWorldComps[type] = worldComp = world.GetComponent<T>();
 			}
-			//Log.Message("Returning world comp: " + worldComp + ", total count of world comps is " + world.components.Count);
+			Log.Message("Returning world comp: " + worldComp + ", total count of world comps is " + world.components.Count);
 			return worldComp as T;
 		}
 
@@ -135,7 +135,7 @@ namespace PerformanceOptimizer
 		public static T GetGameComponent<T>(this Game game) where T : GameComponent
 		{
 			var type = typeof(T);
-			if (!cachedGameComps.TryGetValue(type, out var gameComp))
+			if (!cachedGameComps.TryGetValue(type, out var gameComp) || gameComp is null)
 			{
 				cachedGameComps[type] = gameComp = game.GetComponent<T>();
 			}

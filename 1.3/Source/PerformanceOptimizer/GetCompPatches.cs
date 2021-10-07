@@ -66,7 +66,7 @@ namespace PerformanceOptimizer
 
         public static HashSet<string> typesToSkip = new HashSet<string>
         {
-            "ICSharpCode", "Newtonsoft", "TranspilerExplorer", "Ionic"
+            "Numbers.MainTabWindow_Numbers", "Numbers.OptionsMaker"
         };
         private static List<Type> types;
         public static List<Type> GetTypesToParse()
@@ -79,21 +79,24 @@ namespace PerformanceOptimizer
         }
 
         private static bool TypeValidator(Type type) => !assembliesToSkip.Any(asmName => type.Assembly?.FullName?.Contains(asmName) ?? false)
-                                                     && !typesToSkip.Any(typeName => type.Name.Contains(typeName));
+                                                     && !typesToSkip.Any(typeName => type.FullName.Contains(typeName));
 
         public static IEnumerable<MethodInfo> GetValidMethods(this Type type)
         {
-            return type.GetMethods().Where(predicate: mi => mi != null && !mi.IsAbstract && !mi.IsVirtual && !mi.IsGenericMethod && TypeValidator(mi.DeclaringType)).Distinct();
+            return AccessTools.GetDeclaredMethods(type).Where(predicate: mi => mi != null && !mi.IsAbstract && !mi.IsGenericMethod && TypeValidator(mi.DeclaringType)).Distinct();
         }
 
-        private static Stopwatch total = new Stopwatch();
+        private static Stopwatch totalSW = new Stopwatch();
+        private static Stopwatch curSW = new Stopwatch();
 
         private static Harmony harmony;
         static GetCompPatches()
         {
             harmony = new Harmony("PerformanceOptimizer.Patches");
             harmony.PatchAll();
-            total.Restart();
+            totalSW.Restart(); 
+
+            curSW.Restart();
             var methodsCallingMapGetComp = new HashSet<MethodInfo>();
             var methodsCallingWorldGetComp = new HashSet<MethodInfo>();
             var methodsCallingGameGetComp = new HashSet<MethodInfo>();
@@ -101,6 +104,9 @@ namespace PerformanceOptimizer
             var methodsCallingThingTryGetComp = new HashSet<MethodInfo>();
             var types = GetTypesToParse();
             var methodsToParse = new HashSet<MethodInfo>();
+            curSW.LogTime("Collected types: ", 0);
+            curSW.Restart();
+            //GenThreading.ParallelForEach(types, delegate (Type t) { });
             foreach (var type in types)
             {
                 foreach (var method in type.GetValidMethods())
@@ -108,19 +114,21 @@ namespace PerformanceOptimizer
                     methodsToParse.Add(method);
                 }
             }
+            curSW.LogTime("Methods added to be parsed: ", 0);
+            curSW.Restart();
 
-            //var mapGetComp = AccessTools.GetDeclaredMethods(typeof(Map)).FirstOrDefault(mi => mi.IsGenericMethod && mi.Name == "GetComponent" && mi.GetParameters().Length == 0);
-            //var worldGetComp = AccessTools.GetDeclaredMethods(typeof(World)).FirstOrDefault(mi => mi.IsGenericMethod && mi.Name == "GetComponent" && mi.GetParameters().Length == 0);
-            //var gameGetComp = AccessTools.GetDeclaredMethods(typeof(Game)).FirstOrDefault(mi => mi.IsGenericMethod && mi.Name == "GetComponent" && mi.GetParameters().Length == 0);
-            //var thingGetComp = AccessTools.GetDeclaredMethods(typeof(ThingWithComps)).FirstOrDefault(mi => mi.IsGenericMethod && mi.Name == "GetComp" && mi.GetParameters().Length == 0);
-            //var thingTryGetComp = AccessTools.GetDeclaredMethods(typeof(ThingCompUtility)).FirstOrDefault(mi => mi.IsGenericMethod && mi.Name == "TryGetComp" && mi.GetParameters().Length == 1);
-            
-            //Log.Message("mapGetComp: " + mapGetComp);
-            //Log.Message("worldGetComp: " + mapGetComp);
-            //Log.Message("gameGetComp: " + gameGetComp);
-            //Log.Message("thingGetComp: " + thingGetComp);
-            //Log.Message("thingTryGetComp: " + thingTryGetComp);
+            object resolvedRefsLock = new object();
 
+            GenThreading.ParallelForEach(methodsToParse, delegate (MethodInfo method)
+            {
+                if (method.TryResolve(failReportMode))
+                {
+                    lock (resolvedRefsLock)
+                    {
+                        resolvedRefs.Add(method);
+                    }
+                }
+            });
             foreach (var method in methodsToParse)
             {
                 try
@@ -128,29 +136,6 @@ namespace PerformanceOptimizer
                     var instructions = PatchProcessor.GetOriginalInstructions(method);
                     foreach (var instr in instructions)
                     {
-                        // this following code doesn't work... instruments don't recognize methods, maybe because they are generic methods splitted by types
-                        //if (instr.Calls(mapGetComp))
-                        //{
-                        //    methodsCallingMapGetComp.Add(method);
-                        //}
-                        //else if (instr.Calls(worldGetComp))
-                        //{
-                        //    methodsCallingWorldGetComp.Add(method);
-                        //}
-                        //else if (instr.Calls(gameGetComp))
-                        //{
-                        //    methodsCallingGameGetComp.Add(method);
-                        //}
-                        //else if (instr.Calls(thingGetComp))
-                        //{
-                        //    methodsCallingThingGetComp.Add(method);
-                        //}
-                        //else if (instr.Calls(thingTryGetComp))
-                        //{
-                        //    methodsCallingThingTryGetComp.Add(method);
-                        //}
-
-                        // this following code works, although it's a bit clustefuck
                         if (instr.operand is MethodInfo mi)
                         {
                             if (mi.IsGenericMethod && mi.GetParameters().Length <= 0)
@@ -202,13 +187,15 @@ namespace PerformanceOptimizer
                 }
                 catch { }
             }
-
+            curSW.LogTime("Methods parsed: ", 0);
+            curSW.Restart();
             Patch(methodsCallingMapGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetMapCompTranspiler))));
             Patch(methodsCallingWorldGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetWorldCompTranspiler))));
             Patch(methodsCallingGameGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetGameCompTranspiler))));
             Patch(methodsCallingThingGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetThingCompTranspiler))));
             Patch(methodsCallingThingTryGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.TryGetThingCompTranspiler))));
-
+            curSW.LogTime("Patched methods: ", 0);
+            curSW.Restart();
             var hooks = new List<MethodInfo>
             {
                 AccessTools.Method(typeof(MapDeiniter), "Deinit"),
@@ -226,9 +213,11 @@ namespace PerformanceOptimizer
                 harmony.Patch(hook, null, new HarmonyMethod(typeof(ComponentCache), "ResetComps"));
             }
 
-            var elapsed = (float)total.ElapsedTicks / Stopwatch.Frequency;
-            Log.Message("Parsed and Transpiled for get comp replacement: " + elapsed);
-            total.Stop();
+            curSW.LogTime("Patched hooks: ", 0);
+            curSW.Stop();
+
+            totalSW.LogTime("Parsed and Transpiled for get comp replacement, total patched: " + patchedMethodsCount + ", parsed methods: " + methodsToParse.Count + ", total time: ", 0);
+            totalSW.Stop();
         }
 
         [HarmonyPatch(typeof(MapComponentUtility), "FinalizeInit")]
@@ -291,19 +280,22 @@ namespace PerformanceOptimizer
             }
         }
 
+        private static int patchedMethodsCount = 0;
         private static void Patch(HashSet<MethodInfo> methodsToPatch, HarmonyMethod transpiler)
         {
             foreach (var method in methodsToPatch)
             {
-                //Log.Message("Patching " + method.DeclaringType.ToString() + " - " + method.ToString() + " - is generic: " + method.IsGenericMethod + ", is virtual: " + method.IsVirtual
-                //    + " - is type generic: " + method.DeclaringType.IsGenericType + ", is type abstract: " + method.DeclaringType.IsAbstract);
                 try
                 {
+                    //var staticFields = method.DeclaringType.GetFields().Any(x => x.IsStatic);
+                    //Log.Message(method.GetHashCode() + " Patching " + method.DeclaringType.ToString() + " - " + method.ToString() + " - is generic: " + method.IsGenericMethod + ", is virtual: " + method.IsVirtual
+                    //    + " - is type generic: " + method.DeclaringType.IsGenericType + ", is type abstract: " + method.DeclaringType.IsAbstract + ", has static fields: " + staticFields);
                     harmony.Patch(method, transpiler: transpiler);
+                    patchedMethodsCount++;
                 }
                 catch (Exception ex)
                 {
-                    //Log.Error("Error in transpiling: " + method + ", exception: " + ex);
+                    Log.Error(ex.GetType() + " - Error in transpiling: " + method + ", type: " + method.DeclaringType + ", exception: " + ex + " - InnerException: " + ex.InnerException);
                 }
             }
         }
@@ -381,7 +373,7 @@ namespace PerformanceOptimizer
 
         private static Dictionary<Stopwatch, StopwatchData> stopwatches = new Dictionary<Stopwatch, StopwatchData>();
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void LogTime(this Stopwatch stopwatch, string log)
+        public static void LogTime(this Stopwatch stopwatch, string log, int limit = 999999)
         {
             if (!stopwatches.TryGetValue(stopwatch, out var stats))
             {
@@ -392,9 +384,9 @@ namespace PerformanceOptimizer
             stats.count++;
             stats.total += elapsed;
 
-            if (stats.count > 999999)
+            if (stats.count > limit)
             {
-                Log.Message(log + "it took (" + stats.count + "): " + stats.total);
+                Log.Message(log + "it took: " + stats.total);
                 foreach (var data in ComponentCache.calledStats.OrderByDescending(x => x.Value))
                 {
                     Log.Message("Called: " + data.Key + " - " + data.Value);
