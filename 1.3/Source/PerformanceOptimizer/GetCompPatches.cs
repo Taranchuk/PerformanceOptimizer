@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using RimWorld.Planet;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -86,6 +87,70 @@ namespace PerformanceOptimizer
             return AccessTools.GetDeclaredMethods(type).Where(predicate: mi => mi != null && !mi.IsAbstract && !mi.IsGenericMethod && TypeValidator(mi.DeclaringType)).Distinct();
         }
 
+        private static HashSet<MethodInfo> methodsCallingMapGetComp = new HashSet<MethodInfo>();
+        private static HashSet<MethodInfo> methodsCallingWorldGetComp = new HashSet<MethodInfo>();
+        private static HashSet<MethodInfo> methodsCallingGameGetComp = new HashSet<MethodInfo>();
+        private static HashSet<MethodInfo> methodsCallingThingGetComp = new HashSet<MethodInfo>();
+        private static HashSet<MethodInfo> methodsCallingThingTryGetComp = new HashSet<MethodInfo>();
+        public static void ParseMethod(MethodInfo method)
+        {
+            try
+            {
+                var instructions = PatchProcessor.GetOriginalInstructions(method);
+                foreach (var instr in instructions)
+                {
+                    if (instr.operand is MethodInfo mi)
+                    {
+                        if (mi.IsGenericMethod && mi.GetParameters().Length <= 0)
+                        {
+                            if (instr.opcode == OpCodes.Callvirt)
+                            {
+                                if (mi.Name == "GetComponent")
+                                {
+                                    var underlyingType = mi.GetUnderlyingType();
+                                    if (typeof(MapComponent).IsAssignableFrom(underlyingType))
+                                    {
+                                        methodsCallingMapGetComp.Add(method);
+                                    }
+                                    else if (typeof(GameComponent).IsAssignableFrom(underlyingType))
+                                    {
+                                        methodsCallingGameGetComp.Add(method);
+                                    }
+                                    else if (typeof(WorldComponent).IsAssignableFrom(underlyingType))
+                                    {
+                                        methodsCallingWorldGetComp.Add(method);
+                                    }
+                                }
+                                else if (mi.Name == "GetComp")
+                                {
+                                    var underlyingType = mi.GetUnderlyingType();
+                                    if (typeof(ThingComp).IsAssignableFrom(underlyingType))
+                                    {
+                                        methodsCallingThingGetComp.Add(method);
+                                    }
+                                }
+                            }
+                        }
+                        else if (mi.IsGenericMethod && mi.GetParameters().Length == 1)
+                        {
+                            if (instr.opcode == OpCodes.Call)
+                            {
+                                if (mi.Name == "TryGetComp")
+                                {
+                                    var underlyingType = mi.GetUnderlyingType();
+                                    if (typeof(ThingComp).IsAssignableFrom(underlyingType))
+                                    {
+                                        methodsCallingThingTryGetComp.Add(method);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
         private static Stopwatch totalSW = new Stopwatch();
         private static Stopwatch curSW = new Stopwatch();
 
@@ -97,16 +162,10 @@ namespace PerformanceOptimizer
             totalSW.Restart(); 
 
             curSW.Restart();
-            var methodsCallingMapGetComp = new HashSet<MethodInfo>();
-            var methodsCallingWorldGetComp = new HashSet<MethodInfo>();
-            var methodsCallingGameGetComp = new HashSet<MethodInfo>();
-            var methodsCallingThingGetComp = new HashSet<MethodInfo>();
-            var methodsCallingThingTryGetComp = new HashSet<MethodInfo>();
             var types = GetTypesToParse();
             var methodsToParse = new HashSet<MethodInfo>();
             curSW.LogTime("Collected types: ", 0);
             curSW.Restart();
-            //GenThreading.ParallelForEach(types, delegate (Type t) { });
             foreach (var type in types)
             {
                 foreach (var method in type.GetValidMethods())
@@ -117,75 +176,10 @@ namespace PerformanceOptimizer
             curSW.LogTime("Methods added to be parsed: ", 0);
             curSW.Restart();
 
-            object resolvedRefsLock = new object();
-
-            GenThreading.ParallelForEach(methodsToParse, delegate (MethodInfo method)
+            var list = methodsToParse.ToList();
+            for (var i = 0; i < list.Count; i++)
             {
-                if (method.TryResolve(failReportMode))
-                {
-                    lock (resolvedRefsLock)
-                    {
-                        resolvedRefs.Add(method);
-                    }
-                }
-            });
-            foreach (var method in methodsToParse)
-            {
-                try
-                {
-                    var instructions = PatchProcessor.GetOriginalInstructions(method);
-                    foreach (var instr in instructions)
-                    {
-                        if (instr.operand is MethodInfo mi)
-                        {
-                            if (mi.IsGenericMethod && mi.GetParameters().Length <= 0)
-                            {
-                                if (instr.opcode == OpCodes.Callvirt)
-                                {
-                                    if (mi.Name == "GetComponent")
-                                    {
-                                        var underlyingType = mi.GetUnderlyingType();
-                                        if (typeof(MapComponent).IsAssignableFrom(underlyingType))
-                                        {
-                                            methodsCallingMapGetComp.Add(method);
-                                        }
-                                        else if (typeof(GameComponent).IsAssignableFrom(underlyingType))
-                                        {
-                                            methodsCallingGameGetComp.Add(method);
-                                        }
-                                        else if (typeof(WorldComponent).IsAssignableFrom(underlyingType))
-                                        {
-                                            methodsCallingWorldGetComp.Add(method);
-                                        }
-                                    }
-                                    else if (mi.Name == "GetComp")
-                                    {
-                                        var underlyingType = mi.GetUnderlyingType();
-                                        if (typeof(ThingComp).IsAssignableFrom(underlyingType))
-                                        {
-                                            methodsCallingThingGetComp.Add(method);
-                                        }
-                                    }
-                                }
-                            }
-                            else if (mi.IsGenericMethod && mi.GetParameters().Length == 1)
-                            {
-                                if (instr.opcode == OpCodes.Call)
-                                {
-                                    if (mi.Name == "TryGetComp")
-                                    {
-                                        var underlyingType = mi.GetUnderlyingType();
-                                        if (typeof(ThingComp).IsAssignableFrom(underlyingType))
-                                        {
-                                            methodsCallingThingTryGetComp.Add(method);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                catch { }
+                ParseMethod(list[i]);
             }
             curSW.LogTime("Methods parsed: ", 0);
             curSW.Restart();
