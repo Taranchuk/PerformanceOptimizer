@@ -15,13 +15,21 @@ using Verse;
 
 namespace PerformanceOptimizer
 {
-    class PerformanceOptimizerMod : Mod
+    class PerformanceOptimizerMain : Mod
     {
         public static Harmony harmony;
-        public PerformanceOptimizerMod(ModContentPack pack) : base(pack)
+        public PerformanceOptimizerMain(ModContentPack mod) : base(mod)
         {
-            harmony = new Harmony("PerformanceOptimizer.Patches");
+            harmony = new Harmony("PerformanceOptimizer.Main");
             harmony.PatchAll();
+        }
+    }
+
+    [HarmonyPatch(typeof(StaticConstructorOnStartupUtility), "CallAll")]
+    public static class StaticConstructorOnStartupUtilityCallAll
+    {
+        public static void Postfix()
+        {
             GetCompPatches.DoPatchesAsync();
         }
     }

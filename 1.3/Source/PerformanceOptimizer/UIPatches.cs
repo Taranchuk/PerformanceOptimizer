@@ -90,7 +90,7 @@ namespace PerformanceOptimizer
         }
     }
 
-    [HarmonyPatch(typeof(AlertsReadout), "AlertsReadoutUpdate")]
+    //[HarmonyPatch(typeof(AlertsReadout), "AlertsReadoutUpdate")]
     public static class AlertsReadoutUpdate_Prefix
     {
     

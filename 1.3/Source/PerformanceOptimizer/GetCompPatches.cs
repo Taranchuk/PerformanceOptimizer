@@ -17,58 +17,16 @@ namespace PerformanceOptimizer
 {
     public static class GetCompPatches
     {
-        public static List<string> mostCalledComps = new List<string>
-        {
-            "RimWorld.CompQuality",
-            "Verse.CompAttachBase",
-            "Verse.CompEquippable",
-            "AlienRace.AlienPartGenerator+AlienComp",
-            "RimWorld.CompForbiddable",
-            "RimWorld.CompRottable",
-            "aRandomKiwi.GFM.Comp_Guard",
-            "RimWorld.CompBreakdownable",
-            "CaravanAdventures.CaravanStory.CompTalk",
-            "RimWorld.CompStyleable",
-            "LWM.DeepStorage.CompDeepStorage",
-            "RimWorld.CompPowerTrader",
-            "RimWorld.CompFlickable",
-            "VFECore.Abilities.CompAbilities",
-            "RimWorld.CompFacility",
-            "BestMix.CompBestMix",
-            "RimWorld.CompBiocodable",
-            "CombatExtended.CompAmmoUser",
-            "VFESecurity.CompPawnTracker",
-            "RimWorld.CompCanBeDormant",
-            "CombatExtended.CompInventory",
-            "RimWorld.CompIngredients",
-            "VFEV.Facepaint.CompFacepaint",
-            "RimWorld.CompDrug",
-            "RimWorld.CompEggLayer",
-            "RimWorld.CompAffectedByFacilities",
-            "RimWorld.CompSpawnSubplant",
-            "Verse.CompColorable",
-            "RimWorld.CompArt",
-            "PickUpAndHaul.CompHauledToInventory",
-            "CommonSense.CompUnloadChecker",
-            "Dark.Signs.Comp_Sign",
-            "Locks2.Core.LockComp",
-            "RimWorld.CompBecomeBuilding",
-            "Hospitality.CompGuest",
-            "CombatExtended.CompTacticalManager",
-            "RimWorld.CompReloadable",
-            "RimWorld.CompTransporter",
-            "DubsBadHygiene.CompBlockage",
-        };
-
         public static HashSet<string> assembliesToSkip = new HashSet<string>
         {
             "System", "Cecil", "Multiplayer", "Prepatcher", "HeavyMelee", "0Harmony", "UnityEngine", "mscorlib", "ICSharpCode", "Newtonsoft", "TranspilerExplorer"
         };
 
-        public static HashSet<string> typesToSkip = new HashSet<string>
+        public static HashSet<string> methodsToSkip = new HashSet<string>
         {
-            "Numbers.MainTabWindow_Numbers", "Numbers.OptionsMaker"
+            "Numbers.MainTabWindow_Numbers", "Numbers.OptionsMaker", "<PawnSelector>g__Action", "<AllBuildingsColonistWithComp>", "<FailOnOwnerStatus>"
         };
+        private static bool TypeValidator(Type type) => !assembliesToSkip.Any(asmName => type.Assembly?.FullName?.Contains(asmName) ?? false);
 
         private static List<Type> types;
         public static List<Type> GetTypesToParse()
@@ -80,12 +38,9 @@ namespace PerformanceOptimizer
             return types;
         }
 
-        private static bool TypeValidator(Type type) => !assembliesToSkip.Any(asmName => type.Assembly?.FullName?.Contains(asmName) ?? false)
-                                                     && !typesToSkip.Any(typeName => type.FullName.Contains(typeName));
-
-        public static IEnumerable<MethodInfo> GetValidMethods(this Type type)
+        public static IEnumerable<MethodInfo> GetMethodsToParse(this Type type)
         {
-            return AccessTools.GetDeclaredMethods(type).Where(predicate: mi => mi != null && !mi.IsAbstract && !mi.IsGenericMethod && TypeValidator(mi.DeclaringType)).Distinct();
+            return AccessTools.GetDeclaredMethods(type).Where(predicate: mi => mi != null && !mi.IsAbstract && !mi.IsGenericMethod && !methodsToSkip.Any(x => mi.FullDescription().Contains(x)));
         }
 
         public static List<MethodInfo> methodsCallingMapGetComp = new List<MethodInfo>();
@@ -166,7 +121,7 @@ namespace PerformanceOptimizer
                 curSW.Restart();
                 foreach (var type in types)
                 {
-                    foreach (var method in type.GetValidMethods())
+                    foreach (var method in type.GetMethodsToParse())
                     {
                         methodsToParse.Add(method);
                     }
@@ -204,7 +159,7 @@ namespace PerformanceOptimizer
 
             foreach (var hook in hooks)
             {
-                PerformanceOptimizerMod.harmony.Patch(hook, null, new HarmonyMethod(typeof(ComponentCache), "ResetComps"));
+                PerformanceOptimizerMain.harmony.Patch(hook, null, new HarmonyMethod(typeof(ComponentCache), "ResetComps"));
             }
 
             curSW.LogTime("Patched hooks: ", 0);
@@ -221,10 +176,7 @@ namespace PerformanceOptimizer
             {
                 try
                 {
-                    //var staticFields = method.DeclaringType.GetFields().Any(x => x.IsStatic);
-                    //Log.Message(method.GetHashCode() + " Patching " + method.DeclaringType.ToString() + " - " + method.ToString() + " - is generic: " + method.IsGenericMethod + ", is virtual: " + method.IsVirtual
-                    //    + " - is type generic: " + method.DeclaringType.IsGenericType + ", is type abstract: " + method.DeclaringType.IsAbstract + ", has static fields: " + staticFields);
-                    PerformanceOptimizerMod.harmony.Patch(method, transpiler: transpiler);
+                    PerformanceOptimizerMain.harmony.Patch(method, transpiler: transpiler);
                     patchedMethodsCount++;
                 }
                 catch (Exception ex)
@@ -354,6 +306,49 @@ namespace PerformanceOptimizer
                     }).ToList();
                 }
             }
+
+            public static List<string> mostCalledComps = new List<string>
+            {
+                "RimWorld.CompQuality",
+                "Verse.CompAttachBase",
+                "Verse.CompEquippable",
+                "AlienRace.AlienPartGenerator+AlienComp",
+                "RimWorld.CompForbiddable",
+                "RimWorld.CompRottable",
+                "aRandomKiwi.GFM.Comp_Guard",
+                "RimWorld.CompBreakdownable",
+                "CaravanAdventures.CaravanStory.CompTalk",
+                "RimWorld.CompStyleable",
+                "LWM.DeepStorage.CompDeepStorage",
+                "RimWorld.CompPowerTrader",
+                "RimWorld.CompFlickable",
+                "VFECore.Abilities.CompAbilities",
+                "RimWorld.CompFacility",
+                "BestMix.CompBestMix",
+                "RimWorld.CompBiocodable",
+                "CombatExtended.CompAmmoUser",
+                "VFESecurity.CompPawnTracker",
+                "RimWorld.CompCanBeDormant",
+                "CombatExtended.CompInventory",
+                "RimWorld.CompIngredients",
+                "VFEV.Facepaint.CompFacepaint",
+                "RimWorld.CompDrug",
+                "RimWorld.CompEggLayer",
+                "RimWorld.CompAffectedByFacilities",
+                "RimWorld.CompSpawnSubplant",
+                "Verse.CompColorable",
+                "RimWorld.CompArt",
+                "PickUpAndHaul.CompHauledToInventory",
+                "CommonSense.CompUnloadChecker",
+                "Dark.Signs.Comp_Sign",
+                "Locks2.Core.LockComp",
+                "RimWorld.CompBecomeBuilding",
+                "Hospitality.CompGuest",
+                "CombatExtended.CompTacticalManager",
+                "RimWorld.CompReloadable",
+                "RimWorld.CompTransporter",
+                "DubsBadHygiene.CompBlockage",
+            };
         }
     }
 }

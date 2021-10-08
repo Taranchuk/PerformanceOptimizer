@@ -32,6 +32,7 @@ namespace PerformanceOptimizer
 				calledStats[type] = 1;
 			}
         }
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T GetThingCompDict<T>(this ThingWithComps thingWithComps) where T : ThingComp
 		{
