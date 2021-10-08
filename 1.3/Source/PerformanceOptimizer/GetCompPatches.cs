@@ -17,16 +17,23 @@ namespace PerformanceOptimizer
 {
     public static class GetCompPatches
     {
+        private static Stopwatch totalSW = new Stopwatch();
+        private static Stopwatch curSW = new Stopwatch();
+
         public static HashSet<string> assembliesToSkip = new HashSet<string>
         {
             "System", "Cecil", "Multiplayer", "Prepatcher", "HeavyMelee", "0Harmony", "UnityEngine", "mscorlib", "ICSharpCode", "Newtonsoft", "TranspilerExplorer"
         };
 
+        public static HashSet<string> typesToSkip = new HashSet<string>
+        {
+            "AnimalGenetics.ColonyManager+JobsWrapper"
+        };
         public static HashSet<string> methodsToSkip = new HashSet<string>
         {
             "Numbers.MainTabWindow_Numbers", "Numbers.OptionsMaker", "<PawnSelector>g__Action", "<AllBuildingsColonistWithComp>", "<FailOnOwnerStatus>"
         };
-        private static bool TypeValidator(Type type) => !assembliesToSkip.Any(asmName => type.Assembly?.FullName?.Contains(asmName) ?? false);
+        private static bool TypeValidator(Type type) => !assembliesToSkip.Any(asmName => type.Assembly?.FullName?.Contains(asmName) ?? false) && !typesToSkip.Any(x => type.FullName.Contains(x));
 
         private static List<Type> types;
         public static List<Type> GetTypesToParse()
@@ -42,13 +49,8 @@ namespace PerformanceOptimizer
         {
             return AccessTools.GetDeclaredMethods(type).Where(predicate: mi => mi != null && !mi.IsAbstract && !mi.IsGenericMethod && !methodsToSkip.Any(x => mi.FullDescription().Contains(x)));
         }
-
-        public static List<MethodInfo> methodsCallingMapGetComp = new List<MethodInfo>();
-        public static List<MethodInfo> methodsCallingWorldGetComp = new List<MethodInfo>();
-        public static List<MethodInfo> methodsCallingGameGetComp = new List<MethodInfo>();
-        public static List<MethodInfo> methodsCallingThingGetComp = new List<MethodInfo>();
-        public static List<MethodInfo> methodsCallingThingTryGetComp = new List<MethodInfo>();
-        public static void ParseMethod(MethodInfo method)
+        public static void ParseMethod(MethodInfo method, List<MethodInfo> methodsCallingMapGetComp, List<MethodInfo> methodsCallingWorldGetComp, List<MethodInfo> methodsCallingGameGetComp, 
+            List<MethodInfo> methodsCallingThingGetComp, List<MethodInfo> methodsCallingThingTryGetComp)
         {
             try
             {
@@ -106,12 +108,14 @@ namespace PerformanceOptimizer
             }
             catch { }
         }
-
-        private static Stopwatch totalSW = new Stopwatch();
-        private static Stopwatch curSW = new Stopwatch();
-        public static List<MethodInfo> methodsToParse = new List<MethodInfo>();
         public static async void DoPatchesAsync()
         {
+            var methodsCallingMapGetComp = new List<MethodInfo>();
+            var methodsCallingWorldGetComp = new List<MethodInfo>();
+            var methodsCallingGameGetComp = new List<MethodInfo>();
+            var methodsCallingThingGetComp = new List<MethodInfo>();
+            var methodsCallingThingTryGetComp = new List<MethodInfo>();
+            var methodsToParse = new List<MethodInfo>();
             totalSW.Restart();
             await Task.Run(() => 
             {
@@ -131,11 +135,10 @@ namespace PerformanceOptimizer
 
                 for (var i = 0; i < methodsToParse.Count; i++)
                 {
-                    ParseMethod(methodsToParse[i]);
+                    ParseMethod(methodsToParse[i], methodsCallingMapGetComp, methodsCallingWorldGetComp, methodsCallingGameGetComp, methodsCallingThingGetComp, methodsCallingThingTryGetComp);
                 }
                 curSW.LogTime("Methods parsed: ", 0);
             });
-
             curSW.Restart();
             Patch(methodsCallingMapGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetMapCompTranspiler))));
             Patch(methodsCallingWorldGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetWorldCompTranspiler))));
