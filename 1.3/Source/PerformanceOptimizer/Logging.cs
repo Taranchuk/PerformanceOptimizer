@@ -43,10 +43,6 @@ namespace PerformanceOptimizer
             if (stats.count > limit)
             {
                 Log.Message(log + "it took: " + stats.total);
-                foreach (var data in ComponentCache.calledStats.OrderByDescending(x => x.Value))
-                {
-                    Log.Message("Called: " + data.Key + " - " + data.Value);
-                }
                 stats.total = 0;
                 stats.count = 0;
             }

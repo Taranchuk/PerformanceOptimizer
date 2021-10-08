@@ -19,20 +19,18 @@ namespace PerformanceOptimizer
 	{
 		//private static Stopwatch dictStopwatch = new Stopwatch();
 
-		public static Dictionary<Type, int> calledStats = new Dictionary<Type, int>();
-
-		private static void RegisterComp(Type type)
-        {
-			if (calledStats.ContainsKey(type))
-            {
-				calledStats[type]++;
-			}
-			else
-            {
-				calledStats[type] = 1;
-			}
-        }
-
+		//public static Dictionary<Type, int> calledStats = new Dictionary<Type, int>();
+		//private static void RegisterComp(Type type)
+        //{
+		//	if (calledStats.ContainsKey(type))
+        //    {
+		//		calledStats[type]++;
+		//	}
+		//	else
+        //    {
+		//		calledStats[type] = 1;
+		//	}
+        //}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T GetThingCompFast<T>(this ThingWithComps thingWithComps) where T : ThingComp
@@ -164,7 +162,7 @@ namespace PerformanceOptimizer
 			{
 				cachedWorldComps[type] = worldComp = world.GetComponent<T>();
 			}
-			Log.Message("Returning world comp: " + worldComp + ", total count of world comps is " + world.components.Count);
+			//Log.Message("Returning world comp: " + worldComp + ", total count of world comps is " + world.components.Count);
 			return worldComp as T;
 		}
 
