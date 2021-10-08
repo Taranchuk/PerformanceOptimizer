@@ -50,7 +50,8 @@ namespace PerformanceOptimizer
             return AccessTools.GetDeclaredMethods(type).Where(predicate: mi => mi != null && !mi.IsAbstract && !mi.IsGenericMethod && !methodsToSkip.Any(x => mi.FullDescription().Contains(x)));
         }
         public static void ParseMethod(MethodInfo method, List<MethodInfo> methodsCallingMapGetComp, List<MethodInfo> methodsCallingWorldGetComp, List<MethodInfo> methodsCallingGameGetComp, 
-            List<MethodInfo> methodsCallingThingGetComp, List<MethodInfo> methodsCallingThingTryGetComp)
+            List<MethodInfo> methodsCallingThingGetComp, List<MethodInfo> methodsCallingThingTryGetComp, List<MethodInfo> methodsCallingHediffTryGetComp
+            , List<MethodInfo> methodsCallingWorldObjectGetComp)
         {
             try
             {
@@ -78,6 +79,10 @@ namespace PerformanceOptimizer
                                     {
                                         methodsCallingWorldGetComp.Add(method);
                                     }
+                                    else if (!methodsCallingWorldObjectGetComp.Contains(method) && typeof(WorldObjectComp).IsAssignableFrom(underlyingType))
+                                    {
+                                        methodsCallingWorldObjectGetComp.Add(method);
+                                    }
                                 }
                                 else if (mi.Name == "GetComp")
                                 {
@@ -100,6 +105,10 @@ namespace PerformanceOptimizer
                                     {
                                         methodsCallingThingTryGetComp.Add(method);
                                     }
+                                    else if (!methodsCallingHediffTryGetComp.Contains(method) && typeof(HediffComp).IsAssignableFrom(underlyingType))
+                                    {
+                                        methodsCallingHediffTryGetComp.Add(method);
+                                    }
                                 }
                             }
                         }
@@ -115,6 +124,9 @@ namespace PerformanceOptimizer
             var methodsCallingGameGetComp = new List<MethodInfo>();
             var methodsCallingThingGetComp = new List<MethodInfo>();
             var methodsCallingThingTryGetComp = new List<MethodInfo>();
+            var methodsCallingHediffTryGetComp = new List<MethodInfo>();
+            var methodsCallingWorldObjectGetComp = new List<MethodInfo>();
+
             var methodsToParse = new List<MethodInfo>();
             totalSW.Restart();
             await Task.Run(() => 
@@ -135,7 +147,8 @@ namespace PerformanceOptimizer
 
                 for (var i = 0; i < methodsToParse.Count; i++)
                 {
-                    ParseMethod(methodsToParse[i], methodsCallingMapGetComp, methodsCallingWorldGetComp, methodsCallingGameGetComp, methodsCallingThingGetComp, methodsCallingThingTryGetComp);
+                    ParseMethod(methodsToParse[i], methodsCallingMapGetComp, methodsCallingWorldGetComp, methodsCallingGameGetComp, methodsCallingThingGetComp, 
+                        methodsCallingThingTryGetComp, methodsCallingHediffTryGetComp, methodsCallingWorldObjectGetComp);
                 }
                 curSW.LogTime("Methods parsed: ", 0);
             });
@@ -145,6 +158,8 @@ namespace PerformanceOptimizer
             Patch(methodsCallingGameGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetGameCompTranspiler))));
             Patch(methodsCallingThingGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetThingCompTranspiler))));
             Patch(methodsCallingThingTryGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.TryGetThingCompTranspiler))));
+            Patch(methodsCallingHediffTryGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.TryGetHediffCompTranspiler))));
+            Patch(methodsCallingWorldObjectGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetWorldObjectCompTranspiler))));
             curSW.LogTime("Patched methods: ", 0);
             curSW.Restart();
             var hooks = new List<MethodInfo>
@@ -162,7 +177,7 @@ namespace PerformanceOptimizer
 
             foreach (var hook in hooks)
             {
-                PerformanceOptimizerMain.harmony.Patch(hook, null, new HarmonyMethod(typeof(ComponentCache), "ResetComps"));
+                PerformanceOptimizerMain.harmony.Patch(hook, null, new HarmonyMethod(typeof(ComponentCache), nameof(ComponentCache.ResetComps)));
             }
 
             curSW.LogTime("Patched hooks: ", 0);
@@ -201,6 +216,12 @@ namespace PerformanceOptimizer
             return PerformTranspiler("GetComponent", typeof(WorldComponent), genericWorldGetComp, OpCodes.Callvirt, 0, instructions, source, il);
         }
 
+        public static MethodInfo genericWorldObjectGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetWorldObjectCompDict));
+        private static IEnumerable<CodeInstruction> GetWorldObjectCompTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase source, ILGenerator il)
+        {
+            return PerformTranspiler("GetComponent", typeof(WorldObjectComp), genericWorldObjectGetComp, OpCodes.Callvirt, 0, instructions, source, il);
+        }
+
         public static MethodInfo genericGameGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetGameComponent));
         private static IEnumerable<CodeInstruction> GetGameCompTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase source, ILGenerator il)
         {
@@ -214,35 +235,42 @@ namespace PerformanceOptimizer
             return PerformTranspiler("GetComp", typeof(ThingComp), genericThingGetComp, OpCodes.Callvirt, 0, instructions, source, il);
         }
 
-        //public static MethodInfo genericThingTryGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.TryGetCompVanilla));
-        public static MethodInfo genericThingTryGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.TryGetCompDict));
+        public static MethodInfo genericThingTryGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.TryGetThingCompDict));
         private static IEnumerable<CodeInstruction> TryGetThingCompTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase source, ILGenerator il)
         {
             return PerformTranspiler("TryGetComp", typeof(ThingComp), genericThingTryGetComp, OpCodes.Call, 1, instructions, source, il);
         }
-        public static bool CallsComponent(this CodeInstruction codeInstruction, OpCode opcode, string methodName, Type baseCompType, int parameterLength, out Type curMapCompType)
+
+        public static MethodInfo genericHediffTryGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.TryGetHediffCompDict));
+        private static IEnumerable<CodeInstruction> TryGetHediffCompTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase source, ILGenerator il)
+        {
+            return PerformTranspiler("TryGetComp", typeof(HediffComp), genericHediffTryGetComp, OpCodes.Call, 1, instructions, source, il);
+        }
+
+        public static bool CallsComponent(this CodeInstruction codeInstruction, OpCode opcode, string methodName, Type baseCompType, int parameterLength, out Type curType)
         {
             if (codeInstruction.opcode == opcode && codeInstruction.operand is MethodInfo mi && mi.Name == methodName && mi.IsGenericMethod && mi.GetParameters().Length == parameterLength)
             {
-                curMapCompType = mi.GetUnderlyingType();
-                if (baseCompType.IsAssignableFrom(curMapCompType))
+                curType = mi.GetUnderlyingType();
+                if (baseCompType.IsAssignableFrom(curType))
                 {
                     return true;
                 }
             }
-            curMapCompType = null;
+            curType = null;
             return false;
         }
 
-        private static IEnumerable<CodeInstruction> PerformTranspiler(string methodName, Type baseType, MethodInfo genericMethod, OpCode opcode, int parameterLength, IEnumerable<CodeInstruction> instructions, MethodBase source, ILGenerator il)
+        private static IEnumerable<CodeInstruction> PerformTranspiler(string methodName, Type baseType, MethodInfo genericMethod, OpCode opcode, int parameterLength, 
+            IEnumerable<CodeInstruction> instructions, MethodBase source, ILGenerator il)
         {
             var codes = instructions.ToList();
             for (var i = 0; i < codes.Count; i++)
             {
                 var instr = codes[i];
-                if (instr.CallsComponent(opcode, methodName, baseType, parameterLength, out Type curMapCompType))
+                if (instr.CallsComponent(opcode, methodName, baseType, parameterLength, out Type type))
                 {
-                    var methodToReplace = genericMethod.MakeGenericMethod(new Type[] { curMapCompType });
+                    var methodToReplace = genericMethod.MakeGenericMethod(new Type[] { type });
                     instr.opcode = OpCodes.Call;
                     instr.operand = methodToReplace;
                 }
@@ -274,20 +302,6 @@ namespace PerformanceOptimizer
             public static void Postfix()
             {
                 Log.Message("Loaded game: " + Current.Game + ", it has " + Current.Game.components.Count + " comps");
-            }
-        }
-
-        [HarmonyPatch(typeof(ThingWithComps), "SpawnSetup")]
-        public static class Thing_SpawnSetup_Patch
-        {
-            public static List<ThingDef> reportedDefs = new List<ThingDef>();
-            public static void Postfix(ThingWithComps __instance)
-            {
-                if (__instance.comps?.Count > 0 && !reportedDefs.Contains(__instance.def))
-                {
-                    reportedDefs.Add(__instance.def);
-                    Log.Message("Loaded ThingWithComps: " + __instance.def + ", it has " + __instance.comps?.Count + " comps");
-                }
             }
         }
 

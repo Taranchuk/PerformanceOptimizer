@@ -40,7 +40,7 @@ namespace PerformanceOptimizer
 			if (thingWithComps.comps == null)
             {
 				//dictStopwatch.LogTime("Dict approach: ");
-				return default(T);
+				return null;
 			}
 			for (int i = 0; i < thingWithComps.comps.Count; i++)
 			{
@@ -61,7 +61,38 @@ namespace PerformanceOptimizer
 					return thingWithComps.comps[i] as T;
 				}
 			}
-			return default(T);
+			return null;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static T GetWorldObjectCompDict<T>(this WorldObject worldObject) where T : WorldObjectComp
+		{
+			//dictStopwatch.Restart();
+			if (worldObject.comps == null)
+			{
+				//dictStopwatch.LogTime("Dict approach: ");
+				return null;
+			}
+			for (int i = 0; i < worldObject.comps.Count; i++)
+			{
+				if (worldObject.comps[i].GetType() == typeof(T))
+				{
+					//RegisterComp(thingWithComps.comps[i].GetType());
+					//dictStopwatch.LogTime("Dict approach: ");
+					return worldObject.comps[i] as T;
+				}
+			}
+
+			for (int i = 0; i < worldObject.comps.Count; i++)
+			{
+				if (worldObject.comps[i].GetType() is T)
+				{
+					//RegisterComp(typeof(T));
+					//dictStopwatch.LogTime("Dict approach: ");
+					return worldObject.comps[i] as T;
+				}
+			}
+			return null;
 		}
 
 		private static Stopwatch vanillaStopwatch = new Stopwatch();
@@ -86,7 +117,7 @@ namespace PerformanceOptimizer
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static T TryGetCompDict<T>(this Thing thing) where T : ThingComp
+		public static T TryGetThingCompDict<T>(this Thing thing) where T : ThingComp
 		{
 			ThingWithComps thingWithComps = thing as ThingWithComps;
 			if (thingWithComps == null)
@@ -94,6 +125,43 @@ namespace PerformanceOptimizer
 				return null;
 			}
 			return thingWithComps.GetThingCompDict<T>();
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static T TryGetHediffCompDict<T>(this Hediff hd) where T : HediffComp
+		{
+			HediffWithComps hediffWithComps = hd as HediffWithComps;
+			if (hediffWithComps == null)
+			{
+				return null;
+			}
+			//dictStopwatch.Restart();
+			if (hediffWithComps.comps == null)
+			{
+				//dictStopwatch.LogTime("Dict approach: ");
+				return null;
+			}
+
+			for (int i = 0; i < hediffWithComps.comps.Count; i++)
+			{
+				if (hediffWithComps.comps[i].GetType() == typeof(T))
+				{
+					//RegisterComp(thingWithComps.comps[i].GetType());
+					//dictStopwatch.LogTime("Dict approach: ");
+					return hediffWithComps.comps[i] as T;
+				}
+			}
+
+			for (int i = 0; i < hediffWithComps.comps.Count; i++)
+			{
+				if (hediffWithComps.comps[i].GetType() is T)
+				{
+					//RegisterComp(typeof(T));
+					//dictStopwatch.LogTime("Dict approach: ");
+					return hediffWithComps.comps[i] as T;
+				}
+			}
+			return null;
 		}
 
 		public static T TryGetCompVanilla<T>(this Thing thing) where T : ThingComp
@@ -147,6 +215,7 @@ namespace PerformanceOptimizer
 		{
 			cachedWorldComps.Clear();
 			cachedGameComps.Clear();
+			CompsOfType<Map>.mapCompsByMap.Clear();
 		}
 	}
 }
