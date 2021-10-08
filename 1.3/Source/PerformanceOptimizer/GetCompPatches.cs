@@ -9,15 +9,15 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Verse;
 
 namespace PerformanceOptimizer
 {
-    [StaticConstructorOnStartup]
     public static class GetCompPatches
     {
-        public static HashSet<string> mostCalledComps = new HashSet<string>
+        public static List<string> mostCalledComps = new List<string>
         {
             "RimWorld.CompQuality",
             "Verse.CompAttachBase",
@@ -69,6 +69,7 @@ namespace PerformanceOptimizer
         {
             "Numbers.MainTabWindow_Numbers", "Numbers.OptionsMaker"
         };
+
         private static List<Type> types;
         public static List<Type> GetTypesToParse()
         {
@@ -87,16 +88,16 @@ namespace PerformanceOptimizer
             return AccessTools.GetDeclaredMethods(type).Where(predicate: mi => mi != null && !mi.IsAbstract && !mi.IsGenericMethod && TypeValidator(mi.DeclaringType)).Distinct();
         }
 
-        private static HashSet<MethodInfo> methodsCallingMapGetComp = new HashSet<MethodInfo>();
-        private static HashSet<MethodInfo> methodsCallingWorldGetComp = new HashSet<MethodInfo>();
-        private static HashSet<MethodInfo> methodsCallingGameGetComp = new HashSet<MethodInfo>();
-        private static HashSet<MethodInfo> methodsCallingThingGetComp = new HashSet<MethodInfo>();
-        private static HashSet<MethodInfo> methodsCallingThingTryGetComp = new HashSet<MethodInfo>();
+        public static List<MethodInfo> methodsCallingMapGetComp = new List<MethodInfo>();
+        public static List<MethodInfo> methodsCallingWorldGetComp = new List<MethodInfo>();
+        public static List<MethodInfo> methodsCallingGameGetComp = new List<MethodInfo>();
+        public static List<MethodInfo> methodsCallingThingGetComp = new List<MethodInfo>();
+        public static List<MethodInfo> methodsCallingThingTryGetComp = new List<MethodInfo>();
         public static void ParseMethod(MethodInfo method)
         {
             try
             {
-                var instructions = PatchProcessor.GetOriginalInstructions(method);
+                var instructions = PatchProcessor.GetCurrentInstructions(method);
                 foreach (var instr in instructions)
                 {
                     if (instr.operand is MethodInfo mi)
@@ -108,15 +109,15 @@ namespace PerformanceOptimizer
                                 if (mi.Name == "GetComponent")
                                 {
                                     var underlyingType = mi.GetUnderlyingType();
-                                    if (typeof(MapComponent).IsAssignableFrom(underlyingType))
+                                    if (!methodsCallingMapGetComp.Contains(method) && typeof(MapComponent).IsAssignableFrom(underlyingType))
                                     {
                                         methodsCallingMapGetComp.Add(method);
                                     }
-                                    else if (typeof(GameComponent).IsAssignableFrom(underlyingType))
+                                    else if (!methodsCallingGameGetComp.Contains(method) && typeof(GameComponent).IsAssignableFrom(underlyingType))
                                     {
                                         methodsCallingGameGetComp.Add(method);
                                     }
-                                    else if (typeof(WorldComponent).IsAssignableFrom(underlyingType))
+                                    else if (!methodsCallingWorldGetComp.Contains(method) && typeof(WorldComponent).IsAssignableFrom(underlyingType))
                                     {
                                         methodsCallingWorldGetComp.Add(method);
                                     }
@@ -124,7 +125,7 @@ namespace PerformanceOptimizer
                                 else if (mi.Name == "GetComp")
                                 {
                                     var underlyingType = mi.GetUnderlyingType();
-                                    if (typeof(ThingComp).IsAssignableFrom(underlyingType))
+                                    if (!methodsCallingThingGetComp.Contains(method) && typeof(ThingComp).IsAssignableFrom(underlyingType))
                                     {
                                         methodsCallingThingGetComp.Add(method);
                                     }
@@ -138,7 +139,7 @@ namespace PerformanceOptimizer
                                 if (mi.Name == "TryGetComp")
                                 {
                                     var underlyingType = mi.GetUnderlyingType();
-                                    if (typeof(ThingComp).IsAssignableFrom(underlyingType))
+                                    if (!methodsCallingThingTryGetComp.Contains(method) && typeof(ThingComp).IsAssignableFrom(underlyingType))
                                     {
                                         methodsCallingThingTryGetComp.Add(method);
                                     }
@@ -153,35 +154,33 @@ namespace PerformanceOptimizer
 
         private static Stopwatch totalSW = new Stopwatch();
         private static Stopwatch curSW = new Stopwatch();
-
-        private static Harmony harmony;
-        static GetCompPatches()
+        public static List<MethodInfo> methodsToParse = new List<MethodInfo>();
+        public static async void DoPatchesAsync()
         {
-            harmony = new Harmony("PerformanceOptimizer.Patches");
-            harmony.PatchAll();
-            totalSW.Restart(); 
-
-            curSW.Restart();
-            var types = GetTypesToParse();
-            var methodsToParse = new HashSet<MethodInfo>();
-            curSW.LogTime("Collected types: ", 0);
-            curSW.Restart();
-            foreach (var type in types)
+            totalSW.Restart();
+            await Task.Run(() => 
             {
-                foreach (var method in type.GetValidMethods())
+                curSW.Restart();
+                var types = GetTypesToParse();
+                curSW.LogTime("Collected types: ", 0);
+                curSW.Restart();
+                foreach (var type in types)
                 {
-                    methodsToParse.Add(method);
+                    foreach (var method in type.GetValidMethods())
+                    {
+                        methodsToParse.Add(method);
+                    }
                 }
-            }
-            curSW.LogTime("Methods added to be parsed: ", 0);
-            curSW.Restart();
+                curSW.LogTime("Methods added to be parsed: ", 0);
+                curSW.Restart();
 
-            var list = methodsToParse.ToList();
-            for (var i = 0; i < list.Count; i++)
-            {
-                ParseMethod(list[i]);
-            }
-            curSW.LogTime("Methods parsed: ", 0);
+                for (var i = 0; i < methodsToParse.Count; i++)
+                {
+                    ParseMethod(methodsToParse[i]);
+                }
+                curSW.LogTime("Methods parsed: ", 0);
+            });
+
             curSW.Restart();
             Patch(methodsCallingMapGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetMapCompTranspiler))));
             Patch(methodsCallingWorldGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetWorldCompTranspiler))));
@@ -202,9 +201,10 @@ namespace PerformanceOptimizer
                 AccessTools.Method(typeof(Game), "InitNewGame"),
                 AccessTools.Method(typeof(Game), "LoadGame"),
             };
+
             foreach (var hook in hooks)
             {
-                harmony.Patch(hook, null, new HarmonyMethod(typeof(ComponentCache), "ResetComps"));
+                PerformanceOptimizerMod.harmony.Patch(hook, null, new HarmonyMethod(typeof(ComponentCache), "ResetComps"));
             }
 
             curSW.LogTime("Patched hooks: ", 0);
@@ -214,68 +214,8 @@ namespace PerformanceOptimizer
             totalSW.Stop();
         }
 
-        [HarmonyPatch(typeof(MapComponentUtility), "FinalizeInit")]
-        public class FinalizeInit_Patch
-        {
-            public static void Postfix(Map map)
-            {
-                Log.Message("Loaded map: " + map + ", it has " + map.components.Count + " comps");
-            }
-        }
-        [HarmonyPatch(typeof(WorldComponentUtility), "FinalizeInit")]
-        public class World_Patch
-        {
-            public static void Postfix(World world)
-            {
-                Log.Message("Loaded world: " + world + ", it has " + world.components.Count + " comps");
-            }
-        }
-
-        [HarmonyPatch(typeof(GameComponentUtility), "FinalizeInit")]
-        public class GameComponentUtility_Patch
-        {
-            public static void Postfix()
-            {
-                Log.Message("Loaded game: " + Current.Game + ", it has " + Current.Game.components.Count + " comps");
-            }
-        }
-
-        [HarmonyPatch(typeof(ThingWithComps), "SpawnSetup")]
-        public static class Thing_SpawnSetup_Patch
-        {
-            public static HashSet<ThingDef> reportedDefs = new HashSet<ThingDef>();
-            public static void Postfix(ThingWithComps __instance)
-            {
-                if (__instance.comps?.Count > 0 && !reportedDefs.Contains(__instance.def))
-                {
-                    reportedDefs.Add(__instance.def);
-                    Log.Message("Loaded ThingWithComps: " + __instance.def + ", it has " + __instance.comps?.Count + " comps");
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(ThingWithComps), "InitializeComps")]
-        public static class Thing_InitializeComps_Patch
-        {
-            public static void Postfix(ThingWithComps __instance)
-            {
-                if (__instance.comps != null)
-                {
-                    __instance.comps = __instance.comps.OrderBy(delegate(ThingComp x) 
-                    {
-                        var index = mostCalledComps.FirstIndexOf(y => y == x.GetType().ToString());
-                        if (index == -1)
-                        {
-                            return 99999;
-                        }
-                        return index;
-                    }).ToList();
-                }
-            }
-        }
-
         private static int patchedMethodsCount = 0;
-        private static void Patch(HashSet<MethodInfo> methodsToPatch, HarmonyMethod transpiler)
+        private static void Patch(List<MethodInfo> methodsToPatch, HarmonyMethod transpiler)
         {
             foreach (var method in methodsToPatch)
             {
@@ -284,12 +224,12 @@ namespace PerformanceOptimizer
                     //var staticFields = method.DeclaringType.GetFields().Any(x => x.IsStatic);
                     //Log.Message(method.GetHashCode() + " Patching " + method.DeclaringType.ToString() + " - " + method.ToString() + " - is generic: " + method.IsGenericMethod + ", is virtual: " + method.IsVirtual
                     //    + " - is type generic: " + method.DeclaringType.IsGenericType + ", is type abstract: " + method.DeclaringType.IsAbstract + ", has static fields: " + staticFields);
-                    harmony.Patch(method, transpiler: transpiler);
+                    PerformanceOptimizerMod.harmony.Patch(method, transpiler: transpiler);
                     patchedMethodsCount++;
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex.GetType() + " - Error in transpiling: " + method + ", type: " + method.DeclaringType + ", exception: " + ex + " - InnerException: " + ex.InnerException);
+                    Log.Error(ex.GetType() + " - Error in transpiling: " + method.FullDescription() + ", type: " + method.DeclaringType + ", exception: " + ex + " - InnerException: " + ex.InnerException);
                 }
             }
         }
@@ -354,39 +294,65 @@ namespace PerformanceOptimizer
                 yield return instr;
             }
         }
-        public static void StartLog(this Stopwatch stopwatch)
-        {
-            stopwatch.Restart();
-        }
 
-        public class StopwatchData
-        {
-            public float total;
-            public float count;
-        }
 
-        private static Dictionary<Stopwatch, StopwatchData> stopwatches = new Dictionary<Stopwatch, StopwatchData>();
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void LogTime(this Stopwatch stopwatch, string log, int limit = 999999)
+        [HarmonyPatch(typeof(MapComponentUtility), "FinalizeInit")]
+        public class FinalizeInit_Patch
         {
-            if (!stopwatches.TryGetValue(stopwatch, out var stats))
+            public static void Postfix(Map map)
             {
-                stopwatches[stopwatch] = stats = new StopwatchData();
+                Log.Message("Loaded map: " + map + ", it has " + map.components.Count + " comps");
             }
-
-            var elapsed = (float)stopwatch.ElapsedTicks / Stopwatch.Frequency;
-            stats.count++;
-            stats.total += elapsed;
-
-            if (stats.count > limit)
+        }
+        [HarmonyPatch(typeof(WorldComponentUtility), "FinalizeInit")]
+        public class World_Patch
+        {
+            public static void Postfix(World world)
             {
-                Log.Message(log + "it took: " + stats.total);
-                foreach (var data in ComponentCache.calledStats.OrderByDescending(x => x.Value))
+                Log.Message("Loaded world: " + world + ", it has " + world.components.Count + " comps");
+            }
+        }
+
+        [HarmonyPatch(typeof(GameComponentUtility), "FinalizeInit")]
+        public class GameComponentUtility_Patch
+        {
+            public static void Postfix()
+            {
+                Log.Message("Loaded game: " + Current.Game + ", it has " + Current.Game.components.Count + " comps");
+            }
+        }
+
+        [HarmonyPatch(typeof(ThingWithComps), "SpawnSetup")]
+        public static class Thing_SpawnSetup_Patch
+        {
+            public static List<ThingDef> reportedDefs = new List<ThingDef>();
+            public static void Postfix(ThingWithComps __instance)
+            {
+                if (__instance.comps?.Count > 0 && !reportedDefs.Contains(__instance.def))
                 {
-                    Log.Message("Called: " + data.Key + " - " + data.Value);
+                    reportedDefs.Add(__instance.def);
+                    Log.Message("Loaded ThingWithComps: " + __instance.def + ", it has " + __instance.comps?.Count + " comps");
                 }
-                stats.total = 0;
-                stats.count = 0;
+            }
+        }
+
+        [HarmonyPatch(typeof(ThingWithComps), "InitializeComps")]
+        public static class Thing_InitializeComps_Patch
+        {
+            public static void Postfix(ThingWithComps __instance)
+            {
+                if (__instance.comps != null)
+                {
+                    __instance.comps = __instance.comps.OrderBy(delegate (ThingComp x)
+                    {
+                        var index = mostCalledComps.FirstIndexOf(y => y == x.GetType().ToString());
+                        if (index == -1)
+                        {
+                            return 99999;
+                        }
+                        return index;
+                    }).ToList();
+                }
             }
         }
     }

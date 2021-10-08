@@ -43,8 +43,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ComponentCache.cs" />
+    <Compile Include="PerformanceOptimizerMod.cs" />
     <Compile Include="GetCompPatches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Logging.cs" />
     <Compile Include="UIPatches.cs" />
   </ItemGroup>
   <ItemGroup>
