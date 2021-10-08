@@ -17,7 +17,7 @@ namespace PerformanceOptimizer
 	[StaticConstructorOnStartup]
 	public static class ComponentCache
 	{
-		private static Stopwatch dictStopwatch = new Stopwatch();
+		//private static Stopwatch dictStopwatch = new Stopwatch();
 
 		public static Dictionary<Type, int> calledStats = new Dictionary<Type, int>();
 
@@ -33,12 +33,13 @@ namespace PerformanceOptimizer
 			}
         }
 
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static T GetThingCompDict<T>(this ThingWithComps thingWithComps) where T : ThingComp
+		public static T GetThingCompFast<T>(this ThingWithComps thingWithComps) where T : ThingComp
 		{
 			//dictStopwatch.Restart();
 			if (thingWithComps.comps == null)
-            {
+			{
 				//dictStopwatch.LogTime("Dict approach: ");
 				return null;
 			}
@@ -51,21 +52,23 @@ namespace PerformanceOptimizer
 					return thingWithComps.comps[i] as T;
 				}
 			}
-			
+
 			for (int i = 0; i < thingWithComps.comps.Count; i++)
 			{
-				if (thingWithComps.comps[i].GetType() is T)
-				{
-					//RegisterComp(typeof(T));
+				T val = thingWithComps.comps[i] as T;
+				if (val != null)
+				{   
 					//dictStopwatch.LogTime("Dict approach: ");
-					return thingWithComps.comps[i] as T;
+					return val;
 				}
 			}
+
+			//dictStopwatch.LogTime("Dict approach: ");
 			return null;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static T GetWorldObjectCompDict<T>(this WorldObject worldObject) where T : WorldObjectComp
+		public static T GetWorldObjectCompFast<T>(this WorldObject worldObject) where T : WorldObjectComp
 		{
 			//dictStopwatch.Restart();
 			if (worldObject.comps == null)
@@ -85,50 +88,28 @@ namespace PerformanceOptimizer
 
 			for (int i = 0; i < worldObject.comps.Count; i++)
 			{
-				if (worldObject.comps[i].GetType() is T)
+				T val = worldObject.comps[i] as T;
+				if (val != null)
 				{
-					//RegisterComp(typeof(T));
-					//dictStopwatch.LogTime("Dict approach: ");
-					return worldObject.comps[i] as T;
+					return val;
 				}
 			}
-			return null;
-		}
-
-		private static Stopwatch vanillaStopwatch = new Stopwatch();
-		public static T GetCompVanilla<T>(this ThingWithComps thingWithComps) where T : ThingComp
-		{
-			vanillaStopwatch.Restart();
-			if (thingWithComps.comps != null)
-			{
-				int i = 0;
-				for (int count = thingWithComps.comps.Count; i < count; i++)
-				{
-					T val = thingWithComps.comps[i] as T;
-					if (val != null)
-					{
-						vanillaStopwatch.LogTime("Vanilla approach: ");
-						return val;
-					}
-				}
-			}
-			vanillaStopwatch.LogTime("Vanilla approach: ");
 			return null;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static T TryGetThingCompDict<T>(this Thing thing) where T : ThingComp
+		public static T TryGetThingCompFast<T>(this Thing thing) where T : ThingComp
 		{
 			ThingWithComps thingWithComps = thing as ThingWithComps;
 			if (thingWithComps == null)
 			{
 				return null;
 			}
-			return thingWithComps.GetThingCompDict<T>();
+			return thingWithComps.GetThingCompFast<T>();
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static T TryGetHediffCompDict<T>(this Hediff hd) where T : HediffComp
+		public static T TryGetHediffCompFast<T>(this Hediff hd) where T : HediffComp
 		{
 			HediffWithComps hediffWithComps = hd as HediffWithComps;
 			if (hediffWithComps == null)
@@ -154,29 +135,17 @@ namespace PerformanceOptimizer
 
 			for (int i = 0; i < hediffWithComps.comps.Count; i++)
 			{
-				if (hediffWithComps.comps[i].GetType() is T)
+				T val = hediffWithComps.comps[i] as T;
+				if (val != null)
 				{
-					//RegisterComp(typeof(T));
-					//dictStopwatch.LogTime("Dict approach: ");
-					return hediffWithComps.comps[i] as T;
+					return val;
 				}
 			}
 			return null;
 		}
-
-		public static T TryGetCompVanilla<T>(this Thing thing) where T : ThingComp
-		{
-			ThingWithComps thingWithComps = thing as ThingWithComps;
-			if (thingWithComps == null)
-			{
-				return null;
-			}
-			return thingWithComps.GetCompVanilla<T>();
-		}
-
 		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static T GetMapComponent<T>(this Map map) where T : MapComponent
+		public static T GetMapComponentDict<T>(this Map map) where T : MapComponent
 		{
 			if (!CompsOfType<T>.mapCompsByMap.TryGetValue(map, out T mapComp) || mapComp is null)
 			{
@@ -188,7 +157,7 @@ namespace PerformanceOptimizer
 
 		private static Dictionary<Type, WorldComponent> cachedWorldComps = new Dictionary<Type, WorldComponent>();
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static T GetWorldComponent<T>(this World world) where T : WorldComponent
+		public static T GetWorldComponentDict<T>(this World world) where T : WorldComponent
 		{
 			var type = typeof(T);
 			if (!cachedWorldComps.TryGetValue(type, out var worldComp) || worldComp is null)
@@ -201,7 +170,7 @@ namespace PerformanceOptimizer
 
 		private static Dictionary<Type, GameComponent> cachedGameComps = new Dictionary<Type, GameComponent>();
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static T GetGameComponent<T>(this Game game) where T : GameComponent
+		public static T GetGameComponentDict<T>(this Game game) where T : GameComponent
 		{
 			var type = typeof(T);
 			if (!cachedGameComps.TryGetValue(type, out var gameComp) || gameComp is null)

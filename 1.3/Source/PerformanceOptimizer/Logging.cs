@@ -36,11 +36,10 @@ namespace PerformanceOptimizer
             {
                 stopwatches[stopwatch] = stats = new StopwatchData();
             }
-
+            stopwatch.Stop();
             var elapsed = (float)stopwatch.ElapsedTicks / Stopwatch.Frequency;
             stats.count++;
             stats.total += elapsed;
-
             if (stats.count > limit)
             {
                 Log.Message(log + "it took: " + stats.total);

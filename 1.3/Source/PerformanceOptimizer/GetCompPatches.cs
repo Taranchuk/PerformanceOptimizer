@@ -27,7 +27,7 @@ namespace PerformanceOptimizer
 
         public static HashSet<string> typesToSkip = new HashSet<string>
         {
-            "AnimalGenetics.ColonyManager+JobsWrapper"
+            "AnimalGenetics.ColonyManager+JobsWrapper", "AutoMachineTool"
         };
         public static HashSet<string> methodsToSkip = new HashSet<string>
         {
@@ -156,10 +156,10 @@ namespace PerformanceOptimizer
             Patch(methodsCallingMapGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetMapCompTranspiler))));
             Patch(methodsCallingWorldGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetWorldCompTranspiler))));
             Patch(methodsCallingGameGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetGameCompTranspiler))));
+            Patch(methodsCallingWorldObjectGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetWorldObjectCompTranspiler))));
             Patch(methodsCallingThingGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetThingCompTranspiler))));
             Patch(methodsCallingThingTryGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.TryGetThingCompTranspiler))));
             Patch(methodsCallingHediffTryGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.TryGetHediffCompTranspiler))));
-            Patch(methodsCallingWorldObjectGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetWorldObjectCompTranspiler))));
             curSW.LogTime("Patched methods: ", 0);
             curSW.Restart();
             var hooks = new List<MethodInfo>
@@ -204,49 +204,47 @@ namespace PerformanceOptimizer
             }
         }
 
-        public static MethodInfo genericMapGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetMapComponent));
+        public static MethodInfo genericMapGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetMapComponentDict));
         private static IEnumerable<CodeInstruction> GetMapCompTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase source, ILGenerator il)
         {
             return PerformTranspiler("GetComponent", typeof(MapComponent), genericMapGetComp, OpCodes.Callvirt, 0, instructions, source, il);
         }
 
-        public static MethodInfo genericWorldGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetWorldComponent));
+        public static MethodInfo genericWorldGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetWorldComponentDict));
         private static IEnumerable<CodeInstruction> GetWorldCompTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase source, ILGenerator il)
         {
             return PerformTranspiler("GetComponent", typeof(WorldComponent), genericWorldGetComp, OpCodes.Callvirt, 0, instructions, source, il);
         }
 
-        public static MethodInfo genericWorldObjectGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetWorldObjectCompDict));
-        private static IEnumerable<CodeInstruction> GetWorldObjectCompTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase source, ILGenerator il)
-        {
-            return PerformTranspiler("GetComponent", typeof(WorldObjectComp), genericWorldObjectGetComp, OpCodes.Callvirt, 0, instructions, source, il);
-        }
-
-        public static MethodInfo genericGameGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetGameComponent));
+        public static MethodInfo genericGameGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetGameComponentDict));
         private static IEnumerable<CodeInstruction> GetGameCompTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase source, ILGenerator il)
         {
             return PerformTranspiler("GetComponent", typeof(GameComponent), genericGameGetComp, OpCodes.Callvirt, 0, instructions, source, il);
         }
 
-        //public static MethodInfo genericThingGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetCompVanilla));
-        public static MethodInfo genericThingGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetThingCompDict));
+        public static MethodInfo genericThingGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetThingCompFast));
         private static IEnumerable<CodeInstruction> GetThingCompTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase source, ILGenerator il)
         {
             return PerformTranspiler("GetComp", typeof(ThingComp), genericThingGetComp, OpCodes.Callvirt, 0, instructions, source, il);
         }
 
-        public static MethodInfo genericThingTryGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.TryGetThingCompDict));
+        public static MethodInfo genericThingTryGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.TryGetThingCompFast));
         private static IEnumerable<CodeInstruction> TryGetThingCompTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase source, ILGenerator il)
         {
             return PerformTranspiler("TryGetComp", typeof(ThingComp), genericThingTryGetComp, OpCodes.Call, 1, instructions, source, il);
         }
 
-        public static MethodInfo genericHediffTryGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.TryGetHediffCompDict));
+        public static MethodInfo genericHediffTryGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.TryGetHediffCompFast));
         private static IEnumerable<CodeInstruction> TryGetHediffCompTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase source, ILGenerator il)
         {
             return PerformTranspiler("TryGetComp", typeof(HediffComp), genericHediffTryGetComp, OpCodes.Call, 1, instructions, source, il);
         }
 
+        public static MethodInfo genericWorldObjectGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetWorldObjectCompFast));
+        private static IEnumerable<CodeInstruction> GetWorldObjectCompTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase source, ILGenerator il)
+        {
+            return PerformTranspiler("GetComponent", typeof(WorldObjectComp), genericWorldObjectGetComp, OpCodes.Callvirt, 0, instructions, source, il);
+        }
         public static bool CallsComponent(this CodeInstruction codeInstruction, OpCode opcode, string methodName, Type baseCompType, int parameterLength, out Type curType)
         {
             if (codeInstruction.opcode == opcode && codeInstruction.operand is MethodInfo mi && mi.Name == methodName && mi.IsGenericMethod && mi.GetParameters().Length == parameterLength)
@@ -323,7 +321,7 @@ namespace PerformanceOptimizer
                     }).ToList();
                 }
             }
-
+        
             public static List<string> mostCalledComps = new List<string>
             {
                 "RimWorld.CompQuality",
