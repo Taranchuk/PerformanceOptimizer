@@ -276,6 +276,44 @@ namespace PerformanceOptimizer
         }
     }
 
+    [HarmonyPatch(typeof(ExpectationsUtility), "CurrentExpectationFor", new Type[] { typeof(Pawn) })]
+    public static class Patch_ExpectationsUtility_CurrentExpectationFor
+    {
+        private const int RefreshRate = 60;
+        private static Dictionary<Pawn, ValueCache<ExpectationDef>> cachedResults = new Dictionary<Pawn, ValueCache<ExpectationDef>>();
+
+        [HarmonyPriority(Priority.First)]
+        public static bool Prefix(Pawn p, out bool __state, ref ExpectationDef __result)
+        {
+            if (!cachedResults.TryGetValue(p, out var cache))
+            {
+                cachedResults[p] = new ValueCache<ExpectationDef>(null, RefreshRate);
+                __state = true;
+                return true;
+            }
+            else if (Find.TickManager.ticksGameInt > cache.refreshTick)
+            {
+                __state = true;
+                return true;
+            }
+            else
+            {
+                __result = cache.valueInt;
+                __state = false;
+                return false;
+            }
+        }
+
+        [HarmonyPriority(Priority.Last)]
+        public static void Postfix(Pawn p, bool __state, ExpectationDef __result)
+        {
+            if (__state)
+            {
+                cachedResults[p].SetValue(__result, RefreshRate);
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(PawnNeedsUIUtility), "GetThoughtGroupsInDisplayOrder")]
     public static class Patch_PawnNeedsUIUtility_GetThoughtGroupsInDisplayOrder
     {
@@ -318,12 +356,16 @@ namespace PerformanceOptimizer
     //[HarmonyPatch(typeof(JobDriver), "CheckCurrentToilEndOrFail")] // TODO: produces job errors, investigate further
     //public static class Patch_JobDriver_CheckCurrentToilEndOrFail
     //{
-    //    private const int RefreshRate = 30;
+    //    private const int RefreshRate = 10;
     //    private static Dictionary<Pawn, int> cachedResults = new Dictionary<Pawn, int>();
     //
     //    [HarmonyPriority(Priority.First)]
     //    public static bool Prefix(JobDriver __instance)
     //    {
+    //        if (__instance.pawn.pather.moving || __instance is JobDriver_OperateScanner)
+    //        {
+    //            return true;
+    //        }
     //        if (!cachedResults.TryGetValue(__instance.pawn, out var cache) || Find.TickManager.ticksGameInt > cache + RefreshRate)
     //        {
     //            cachedResults[__instance.pawn] = Find.TickManager.ticksGameInt;
