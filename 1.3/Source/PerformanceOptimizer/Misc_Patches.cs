@@ -159,7 +159,7 @@ namespace PerformanceOptimizer
     [HarmonyPatch(typeof(ThoughtHandler), "TotalMoodOffset")]
     public static class Patch_ThoughtHandler_TotalMoodOffset
     {
-        private const int RefreshRate = 200;
+        private const int RefreshRate = 300;
         private static Dictionary<Pawn, ValueCache<float>> cachedResults = new Dictionary<Pawn, ValueCache<float>>();
     
         [HarmonyPriority(Priority.First)]
@@ -190,6 +190,88 @@ namespace PerformanceOptimizer
             if (__state)
             {
                 cachedResults[__instance.pawn].SetValue(__result, RefreshRate);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(BeautyUtility), "AverageBeautyPerceptible")]
+    public static class Patch_BeautyUtility_AverageBeautyPerceptible
+    {
+        private const int RefreshRate = 300;
+        private static Dictionary<int, ValueCache<float>> cachedResults = new Dictionary<int, ValueCache<float>>();
+        public struct Data
+        {
+            public bool state;
+            public int key;
+        }
+
+        [HarmonyPriority(Priority.First)]
+        public static bool Prefix(IntVec3 root, Map map, out Data __state, ref float __result)
+        {
+            var key = root.GetHashCode() + map.uniqueID;
+            if (!cachedResults.TryGetValue(key, out var cache))
+            {
+                cachedResults[key] = new ValueCache<float>(0, RefreshRate);
+                __state = new Data { state = true, key = key };
+                return true;
+            }
+            else if (Find.TickManager.ticksGameInt > cache.refreshTick)
+            {
+                __state = new Data { state = true, key = key };
+                return true;
+            }
+            else
+            {
+                __result = cache.valueInt;
+                __state = new Data { state = false, key = key};
+                return false;
+            }
+        }
+
+        [HarmonyPriority(Priority.Last)]
+        public static void Postfix(Data __state, float __result)
+        {
+            if (__state.state)
+            {
+                cachedResults[__state.key].SetValue(__result, RefreshRate);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(QuestUtility), "IsQuestLodger")]
+    public static class Patch_QuestUtility_IsQuestLodger
+    {
+        private const int RefreshRate = 60;
+        private static Dictionary<Pawn, ValueCache<bool>> cachedResults = new Dictionary<Pawn, ValueCache<bool>>();
+
+        [HarmonyPriority(Priority.First)]
+        public static bool Prefix(Pawn p, out bool __state, ref bool __result)
+        {
+            if (!cachedResults.TryGetValue(p, out var cache))
+            {
+                cachedResults[p] = new ValueCache<bool>(false, RefreshRate);
+                __state = true;
+                return true;
+            }
+            else if (Find.TickManager.ticksGameInt > cache.refreshTick)
+            {
+                __state = true;
+                return true;
+            }
+            else
+            {
+                __result = cache.valueInt;
+                __state = false;
+                return false;
+            }
+        }
+
+        [HarmonyPriority(Priority.Last)]
+        public static void Postfix(Pawn p, bool __state, bool __result)
+        {
+            if (__state)
+            {
+                cachedResults[p].SetValue(__result, RefreshRate);
             }
         }
     }
@@ -233,26 +315,26 @@ namespace PerformanceOptimizer
     }
 
 
-    [HarmonyPatch(typeof(JobDriver), "CheckCurrentToilEndOrFail")]
-    public static class Patch_JobDriver_CheckCurrentToilEndOrFail
-    {
-        private const int RefreshRate = 30;
-        private static Dictionary<Pawn, int> cachedResults = new Dictionary<Pawn, int>();
-
-        [HarmonyPriority(Priority.First)]
-        public static bool Prefix(JobDriver __instance)
-        {
-            if (!cachedResults.TryGetValue(__instance.pawn, out var cache) || Find.TickManager.ticksGameInt > cache + RefreshRate)
-            {
-                cachedResults[__instance.pawn] = Find.TickManager.ticksGameInt;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-    }
+    //[HarmonyPatch(typeof(JobDriver), "CheckCurrentToilEndOrFail")] // TODO: produces job errors, investigate further
+    //public static class Patch_JobDriver_CheckCurrentToilEndOrFail
+    //{
+    //    private const int RefreshRate = 30;
+    //    private static Dictionary<Pawn, int> cachedResults = new Dictionary<Pawn, int>();
+    //
+    //    [HarmonyPriority(Priority.First)]
+    //    public static bool Prefix(JobDriver __instance)
+    //    {
+    //        if (!cachedResults.TryGetValue(__instance.pawn, out var cache) || Find.TickManager.ticksGameInt > cache + RefreshRate)
+    //        {
+    //            cachedResults[__instance.pawn] = Find.TickManager.ticksGameInt;
+    //            return true;
+    //        }
+    //        else
+    //        {
+    //            return false;
+    //        }
+    //    }
+    //}
 
     [HarmonyPatch(typeof(WindManager), "WindManagerTick")]
     public static class Patch_WindManager_WindManagerTick
