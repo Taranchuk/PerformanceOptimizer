@@ -30,26 +30,19 @@ namespace PerformanceOptimizer
         }
     }
 
-    public class ValueCache<T> where T : struct
+    public class ValueCache<T>
     {
         public int refreshTick;
         public T valueInt;
-        public ValueCache(T value)
+        public ValueCache(T value, int resetInTicks)
         {
-            Value = value;
+            SetValue(value, resetInTicks);
         }
 
-        public T Value
+        public void SetValue(T value, int resetInTicks)
         {
-            get
-            {
-                return valueInt;
-            }
-            set
-            {
-                this.valueInt = value;
-                refreshTick = Find.TickManager.TicksGame + 30;
-            }
+            this.valueInt = value;
+            refreshTick = Find.TickManager.TicksGame + resetInTicks;
         }
     }
 
@@ -63,7 +56,7 @@ namespace PerformanceOptimizer
         {
             if (!cachedResults.TryGetValue(__instance.pawn, out var cache))
             {
-                cachedResults[__instance.pawn] = new ValueCache<float>(0);
+                cachedResults[__instance.pawn] = new ValueCache<float>(0, 30);
                 __state = true;
                 return true;
             }
@@ -84,7 +77,7 @@ namespace PerformanceOptimizer
         {
             if (__state)
             {
-                cachedResults[__instance.pawn].Value = __result;
+                cachedResults[__instance.pawn].SetValue(__result, 30);
             }
         }
     }
@@ -99,7 +92,7 @@ namespace PerformanceOptimizer
         {
             if (!cachedResults.TryGetValue(__instance.pawn, out var cache))
             {
-                cachedResults[__instance.pawn] = new ValueCache<float>(0);
+                cachedResults[__instance.pawn] = new ValueCache<float>(0, 30);
                 __state = true;
                 return true;
             }
@@ -121,7 +114,7 @@ namespace PerformanceOptimizer
         {
             if (__state)
             {
-                cachedResults[__instance.pawn].Value = __result;
+                cachedResults[__instance.pawn].SetValue(__result, 30);
             }
         }
     }
@@ -136,7 +129,7 @@ namespace PerformanceOptimizer
         {
             if (!cachedResults.TryGetValue(__instance.pawn, out var cache))
             {
-                cachedResults[__instance.pawn] = new ValueCache<float>(0);
+                cachedResults[__instance.pawn] = new ValueCache<float>(0, 30);
                 __state = true;
                 return true;
             }
@@ -158,7 +151,7 @@ namespace PerformanceOptimizer
         {
             if (__state)
             {
-                cachedResults[__instance.pawn].Value = __result;
+                cachedResults[__instance.pawn].SetValue(__result, 30);
             }
         }
     }
@@ -166,6 +159,7 @@ namespace PerformanceOptimizer
     [HarmonyPatch(typeof(ThoughtHandler), "TotalMoodOffset")]
     public static class Patch_ThoughtHandler_TotalMoodOffset
     {
+        private const int RefreshRate = 200;
         private static Dictionary<Pawn, ValueCache<float>> cachedResults = new Dictionary<Pawn, ValueCache<float>>();
     
         [HarmonyPriority(Priority.First)]
@@ -173,7 +167,7 @@ namespace PerformanceOptimizer
         {
             if (!cachedResults.TryGetValue(__instance.pawn, out var cache))
             {
-                cachedResults[__instance.pawn] = new ValueCache<float>(0);
+                cachedResults[__instance.pawn] = new ValueCache<float>(0, RefreshRate);
                 __state = true;
                 return true;
             }
@@ -195,8 +189,100 @@ namespace PerformanceOptimizer
         {
             if (__state)
             {
-                cachedResults[__instance.pawn].Value = __result;
+                cachedResults[__instance.pawn].SetValue(__result, RefreshRate);
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(PawnNeedsUIUtility), "GetThoughtGroupsInDisplayOrder")]
+    public static class Patch_PawnNeedsUIUtility_GetThoughtGroupsInDisplayOrder
+    {
+        private const int RefreshRate = 200;
+        private static Dictionary<Need_Mood, ValueCache<List<Thought>>> cachedResults = new Dictionary<Need_Mood, ValueCache<List<Thought>>>();
+
+        [HarmonyPriority(Priority.First)]
+        public static bool Prefix(Need_Mood mood, ref List<Thought> outThoughtGroupsPresent, out bool __state)
+        {
+            if (!cachedResults.TryGetValue(mood, out var cache))
+            {
+                cachedResults[mood] = new ValueCache<List<Thought>>(new List<Thought>(), RefreshRate);
+                __state = true;
+                return true;
+            }
+            else if (Find.TickManager.ticksGameInt > cache.refreshTick)
+            {
+                __state = true;
+                return true;
+            }
+            else
+            {
+                outThoughtGroupsPresent = cache.valueInt;
+                __state = false;
+                return false;
+            }
+        }
+
+        [HarmonyPriority(Priority.Last)]
+        public static void Postfix(Need_Mood mood, ref List<Thought> outThoughtGroupsPresent, bool __state)
+        {
+            if (__state)
+            {
+                cachedResults[mood].SetValue(outThoughtGroupsPresent, RefreshRate);
+            }
+        }
+    }
+
+
+    [HarmonyPatch(typeof(JobDriver), "CheckCurrentToilEndOrFail")]
+    public static class Patch_JobDriver_CheckCurrentToilEndOrFail
+    {
+        private const int RefreshRate = 30;
+        private static Dictionary<Pawn, int> cachedResults = new Dictionary<Pawn, int>();
+
+        [HarmonyPriority(Priority.First)]
+        public static bool Prefix(JobDriver __instance)
+        {
+            if (!cachedResults.TryGetValue(__instance.pawn, out var cache) || Find.TickManager.ticksGameInt > cache + RefreshRate)
+            {
+                cachedResults[__instance.pawn] = Find.TickManager.ticksGameInt;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(WindManager), "WindManagerTick")]
+    public static class Patch_WindManager_WindManagerTick
+    {
+        [HarmonyPriority(Priority.First)]
+        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        {
+            var codes = instructions.ToList();
+            var plantSwayHead = AccessTools.Field(typeof(WindManager), nameof(WindManager.plantSwayHead));
+            for (var i = 0; i < codes.Count; i++)
+            {
+                if (i > 2 && codes[i - 1].opcode == OpCodes.Stfld && codes[i - 1].OperandIs(plantSwayHead) && codes[i-2].OperandIs(0.0f) && codes[i - 2].opcode == OpCodes.Ldc_R4)
+                {
+                    yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Patch_WindManager_WindManagerTick), nameof(ShouldDo))).MoveLabelsFrom(codes[i]);
+                    var label = iLGenerator.DefineLabel();
+                    yield return new CodeInstruction(OpCodes.Brtrue_S, label);
+                    yield return new CodeInstruction(OpCodes.Ret);
+                    codes[i].labels.Add(label);
+                }
+                yield return codes[i];
+            }
+        }
+
+        public static bool ShouldDo()
+        {
+            if (Prefs.PlantWindSway)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
