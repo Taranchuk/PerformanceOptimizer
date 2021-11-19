@@ -23,6 +23,8 @@ namespace PerformanceOptimizer
         public static PerformanceOptimizerSettings settings;
 
         public static TickManager tickManager;
+
+        public static bool DubsPerformanceAnalyzerLoaded;
         public PerformanceOptimizerMod(ModContentPack mod) : base(mod)
         {
             harmony = new Harmony("PerformanceOptimizer.Main");
@@ -48,6 +50,7 @@ namespace PerformanceOptimizer
     {
         public static void Postfix()
         {
+            PerformanceOptimizerMod.DubsPerformanceAnalyzerLoaded = ModLister.AllInstalledMods.Any(x => x.Active && x.Name.Contains("Dubs Performance Analyzer"));
             CachingPatches.DoPatches();
             if (PerformanceOptimizerSettings.fasterGetCompReplacement)
             {

@@ -184,14 +184,27 @@ namespace PerformanceOptimizer
     public static class DoPlaySettings_DoPlaySettings
     {
         [TweakValue("0", 0, 2000)] public static float xTest = 150;
-        [TweakValue("0", 0, 2000)] public static float yTest = 150;
+        [TweakValue("0", -100, 200)] public static float yTest = -40;
+        [TweakValue("0", -100, 200)] public static float dubsFix = -40;
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(WidgetRow rowVisibility, bool worldView, ref float curBaseY)
         {
-            if (PerformanceOptimizerSettings.hideBottomRightOverlayButtons)
+            if (PerformanceOptimizerSettings.hideBottomRightOverlayButtons && rowVisibility.FinalY > 0)
             {
-                if (Event.current.mousePosition.x < (UI.screenWidth - xTest) || Event.current.mousePosition.y < (UI.screenHeight - yTest))
+                if (Event.current.mousePosition.x < (UI.screenWidth - xTest) || Event.current.mousePosition.y < (rowVisibility.FinalY + 
+                    (PerformanceOptimizerMod.DubsPerformanceAnalyzerLoaded ? yTest + dubsFix : yTest)))
                 {
+                    if (!worldView)
+                    {
+                        Find.PlaySettings.CheckKeyBindingToggle(KeyBindingDefOf.ToggleBeautyDisplay, ref Find.PlaySettings.showBeauty);
+                        Find.PlaySettings.CheckKeyBindingToggle(KeyBindingDefOf.ToggleRoomStatsDisplay, ref Find.PlaySettings.showRoomStats);
+                        bool toggleable = Prefs.ResourceReadoutCategorized;
+                        bool flag = toggleable;
+                        if (toggleable != flag)
+                        {
+                            Prefs.ResourceReadoutCategorized = toggleable;
+                        }
+                    }
                     return false;
                 }
             }
@@ -213,6 +226,7 @@ namespace PerformanceOptimizer
             }
             else if (PerformanceOptimizerSettings.hideSpeedButtons && (Event.current.mousePosition.x < (UI.screenWidth - xTest)))
             {
+                DoTimeControlsGUI();
                 return false;
             }
             return true;
