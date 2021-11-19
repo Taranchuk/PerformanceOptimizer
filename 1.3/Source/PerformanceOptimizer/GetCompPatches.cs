@@ -177,7 +177,7 @@ namespace PerformanceOptimizer
 
             foreach (var hook in hooks)
             {
-                PerformanceOptimizerMain.harmony.Patch(hook, null, new HarmonyMethod(typeof(ComponentCache), nameof(ComponentCache.ResetComps)));
+                PerformanceOptimizerMod.harmony.Patch(hook, null, new HarmonyMethod(typeof(ComponentCache), nameof(ComponentCache.ResetComps)));
             }
 
             curSW.LogTime("Patched hooks: ", 0);
@@ -194,7 +194,7 @@ namespace PerformanceOptimizer
             {
                 try
                 {
-                    PerformanceOptimizerMain.harmony.Patch(method, transpiler: transpiler);
+                    PerformanceOptimizerMod.harmony.Patch(method, transpiler: transpiler);
                     patchedMethodsCount++;
                 }
                 catch (Exception ex)

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+	<PO.UISettings>UI settings</PO.UISettings>
+	<PO.HideResourceReadout>Hide resource readout</PO.HideResourceReadout>
+	<PO.HideBottomButtonBar>Hide bottom button bar</PO.HideBottomButtonBar>
+	<PO.HideBottomRightOverlayButtons>Hide bottom right overlay buttons</PO.HideBottomRightOverlayButtons>
+	<PO.MinimizeAlertsReadout>Minimize alerts readout</PO.MinimizeAlertsReadout>
+	<PO.HideSpeedButtons>Hide speed buttons</PO.HideSpeedButtons>
+	<PO.DisableSpeedButtons>Disable speed buttons (leave only keybindings)</PO.DisableSpeedButtons>
+	
+	<PO.MiscSettings>Miscellaneous settings</PO.MiscSettings>
+	<PO.FasterGetCompReplacement>Faster GetComp methods replacement</PO.FasterGetCompReplacement>
+	<PO.DisableSteamManagerCallbacksChecks>Disable Steam Manager callbacks checks</PO.DisableSteamManagerCallbacksChecks>
+	<PO.DisablePlantSwayShaderUpdateIfSwayDisabled>Disable plant sway calculations if plant sway is disabled</PO.DisablePlantSwayShaderUpdateIfSwayDisabled>
+	<PO.DisableSoundsCompletely>Disable sounds completely</PO.DisableSoundsCompletely>
+
+	<PO.CacheSettings>Cache settings</PO.CacheSettings>
+	<PO.QuestLodger>QuestUtility:IsQuestLodger</PO.QuestLodger>
+	<PO.IsTeetotaler>PawnUtility:IsTeetotaler</PO.IsTeetotaler>
+	<PO.CurrentExpectationForPawn>ExpectationsUtility:CurrentExpectationForPawn</PO.CurrentExpectationForPawn>
+	<PO.CurrentExpectationForMap>ExpectationsUtility:CurrentExpectationForMap</PO.CurrentExpectationForMap>
+	<PO.TotalMoodOffset>ThoughtHandler:TotalMoodOffset</PO.TotalMoodOffset>
+	<PO.BreakThresholdMinor>MentalBreaker:BreakThresholdMinor</PO.BreakThresholdMinor>
+	<PO.BreakThresholdMajor>MentalBreaker:BreakThresholdMajor</PO.BreakThresholdMajor>
+	<PO.BreakThresholdExtreme>MentalBreaker:BreakThresholdExtreme</PO.BreakThresholdExtreme>
+	<PO.AmbientTemperature>Thing:AmbientTemperature</PO.AmbientTemperature>
+	<PO.CurrentInstantBeauty>Need_Beauty:CurrentInstantBeauty</PO.CurrentInstantBeauty>
+	<PO.GetStyleDominance>IdeoUtility:GetStyleDominance</PO.GetStyleDominance>
+	<PO.CheckCurrentToilEndOrFail>JobDriver:CheckCurrentToilEndOrFail</PO.CheckCurrentToilEndOrFail>
+	<PO.FindAllowedDesignator>BuildCopyCommandUtility:FindAllowedDesignator</PO.FindAllowedDesignator>
+	<PO.RefreshRate>refresh rate {0}</PO.RefreshRate>
+	<PO.ThrottleRate>throttle rate {0}</PO.ThrottleRate>
+	
+	<PO.GameLoadSettings>Game load settings</PO.GameLoadSettings>
+	<PO.DisableReportProbablyMissingAttributes>Disable report about probably missing attributes</PO.DisableReportProbablyMissingAttributes>
+	<PO.DisableLogHarmonyPatchIssueErrors>Disable Hugslib's log harmony patch issue errors</PO.DisableLogHarmonyPatchIssueErrors>
+	<PO.CacheCustomDataLoadMethodOf>Cache DirectXmlToObject:CustomDataLoadMethodOf</PO.CacheCustomDataLoadMethodOf>
+	<PO.CacheHasGenericDefinition>Cache GenGeneric:CustomDataLoadMethodOf</PO.CacheHasGenericDefinition>
+	<PO.FixCheckForDuplicateNodes>Try to fix duplicate XML nodes errors</PO.FixCheckForDuplicateNodes>
+</LanguageData>

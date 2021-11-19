@@ -16,63 +16,6 @@ using Verse.Sound;
 
 namespace PerformanceOptimizer
 {
-
-    [HarmonyPatch(typeof(BuildCopyCommandUtility))]
-    [HarmonyPatch("FindAllowedDesignator")]
-    public static class Patch_FindAllowedDesignator
-    {
-        private static Dictionary<BuildableDef, Designator_Build> cache = new Dictionary<BuildableDef, Designator_Build>();
-
-        private static int lastCacheTick = -1;
-        public static bool Prefix(ref Designator_Build __result, BuildableDef buildable, bool mustBeVisible = true)
-        {
-            __result = FindAllowedDesignator(buildable, mustBeVisible);
-            return false;
-        }
-        public static Designator_Build FindAllowedDesignator(BuildableDef buildable, bool mustBeVisible = true)
-        {
-            Game game = Current.Game;
-            if (game != null)
-            {
-                if (game.tickManager.TicksGame > lastCacheTick + 1000)
-                {
-                    cache.Clear();
-                    lastCacheTick = game.tickManager.TicksGame;
-                }
-                if (cache.TryGetValue(buildable, out var value))
-                {
-                    return value;
-                }
-            }
-            else
-            {
-                cache.Clear();
-            }
-            List<DesignationCategoryDef> allDefsListForReading = DefDatabase<DesignationCategoryDef>.AllDefsListForReading;
-            for (int i = 0; i < allDefsListForReading.Count; i++)
-            {
-                List<Designator> allResolvedDesignators = allDefsListForReading[i].AllResolvedDesignators;
-                for (int j = 0; j < allResolvedDesignators.Count; j++)
-                {
-                    Designator_Build designator_Build = BuildCopyCommandUtility.FindAllowedDesignatorRecursive(allResolvedDesignators[j], buildable, mustBeVisible);
-                    if (designator_Build != null)
-                    {
-                        if (!cache.ContainsKey(buildable))
-                        {
-                            cache.Add(buildable, designator_Build);
-                        }
-                        return designator_Build;
-                    }
-                }
-            }
-            if (!cache.ContainsKey(buildable))
-            {
-                cache.Add(buildable, null);
-            }
-            return null;
-        }
-    }
-
     [HarmonyPatch(typeof(ResourceReadout))]
     [HarmonyPatch("ResourceReadoutOnGUI")]
     public static class Patch_ResourceReadoutOnGUI
@@ -80,59 +23,62 @@ namespace PerformanceOptimizer
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(ResourceReadout __instance)
         {
-            float width = Prefs.ResourceReadoutCategorized ? 124f : 110f;
-            Rect rect2 = new Rect(0f, 0f, width, Mathf.Max(__instance.lastDrawnHeight + 50, 200));
-            if (!Mouse.IsOver(rect2))
+            if (PerformanceOptimizerSettings.hideResourceReadout)
             {
-                return false;
+                float width = Prefs.ResourceReadoutCategorized ? 124f : 110f;
+                Rect rect2 = new Rect(0f, 0f, width, Mathf.Max(__instance.lastDrawnHeight + 50, 200));
+                if (!Mouse.IsOver(rect2))
+                {
+                    return false;
+                }
             }
             return true;
         }
     }
 
     //[HarmonyPatch(typeof(AlertsReadout), "AlertsReadoutUpdate")]
-    public static class AlertsReadoutUpdate_Prefix
-    {
-    
-        [HarmonyPriority(Priority.First)]
-        public static bool Prefix(AlertsReadout __instance)
-        {
-            if (Event.current.mousePosition.x < (UI.screenWidth - AlertsReadoutOnGUI_Prefix.xTest))
-            {
-                AlertsReadoutUpdate_Mini(__instance);
-                return false;
-            }
-            return true;
-        }
-
-        public static void AlertsReadoutUpdate_Mini(AlertsReadout __instance)
-        {
-            __instance.curAlertIndex++;
-            if (__instance.curAlertIndex >= 24)
-            {
-                __instance.curAlertIndex = 0;
-            }
-            var alerts = __instance.AllAlerts.Where(x => x.Priority == AlertPriority.Critical || x.Priority == AlertPriority.High).ToList();
-            for (int i = __instance.curAlertIndex; i < alerts.Count; i += 24)
-            {
-                __instance.CheckAddOrRemoveAlert(alerts[i]);
-            }
-
-            for (int num3 = alerts.Count - 1; num3 >= 0; num3--)
-            {
-                Alert alert = alerts[num3];
-                try
-                {
-                    alerts[num3].AlertActiveUpdate();
-                }
-                catch (Exception ex)
-                {
-                    Log.ErrorOnce("Exception updating alert " + alert.ToString() + ": " + ex.ToString(), 743575);
-                    alerts.RemoveAt(num3);
-                }
-            }
-        }
-    }
+    //public static class AlertsReadoutUpdate_Prefix
+    //{
+    //
+    //    [HarmonyPriority(Priority.First)]
+    //    public static bool Prefix(AlertsReadout __instance)
+    //    {
+    //        if (Event.current.mousePosition.x < (UI.screenWidth - AlertsReadoutOnGUI_Prefix.xTest))
+    //        {
+    //            AlertsReadoutUpdate_Mini(__instance);
+    //            return false;
+    //        }
+    //        return true;
+    //    }
+    //
+    //    public static void AlertsReadoutUpdate_Mini(AlertsReadout __instance)
+    //    {
+    //        __instance.curAlertIndex++;
+    //        if (__instance.curAlertIndex >= 24)
+    //        {
+    //            __instance.curAlertIndex = 0;
+    //        }
+    //        var alerts = __instance.AllAlerts.Where(x => x.Priority == AlertPriority.Critical || x.Priority == AlertPriority.High).ToList();
+    //        for (int i = __instance.curAlertIndex; i < alerts.Count; i += 24)
+    //        {
+    //            __instance.CheckAddOrRemoveAlert(alerts[i]);
+    //        }
+    //
+    //        for (int num3 = alerts.Count - 1; num3 >= 0; num3--)
+    //        {
+    //            Alert alert = alerts[num3];
+    //            try
+    //            {
+    //                alerts[num3].AlertActiveUpdate();
+    //            }
+    //            catch (Exception ex)
+    //            {
+    //                Log.ErrorOnce("Exception updating alert " + alert.ToString() + ": " + ex.ToString(), 743575);
+    //                alerts.RemoveAt(num3);
+    //            }
+    //        }
+    //    }
+    //}
 
 
     [HarmonyPatch(typeof(AlertsReadout), "AlertsReadoutOnGUI")]
@@ -142,10 +88,13 @@ namespace PerformanceOptimizer
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(AlertsReadout __instance)
         {
-            if (Event.current.mousePosition.x < (UI.screenWidth - xTest))
+            if (PerformanceOptimizerSettings.minimizeAlertsReadout)
             {
-                AlertsReadoutOnGUI_Mini(__instance);
-                return false;
+                if (Event.current.mousePosition.x < (UI.screenWidth - xTest))
+                {
+                    AlertsReadoutOnGUI_Mini(__instance);
+                    return false;
+                }
             }
             return true;
         }
@@ -220,9 +169,12 @@ namespace PerformanceOptimizer
         [HarmonyPriority(Priority.First)]
         public static bool Prefix()
         {
-            if (Event.current.mousePosition.y < UI.screenHeight - 35)
+            if (PerformanceOptimizerSettings.hideBottomButtonBar)
             {
-                return false;
+                if (Event.current.mousePosition.y < UI.screenHeight - 35)
+                {
+                    return false;
+                }
             }
             return true;
         }
@@ -236,9 +188,12 @@ namespace PerformanceOptimizer
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(WidgetRow rowVisibility, bool worldView, ref float curBaseY)
         {
-            if (Event.current.mousePosition.x < (UI.screenWidth - xTest) || Event.current.mousePosition.y < (UI.screenHeight - yTest))
+            if (PerformanceOptimizerSettings.hideBottomRightOverlayButtons)
             {
-                return false;
+                if (Event.current.mousePosition.x < (UI.screenWidth - xTest) || Event.current.mousePosition.y < (UI.screenHeight - yTest))
+                {
+                    return false;
+                }
             }
             return true;
         }
@@ -247,23 +202,32 @@ namespace PerformanceOptimizer
     [HarmonyPatch(typeof(GlobalControlsUtility), "DoTimespeedControls")]
     public static class DoPlaySettings_DoTimespeedControls
     {
+        [TweakValue("0", 0, 2000)] public static float xTest = 154;
         [HarmonyPriority(Priority.Last)]
         public static bool Prefix()
         {
-            DoTimeControlsGUI();
-            return false;
+            if (PerformanceOptimizerSettings.disableSpeedButtons)
+            {
+                DoTimeControlsGUI();
+                return false;
+            }
+            else if (PerformanceOptimizerSettings.hideSpeedButtons && (Event.current.mousePosition.x < (UI.screenWidth - xTest)))
+            {
+                return false;
+            }
+            return true;
         }
         public static void DoTimeControlsGUI()
         {
-            TickManager tickManager = Find.TickManager;
+            TickManager tickManager = PerformanceOptimizerMod.tickManager;
             if (Event.current.type != EventType.KeyDown)
             {
                 return;
             }
             if (KeyBindingDefOf.TogglePause.KeyDownEvent)
             {
-                Find.TickManager.TogglePaused();
-                TimeControls.PlaySoundOf(Find.TickManager.CurTimeSpeed);
+                PerformanceOptimizerMod.tickManager.TogglePaused();
+                TimeControls.PlaySoundOf(PerformanceOptimizerMod.tickManager.CurTimeSpeed);
                 PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Pause, KnowledgeAmount.SpecificInteraction);
                 Event.current.Use();
             }
@@ -271,22 +235,22 @@ namespace PerformanceOptimizer
             {
                 if (KeyBindingDefOf.TimeSpeed_Normal.KeyDownEvent)
                 {
-                    Find.TickManager.CurTimeSpeed = TimeSpeed.Normal;
-                    TimeControls.PlaySoundOf(Find.TickManager.CurTimeSpeed);
+                    PerformanceOptimizerMod.tickManager.CurTimeSpeed = TimeSpeed.Normal;
+                    TimeControls.PlaySoundOf(PerformanceOptimizerMod.tickManager.CurTimeSpeed);
                     PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
                     Event.current.Use();
                 }
                 if (KeyBindingDefOf.TimeSpeed_Fast.KeyDownEvent)
                 {
-                    Find.TickManager.CurTimeSpeed = TimeSpeed.Fast;
-                    TimeControls.PlaySoundOf(Find.TickManager.CurTimeSpeed);
+                    PerformanceOptimizerMod.tickManager.CurTimeSpeed = TimeSpeed.Fast;
+                    TimeControls.PlaySoundOf(PerformanceOptimizerMod.tickManager.CurTimeSpeed);
                     PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
                     Event.current.Use();
                 }
                 if (KeyBindingDefOf.TimeSpeed_Superfast.KeyDownEvent)
                 {
-                    Find.TickManager.CurTimeSpeed = TimeSpeed.Superfast;
-                    TimeControls.PlaySoundOf(Find.TickManager.CurTimeSpeed);
+                    PerformanceOptimizerMod.tickManager.CurTimeSpeed = TimeSpeed.Superfast;
+                    TimeControls.PlaySoundOf(PerformanceOptimizerMod.tickManager.CurTimeSpeed);
                     PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
                     Event.current.Use();
                 }
@@ -294,8 +258,8 @@ namespace PerformanceOptimizer
 
             if (KeyBindingDefOf.TimeSpeed_Ultrafast.KeyDownEvent)
             {
-                Find.TickManager.CurTimeSpeed = TimeSpeed.Ultrafast;
-                TimeControls.PlaySoundOf(Find.TickManager.CurTimeSpeed);
+                PerformanceOptimizerMod.tickManager.CurTimeSpeed = TimeSpeed.Ultrafast;
+                TimeControls.PlaySoundOf(PerformanceOptimizerMod.tickManager.CurTimeSpeed);
                 Event.current.Use();
             }
             if (KeyBindingDefOf.Dev_TickOnce.KeyDownEvent && tickManager.CurTimeSpeed == TimeSpeed.Paused)

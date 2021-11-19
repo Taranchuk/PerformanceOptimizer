@@ -180,6 +180,7 @@ namespace PerformanceOptimizer
 		}
 		public static void ResetComps()
 		{
+			PerformanceOptimizerMod.tickManager = Current.Game?.tickManager;
 			cachedWorldComps.Clear();
 			cachedGameComps.Clear();
 			CompsOfType<Map>.mapCompsByMap.Clear();
