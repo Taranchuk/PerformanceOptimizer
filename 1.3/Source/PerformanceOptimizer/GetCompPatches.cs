@@ -259,33 +259,6 @@ namespace PerformanceOptimizer
             }
         }
 
-
-        [HarmonyPatch(typeof(MapComponentUtility), "FinalizeInit")]
-        public class FinalizeInit_Patch
-        {
-            public static void Postfix(Map map)
-            {
-                Log.Message("Loaded map: " + map + ", it has " + map.components.Count + " comps");
-            }
-        }
-        [HarmonyPatch(typeof(WorldComponentUtility), "FinalizeInit")]
-        public class World_Patch
-        {
-            public static void Postfix(World world)
-            {
-                Log.Message("Loaded world: " + world + ", it has " + world.components.Count + " comps");
-            }
-        }
-
-        [HarmonyPatch(typeof(GameComponentUtility), "FinalizeInit")]
-        public class GameComponentUtility_Patch
-        {
-            public static void Postfix()
-            {
-                Log.Message("Loaded game: " + Current.Game + ", it has " + Current.Game.components.Count + " comps");
-            }
-        }
-
         [HarmonyPatch(typeof(ThingWithComps), "InitializeComps")]
         public static class Thing_InitializeComps_Patch
         {
