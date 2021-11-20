@@ -162,23 +162,6 @@ namespace PerformanceOptimizer
             Patch(methodsCallingHediffTryGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.TryGetHediffCompTranspiler))));
             curSW.LogTime("Patched methods: ", 0);
             curSW.Restart();
-            var hooks = new List<MethodInfo>
-            {
-                AccessTools.Method(typeof(MapDeiniter), "Deinit"),
-                AccessTools.Method(typeof(Game), "AddMap"),
-                AccessTools.Method(typeof(World), "FillComponents"),
-                AccessTools.Method(typeof(Game), "FillComponents"),
-                AccessTools.Method(typeof(MapComponentUtility), "FinalizeInit"),
-                AccessTools.Method(typeof(WorldComponentUtility), "FinalizeInit"),
-                AccessTools.Method(typeof(GameComponentUtility), "FinalizeInit"),
-                AccessTools.Method(typeof(Game), "InitNewGame"),
-                AccessTools.Method(typeof(Game), "LoadGame"),
-            };
-
-            foreach (var hook in hooks)
-            {
-                PerformanceOptimizerMod.harmony.Patch(hook, null, new HarmonyMethod(typeof(ComponentCache), nameof(ComponentCache.ResetComps)));
-            }
 
             curSW.LogTime("Patched hooks: ", 0);
             curSW.Stop();

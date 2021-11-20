@@ -29,6 +29,9 @@
 	<PO.GetStyleDominance>IdeoUtility:GetStyleDominance</PO.GetStyleDominance>
 	<PO.CheckCurrentToilEndOrFail>JobDriver:CheckCurrentToilEndOrFail</PO.CheckCurrentToilEndOrFail>
 	<PO.FindAllowedDesignator>BuildCopyCommandUtility:FindAllowedDesignator</PO.FindAllowedDesignator>
+	<PO.GridsUtilityGetRoom>GridsUtility:GetRoom</PO.GridsUtilityGetRoom>
+	<PO.GridsUtilityFogged>GridsUtility:Fogged</PO.GridsUtilityFogged>
+	<PO.PawnCollisionPosOffsetFor>PawnCollisionTweenerUtility:PawnCollisionPosOffsetFor</PO.PawnCollisionPosOffsetFor>
 	<PO.RefreshRate>refresh rate {0}</PO.RefreshRate>
 	<PO.ThrottleRate>throttle rate {0}</PO.ThrottleRate>
 	
@@ -38,4 +41,5 @@
 	<PO.CacheCustomDataLoadMethodOf>Cache DirectXmlToObject:CustomDataLoadMethodOf</PO.CacheCustomDataLoadMethodOf>
 	<PO.CacheHasGenericDefinition>Cache GenGeneric:CustomDataLoadMethodOf</PO.CacheHasGenericDefinition>
 	<PO.FixCheckForDuplicateNodes>Try to fix duplicate XML nodes errors</PO.FixCheckForDuplicateNodes>
+	<PO.CacheFactionOfPlayer>Cache Faction:OfPlayer</PO.CacheFactionOfPlayer>
 </LanguageData>

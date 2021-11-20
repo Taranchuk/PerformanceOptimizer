@@ -233,15 +233,15 @@ namespace PerformanceOptimizer
         }
         public static void DoTimeControlsGUI()
         {
-            TickManager tickManager = PerformanceOptimizerMod.tickManager;
+            TickManager tickManager = Find.TickManager;
             if (Event.current.type != EventType.KeyDown)
             {
                 return;
             }
             if (KeyBindingDefOf.TogglePause.KeyDownEvent)
             {
-                PerformanceOptimizerMod.tickManager.TogglePaused();
-                TimeControls.PlaySoundOf(PerformanceOptimizerMod.tickManager.CurTimeSpeed);
+                tickManager.TogglePaused();
+                TimeControls.PlaySoundOf(tickManager.CurTimeSpeed);
                 PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Pause, KnowledgeAmount.SpecificInteraction);
                 Event.current.Use();
             }
@@ -249,22 +249,22 @@ namespace PerformanceOptimizer
             {
                 if (KeyBindingDefOf.TimeSpeed_Normal.KeyDownEvent)
                 {
-                    PerformanceOptimizerMod.tickManager.CurTimeSpeed = TimeSpeed.Normal;
-                    TimeControls.PlaySoundOf(PerformanceOptimizerMod.tickManager.CurTimeSpeed);
+                    tickManager.CurTimeSpeed = TimeSpeed.Normal;
+                    TimeControls.PlaySoundOf(tickManager.CurTimeSpeed);
                     PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
                     Event.current.Use();
                 }
                 if (KeyBindingDefOf.TimeSpeed_Fast.KeyDownEvent)
                 {
-                    PerformanceOptimizerMod.tickManager.CurTimeSpeed = TimeSpeed.Fast;
-                    TimeControls.PlaySoundOf(PerformanceOptimizerMod.tickManager.CurTimeSpeed);
+                    tickManager.CurTimeSpeed = TimeSpeed.Fast;
+                    TimeControls.PlaySoundOf(tickManager.CurTimeSpeed);
                     PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
                     Event.current.Use();
                 }
                 if (KeyBindingDefOf.TimeSpeed_Superfast.KeyDownEvent)
                 {
-                    PerformanceOptimizerMod.tickManager.CurTimeSpeed = TimeSpeed.Superfast;
-                    TimeControls.PlaySoundOf(PerformanceOptimizerMod.tickManager.CurTimeSpeed);
+                    tickManager.CurTimeSpeed = TimeSpeed.Superfast;
+                    TimeControls.PlaySoundOf(tickManager.CurTimeSpeed);
                     PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
                     Event.current.Use();
                 }
@@ -272,8 +272,8 @@ namespace PerformanceOptimizer
 
             if (KeyBindingDefOf.TimeSpeed_Ultrafast.KeyDownEvent)
             {
-                PerformanceOptimizerMod.tickManager.CurTimeSpeed = TimeSpeed.Ultrafast;
-                TimeControls.PlaySoundOf(PerformanceOptimizerMod.tickManager.CurTimeSpeed);
+                tickManager.CurTimeSpeed = TimeSpeed.Ultrafast;
+                TimeControls.PlaySoundOf(tickManager.CurTimeSpeed);
                 Event.current.Use();
             }
             if (KeyBindingDefOf.Dev_TickOnce.KeyDownEvent && tickManager.CurTimeSpeed == TimeSpeed.Paused)

@@ -60,6 +60,17 @@ namespace PerformanceOptimizer
         public static bool GetStyleDominanceCacheActive = true;
         public static bool FindAllowedDesignatorCacheActive = true;
         public static bool CheckCurrentToilEndOrFailThrottleActive = true;
+
+        public static int GridsUtilityGetRoomRefreshRate = 30;
+        public static bool GridsUtilityGetRoomCacheActive = true;
+
+        public static int GridsUtilityFoggedRefreshRate = 60;
+        public static bool GridsUtilityFoggedCacheActive = true;
+        public static bool CacheFactionOfPlayer = true;
+
+        public static int PawnCollisionPosOffsetForRefreshRate = 30;
+        public static bool PawnCollisionPosOffsetForCacheActive = true;
+
         public override void ExposeData()
         {
             base.ExposeData();
@@ -107,15 +118,24 @@ namespace PerformanceOptimizer
             Scribe_Values.Look(ref GetStyleDominanceCacheActive, "GetStyleDominanceCacheActive", true);
             Scribe_Values.Look(ref FindAllowedDesignatorCacheActive, "FindAllowedDesignatorCacheActive", true);
             Scribe_Values.Look(ref CheckCurrentToilEndOrFailThrottleActive, "CheckCurrentToilEndOrFailThrottleActive", true);
+
+            Scribe_Values.Look(ref GridsUtilityGetRoomRefreshRate, "GridsUtilityGetRoomRefreshRate", 30);
+            Scribe_Values.Look(ref GridsUtilityGetRoomCacheActive, "GridsUtilityGetRoomCacheActive", true);
+            Scribe_Values.Look(ref GridsUtilityFoggedRefreshRate, "GridsUtilityFoggedRefreshRate", 60);
+            Scribe_Values.Look(ref GridsUtilityFoggedCacheActive, "GridsUtilityFoggedCacheActive", true);
+            Scribe_Values.Look(ref CacheFactionOfPlayer, "cacheFactionOfPlayer", true);
+
+            Scribe_Values.Look(ref PawnCollisionPosOffsetForRefreshRate, "PawnCollisionPosOffsetForRefreshRate", 30);
+            Scribe_Values.Look(ref PawnCollisionPosOffsetForCacheActive, "PawnCollisionPosOffsetForCacheActive", true);
         }
         public void DoSettingsWindowContents(Rect inRect)
         {
-            var totalHeight = 620;
+            var totalHeight = 680;
             Rect rect = new Rect(inRect.x, inRect.y, inRect.width, inRect.height - 20);
             Rect rect2 = new Rect(0f, 0f, inRect.width - 30f, totalHeight);
             Widgets.BeginScrollView(rect, ref scrollPosition, rect2, true);
 
-            var cacheSettingsHeight = (14 * 24) + 8 + 30;
+            var cacheSettingsHeight = (17 * 24) + 8 + 30;
             Listing_Standard cacheSection = new Listing_Standard();
             Rect topRect = new Rect(inRect.x, inRect.y - 30, inRect.width - 30, cacheSettingsHeight);
             cacheSection.Begin(topRect);
@@ -151,6 +171,15 @@ namespace PerformanceOptimizer
                 GetStyleDominanceCacheActive = true;
                 FindAllowedDesignatorCacheActive = true;
                 CheckCurrentToilEndOrFailThrottleActive = true;
+
+                GridsUtilityGetRoomRefreshRate = 30;
+                GridsUtilityGetRoomCacheActive = true;
+
+                GridsUtilityFoggedRefreshRate = 60;
+                GridsUtilityFoggedCacheActive = true;
+
+                PawnCollisionPosOffsetForRefreshRate = 30;
+                PawnCollisionPosOffsetForCacheActive = true;
             }
 
             cacheSettings.GapLine(8);
@@ -167,6 +196,9 @@ namespace PerformanceOptimizer
             cacheSettings.CheckboxLabeledWithSlider("PO.GetStyleDominance".Translate(), "PO.RefreshRate", ref GetStyleDominanceCacheActive, ref GetStyleDominanceRefreshRate);
             cacheSettings.CheckboxLabeledWithSlider("PO.FindAllowedDesignator".Translate(), "PO.RefreshRate", ref FindAllowedDesignatorCacheActive, ref FindAllowedDesignatorRefreshRate);
             cacheSettings.CheckboxLabeledWithSlider("PO.CheckCurrentToilEndOrFail".Translate(), "PO.ThrottleRate", ref CheckCurrentToilEndOrFailThrottleActive, ref CheckCurrentToilEndOrFailThrottleRate);
+            cacheSettings.CheckboxLabeledWithSlider("PO.GridsUtilityGetRoom".Translate(), "PO.RefreshRate", ref GridsUtilityGetRoomCacheActive, ref GridsUtilityGetRoomRefreshRate);
+            cacheSettings.CheckboxLabeledWithSlider("PO.GridsUtilityFogged".Translate(), "PO.RefreshRate", ref GridsUtilityFoggedCacheActive, ref GridsUtilityFoggedRefreshRate);
+            cacheSettings.CheckboxLabeledWithSlider("PO.PawnCollisionPosOffsetFor".Translate(), "PO.RefreshRate", ref PawnCollisionPosOffsetForCacheActive, ref PawnCollisionPosOffsetForRefreshRate);
 
             cacheSection.EndSection(cacheSettings);
             cacheSection.End();
@@ -185,6 +217,7 @@ namespace PerformanceOptimizer
                 minimizeAlertsReadout = true;
                 hideSpeedButtons = true;
                 disableSpeedButtons = false;
+
             }
             uiSection.GapLine(8);
             uiSection.CheckboxLabeled("PO.HideResourceReadout".Translate(), ref hideResourceReadout);
@@ -208,9 +241,12 @@ namespace PerformanceOptimizer
                 disableSteamManagerCallbacksChecks = true;
                 disablePlantSwayShaderUpdateIfSwayDisabled = true;
                 disableSoundsCompletely = false;
+                CacheFactionOfPlayer = true;
             }
+
             miscSettings.GapLine(8);
             miscSettings.CheckboxLabeled("PO.FasterGetCompReplacement".Translate(), ref fasterGetCompReplacement);
+            miscSettings.CheckboxLabeled("PO.CacheFactionOfPlayer".Translate(), ref CacheFactionOfPlayer);
             miscSettings.CheckboxLabeled("PO.DisableSteamManagerCallbacksChecks".Translate(), ref disableSteamManagerCallbacksChecks);
             miscSettings.CheckboxLabeled("PO.DisablePlantSwayShaderUpdateIfSwayDisabled".Translate(), ref disablePlantSwayShaderUpdateIfSwayDisabled);
             miscSettings.CheckboxLabeled("PO.DisableSoundsCompletely".Translate(), ref disableSoundsCompletely);

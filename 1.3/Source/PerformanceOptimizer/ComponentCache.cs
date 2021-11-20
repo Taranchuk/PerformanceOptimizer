@@ -153,7 +153,7 @@ namespace PerformanceOptimizer
 			return mapComp as T;
 		}
 
-		private static Dictionary<Type, WorldComponent> cachedWorldComps = new Dictionary<Type, WorldComponent>();
+		public static Dictionary<Type, WorldComponent> cachedWorldComps = new Dictionary<Type, WorldComponent>();
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T GetWorldComponentDict<T>(this World world) where T : WorldComponent
 		{
@@ -166,7 +166,7 @@ namespace PerformanceOptimizer
 			return worldComp as T;
 		}
 
-		private static Dictionary<Type, GameComponent> cachedGameComps = new Dictionary<Type, GameComponent>();
+		public static Dictionary<Type, GameComponent> cachedGameComps = new Dictionary<Type, GameComponent>();
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T GetGameComponentDict<T>(this Game game) where T : GameComponent
 		{
@@ -177,13 +177,6 @@ namespace PerformanceOptimizer
 			}
 			//Log.Message("Returning game comp: " + gameComp + ", total count of game comps is " + game.components.Count);
 			return gameComp as T;
-		}
-		public static void ResetComps()
-		{
-			PerformanceOptimizerMod.tickManager = Current.Game?.tickManager;
-			cachedWorldComps.Clear();
-			cachedGameComps.Clear();
-			CompsOfType<Map>.mapCompsByMap.Clear();
 		}
 	}
 }

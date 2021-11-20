@@ -9,10 +9,10 @@ using System.Xml;
 using Verse;
 using Verse.Sound;
 using Verse.Steam;
-using static Verse.XmlInheritance;
 
 namespace PerformanceOptimizer
 {
+
     [HarmonyPatch(typeof(SteamManager))]
     [HarmonyPatch("Update")]
     public static class Patch_SteamManager_Update
@@ -76,6 +76,7 @@ namespace PerformanceOptimizer
             return true;
         }
     }
+
 
     [HarmonyPatch(typeof(SoundStarter))]
     [HarmonyPatch("PlayOneShotOnCamera")]

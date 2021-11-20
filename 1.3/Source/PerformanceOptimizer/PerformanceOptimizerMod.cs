@@ -30,6 +30,24 @@ namespace PerformanceOptimizer
             harmony = new Harmony("PerformanceOptimizer.Main");
             GameLoad_Patches.DoPatches();
             harmony.PatchAll();
+            var hooks = new List<MethodInfo>
+            {
+                AccessTools.Method(typeof(MapDeiniter), "Deinit"),
+                AccessTools.Method(typeof(Game), "AddMap"),
+                AccessTools.Method(typeof(World), "FillComponents"),
+                AccessTools.Method(typeof(Game), "FillComponents"),
+                AccessTools.Method(typeof(MapComponentUtility), "FinalizeInit"),
+                AccessTools.Method(typeof(WorldComponentUtility), "FinalizeInit"),
+                AccessTools.Method(typeof(GameComponentUtility), "FinalizeInit"),
+                AccessTools.Method(typeof(Game), "InitNewGame"),
+                AccessTools.Method(typeof(Game), "LoadGame"),
+            };
+
+            foreach (var hook in hooks)
+            {
+                harmony.Patch(hook, null, new HarmonyMethod(typeof(PerformanceOptimizerMod), nameof(PerformanceOptimizerMod.ResetStaticData)));
+            }
+
             settings = GetSettings<PerformanceOptimizerSettings>();
         }
 
@@ -42,6 +60,34 @@ namespace PerformanceOptimizer
         public override string SettingsCategory()
         {
             return this.Content.Name;
+        }
+
+        public static void ResetStaticData()
+        {
+            Log.Message("We reset static data");
+            tickManager = Current.Game?.tickManager;
+            ComponentCache.cachedWorldComps.Clear();
+            ComponentCache.cachedGameComps.Clear();
+            CompsOfType<Map>.mapCompsByMap.Clear();
+
+            PawnCollisionPosOffsetFor.cachedResults.Clear();
+            GridsUtility_GetRoom.cachedResults.Clear();
+            GridsUtility_Fogged.cachedResults.Clear();
+            Patch_BuildCopyCommandUtility_FindAllowedDesignator.cachedResults.Clear();
+            Patch_Thing_AmbientTemperature.cachedResults.Clear();
+            Patch_IdeoUtility_GetStyleDominance.cachedResults.Clear();
+            Patch_Need_Beauty_CurrentInstantBeauty.cachedResults.Clear();
+            Patch_MentalBreaker_BreakThresholdExtreme.cachedResults.Clear();
+            Patch_MentalBreaker_BreakThresholdMajor.cachedResults.Clear();
+            Patch_MentalBreaker_BreakThresholdMinor.cachedResults.Clear();
+            Patch_ThoughtHandler_TotalMoodOffset.cachedResults.Clear();
+            Patch_PawnUtility_IsTeetotaler.cachedResults.Clear();
+            Patch_QuestUtility_IsQuestLodger.cachedResults.Clear();
+            Patch_ExpectationsUtility_CurrentExpectationForPawn.cachedResults.Clear();
+            Patch_ExpectationsUtility_CurrentExpectationFor_Map.cachedResults.Clear();
+            Patch_PawnNeedsUIUtility_GetThoughtGroupsInDisplayOrder.cachedResults.Clear();
+            Patch_JobDriver_CheckCurrentToilEndOrFail.cachedResults.Clear();
+            Patch_Faction_FactionOfPlayer.factionOfPlayer = null;
         }
     }
 
