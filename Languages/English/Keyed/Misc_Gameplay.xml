@@ -14,7 +14,10 @@
 	<PO.DisableSteamManagerCallbacksChecks>Disable Steam Manager callbacks checks</PO.DisableSteamManagerCallbacksChecks>
 	<PO.DisablePlantSwayShaderUpdateIfSwayDisabled>Disable plant sway calculations if plant sway is disabled</PO.DisablePlantSwayShaderUpdateIfSwayDisabled>
 	<PO.DisableSoundsCompletely>Disable sounds completely</PO.DisableSoundsCompletely>
-
+	<PO.FixCheckForDuplicateNodes>Try to fix duplicate XML nodes errors</PO.FixCheckForDuplicateNodes>
+	<PO.CacheFactionOfPlayer>Cache Faction:OfPlayer</PO.CacheFactionOfPlayer>
+	<PO.CacheStatWorker_MarketValue>Cache StatWorker_MarketValue:CalculableRecipe</PO.CacheStatWorker_MarketValue>
+	
 	<PO.CacheSettings>Cache settings</PO.CacheSettings>
 	<PO.QuestLodger>QuestUtility:IsQuestLodger</PO.QuestLodger>
 	<PO.IsTeetotaler>PawnUtility:IsTeetotaler</PO.IsTeetotaler>
@@ -35,11 +38,4 @@
 	<PO.RefreshRate>refresh rate {0}</PO.RefreshRate>
 	<PO.ThrottleRate>throttle rate {0}</PO.ThrottleRate>
 	
-	<PO.GameLoadSettings>Game load settings</PO.GameLoadSettings>
-	<PO.DisableReportProbablyMissingAttributes>Disable report about probably missing attributes</PO.DisableReportProbablyMissingAttributes>
-	<PO.DisableLogHarmonyPatchIssueErrors>Disable Hugslib's log harmony patch issue errors</PO.DisableLogHarmonyPatchIssueErrors>
-	<PO.CacheCustomDataLoadMethodOf>Cache DirectXmlToObject:CustomDataLoadMethodOf</PO.CacheCustomDataLoadMethodOf>
-	<PO.CacheHasGenericDefinition>Cache GenGeneric:CustomDataLoadMethodOf</PO.CacheHasGenericDefinition>
-	<PO.FixCheckForDuplicateNodes>Try to fix duplicate XML nodes errors</PO.FixCheckForDuplicateNodes>
-	<PO.CacheFactionOfPlayer>Cache Faction:OfPlayer</PO.CacheFactionOfPlayer>
 </LanguageData>

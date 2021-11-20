@@ -20,7 +20,7 @@ namespace PerformanceOptimizer
         [HarmonyPriority(Priority.First)]
         public static bool Prefix()
         {
-            if (PerformanceOptimizerSettings.disableSteamManagerCallbacksChecks)
+            if (PerformanceOptimizerSettings.disableSteamManagerCallbacksChecks && Current.ProgramState == ProgramState.Playing)
             {
                 return false;
             }

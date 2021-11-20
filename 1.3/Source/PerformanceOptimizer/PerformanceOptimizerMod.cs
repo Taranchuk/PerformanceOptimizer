@@ -45,7 +45,7 @@ namespace PerformanceOptimizer
 
             foreach (var hook in hooks)
             {
-                harmony.Patch(hook, null, new HarmonyMethod(typeof(PerformanceOptimizerMod), nameof(PerformanceOptimizerMod.ResetStaticData)));
+                harmony.Patch(hook, new HarmonyMethod(typeof(PerformanceOptimizerMod), nameof(PerformanceOptimizerMod.ResetStaticData)));
             }
 
             settings = GetSettings<PerformanceOptimizerSettings>();
@@ -64,14 +64,13 @@ namespace PerformanceOptimizer
 
         public static void ResetStaticData()
         {
+            Log.Message("We reset static data");
             tickManager = Current.Game?.tickManager;
             ComponentCache.cachedWorldComps.Clear();
             ComponentCache.cachedGameComps.Clear();
             CompsOfType<Map>.mapCompsByMap.Clear();
 
             PawnCollisionPosOffsetFor.cachedResults.Clear();
-            GridsUtility_GetRoom.cachedResults.Clear();
-            GridsUtility_Fogged.cachedResults.Clear();
             Patch_BuildCopyCommandUtility_FindAllowedDesignator.cachedResults.Clear();
             Patch_Thing_AmbientTemperature.cachedResults.Clear();
             Patch_IdeoUtility_GetStyleDominance.cachedResults.Clear();

@@ -106,26 +106,18 @@ namespace PerformanceOptimizer
                 PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(Pawn_PathFollower), "StartPath"),
                     transpiler: new HarmonyMethod(AccessTools.Method(typeof(Patch_Pawn_PathFollower_StartPath), nameof(Patch_Pawn_PathFollower_StartPath.Transpiler))));
             }
-
-            if (PerformanceOptimizerSettings.GridsUtilityGetRoomCacheActive)
-            {
-                PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(GridsUtility), "GetRoom"),
-                    new HarmonyMethod(AccessTools.Method(typeof(GridsUtility_GetRoom), nameof(GridsUtility_GetRoom.Prefix))),
-                    new HarmonyMethod(AccessTools.Method(typeof(GridsUtility_GetRoom), nameof(GridsUtility_GetRoom.Postfix))));
-            }
-
-            if (PerformanceOptimizerSettings.GridsUtilityFoggedCacheActive)
-            {
-                PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(GridsUtility), "Fogged", new Type[] {typeof(Thing) }),
-                    new HarmonyMethod(AccessTools.Method(typeof(GridsUtility_Fogged), nameof(GridsUtility_Fogged.Prefix))),
-                    new HarmonyMethod(AccessTools.Method(typeof(GridsUtility_Fogged), nameof(GridsUtility_Fogged.Postfix))));
-            }
             
             if (PerformanceOptimizerSettings.CacheFactionOfPlayer)
             {
                 PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(Faction), "get_OfPlayer"),
-                    new HarmonyMethod(AccessTools.Method(typeof(Patch_Faction_FactionOfPlayer), nameof(Patch_Faction_FactionOfPlayer.Prefix))),
-                    new HarmonyMethod(AccessTools.Method(typeof(Patch_Faction_FactionOfPlayer), nameof(Patch_Faction_FactionOfPlayer.Postfix))));
+                    new HarmonyMethod(AccessTools.Method(typeof(Patch_Faction_FactionOfPlayer), nameof(Patch_Faction_FactionOfPlayer.Prefix))));
+            }
+
+            if (PerformanceOptimizerSettings.CacheStatWorker_MarketValue)
+            {
+                PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(StatWorker_MarketValue), "CalculableRecipe"),
+                    new HarmonyMethod(AccessTools.Method(typeof(Patch_StatWorker_MarketValue_CalculableRecipe), nameof(Patch_StatWorker_MarketValue_CalculableRecipe.Prefix))),
+                    new HarmonyMethod(AccessTools.Method(typeof(Patch_StatWorker_MarketValue_CalculableRecipe), nameof(Patch_StatWorker_MarketValue_CalculableRecipe.Postfix))));
             }
 
             if (PerformanceOptimizerSettings.PawnCollisionPosOffsetForCacheActive)
@@ -178,103 +170,56 @@ namespace PerformanceOptimizer
         }
     }
 
-    public static class GridsUtility_Fogged
-    {
-        public static Dictionary<Thing, CachedValue<bool>> cachedResults = new Dictionary<Thing, CachedValue<bool>>();
-
-        [HarmonyPriority(Priority.First)]
-        public static bool Prefix(Thing t, out bool __state, ref bool __result)
-        {
-            if (!cachedResults.TryGetValue(t, out var cache))
-            {
-                cachedResults[t] = new CachedValue<bool>(default, PerformanceOptimizerSettings.GridsUtilityFoggedRefreshRate);
-                __state = true;
-                return true;
-            }
-            else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
-            {
-                __state = true;
-                return true;
-            }
-            else
-            {
-                __result = cache.GetValue();
-                __state = false;
-                return false;
-            }
-        }
-        [HarmonyPriority(Priority.Last)]
-        public static void Postfix(Thing t, bool __state, ref bool __result)
-        {
-            if (__state)
-            {
-                cachedResults[t].SetValue(__result, PerformanceOptimizerSettings.GridsUtilityFoggedRefreshRate);
-            }
-        }
-    }
-
-    public static class GridsUtility_GetRoom
-    {
-        public static Dictionary<int, CachedValue<Room>> cachedResults = new Dictionary<int, CachedValue<Room>>();
-        [HarmonyPriority(Priority.First)]
-        public static bool Prefix(IntVec3 loc, Map map, out Data __state, ref Room __result)
-        {
-            var key = loc.GetHashCode() + map.Index;
-            if (!cachedResults.TryGetValue(key, out var cache))
-            {
-                cachedResults[key] = new CachedValue<Room>(default, PerformanceOptimizerSettings.GridsUtilityGetRoomRefreshRate);
-                __state = new Data { key = key, state = true };
-                return true;
-            }
-            else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
-            {
-                __state = new Data { key = key, state = true };
-                return true;
-            }
-            else
-            {
-                __result = cache.GetValue();
-                __state = new Data { key = key, state = false };
-                return false;
-            }
-        }
-
-        [HarmonyPriority(Priority.Last)]
-        public static void Postfix(Data __state, ref Room __result)
-        {
-            if (__state.state)
-            {
-                cachedResults[__state.key].SetValue(__result, PerformanceOptimizerSettings.GridsUtilityGetRoomRefreshRate);
-            }
-        }
-    }
-
     public static class Patch_Faction_FactionOfPlayer
     {
         public static Faction factionOfPlayer;
+        [HarmonyPriority(Priority.First)]
+        public static bool Prefix(ref Faction __result)
+        {
+            if (Current.programStateInt != ProgramState.Playing)
+            {
+                GameInitData gameInitData = Find.GameInitData;
+                if (gameInitData != null && gameInitData.playerFaction != null)
+                {
+                    __result = gameInitData.playerFaction;
+                    return false;
+                }
+            }
+
+            if (factionOfPlayer is null)
+            {
+                factionOfPlayer = Find.FactionManager.OfPlayer;
+            }
+            __result = factionOfPlayer;
+            return false;
+        }
+    }
+    public static class Patch_StatWorker_MarketValue_CalculableRecipe
+    {
+        public static Dictionary<BuildableDef, RecipeDef> cachedResults = new Dictionary<BuildableDef, RecipeDef>();
 
         [HarmonyPriority(Priority.First)]
-        public static bool Prefix(out bool __state, ref Faction __result)
+        public static bool Prefix(BuildableDef buildable, out bool __state, ref RecipeDef __result)
         {
-            if (factionOfPlayer is null)
+            if (!cachedResults.TryGetValue(buildable, out var cache))
             {
                 __state = true;
                 return true;
             }
             else
             {
-                __result = factionOfPlayer;
+                __result = cache;
                 __state = false;
                 return false;
             }
         }
 
         [HarmonyPriority(Priority.Last)]
-        public static void Postfix(bool __state, ref Faction __result)
+        public static void Postfix(BuildableDef buildable, bool __state, RecipeDef __result)
         {
             if (__state)
             {
-                factionOfPlayer = __result;
+                cachedResults[buildable] = __result;
             }
         }
     }
@@ -312,6 +257,7 @@ namespace PerformanceOptimizer
             }
         }
     }
+
     public static class Patch_Thing_AmbientTemperature
     {
         public static Dictionary<Thing, CachedValue<float>> cachedResults = new Dictionary<Thing, CachedValue<float>>();
