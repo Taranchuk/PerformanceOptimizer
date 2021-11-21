@@ -36,7 +36,6 @@ namespace PerformanceOptimizer
         public static int CurrentExpectationForPawnRefreshRate = 1000;
         public static int CurrentExpectationForMapRefreshRate = 1000;
         public static int TotalMoodOffsetRefreshRate = 500;
-        public static int GetThoughtGroupsInDisplayOrderRefreshRate = 1;
         public static int BreakThresholdMinorRefreshRate = 300;
         public static int BreakThresholdMajorRefreshRate = 300;
         public static int BreakThresholdExtremeRefreshRate = 300;
@@ -51,7 +50,6 @@ namespace PerformanceOptimizer
         public static bool CurrentExpectationForPawnCacheActive = true;
         public static bool CurrentExpectationForMapCacheActive = true;
         public static bool TotalMoodOffsetCacheActive = true;
-        public static bool GetThoughtGroupsInDisplayOrderCacheActive = true;
         public static bool BreakThresholdMinorCacheActive = true;
         public static bool BreakThresholdMajorCacheActive = true;
         public static bool BreakThresholdExtremeCacheActive = true;
@@ -90,7 +88,6 @@ namespace PerformanceOptimizer
             Scribe_Values.Look(ref CurrentExpectationForPawnRefreshRate, "CurrentExpectationForPawnRefreshRate", 1000);
             Scribe_Values.Look(ref CurrentExpectationForMapRefreshRate, "CurrentExpectationForMapRefreshRate", 1000);
             Scribe_Values.Look(ref TotalMoodOffsetRefreshRate, "TotalMoodOffsetRefreshRate", 500);
-            Scribe_Values.Look(ref GetThoughtGroupsInDisplayOrderRefreshRate, "GetThoughtGroupsInDisplayOrderRefreshRate", 1);
             Scribe_Values.Look(ref BreakThresholdMinorRefreshRate, "BreakThresholdMinorRefreshRate", 300);
             Scribe_Values.Look(ref BreakThresholdMajorRefreshRate, "BreakThresholdMajorRefreshRate", 300);
             Scribe_Values.Look(ref BreakThresholdExtremeRefreshRate, "BreakThresholdExtremeRefreshRate", 300);
@@ -104,7 +101,6 @@ namespace PerformanceOptimizer
             Scribe_Values.Look(ref CurrentExpectationForPawnCacheActive, "CurrentExpectationForPawnCacheActive", true);
             Scribe_Values.Look(ref CurrentExpectationForMapCacheActive, "CurrentExpectationForMapCacheActive", true);
             Scribe_Values.Look(ref TotalMoodOffsetCacheActive, "TotalMoodOffsetCacheActive", true);
-            Scribe_Values.Look(ref GetThoughtGroupsInDisplayOrderCacheActive, "GetThoughtGroupsInDisplayOrderCacheActive", true);
             Scribe_Values.Look(ref BreakThresholdMinorCacheActive, "BreakThresholdMinorCacheActive", true);
             Scribe_Values.Look(ref BreakThresholdMajorCacheActive, "BreakThresholdMajorCacheActive", true);
             Scribe_Values.Look(ref BreakThresholdExtremeCacheActive, "BreakThresholdExtremeCacheActive", true);
@@ -138,7 +134,6 @@ namespace PerformanceOptimizer
                 CurrentExpectationForPawnRefreshRate = 1000;
                 CurrentExpectationForMapRefreshRate = 1000;
                 TotalMoodOffsetRefreshRate = 500;
-                GetThoughtGroupsInDisplayOrderRefreshRate = 1;
                 BreakThresholdMinorRefreshRate = 300;
                 BreakThresholdMajorRefreshRate = 300;
                 BreakThresholdExtremeRefreshRate = 300;
@@ -153,7 +148,6 @@ namespace PerformanceOptimizer
                 CurrentExpectationForPawnCacheActive = true;
                 CurrentExpectationForMapCacheActive = true;
                 TotalMoodOffsetCacheActive = true;
-                GetThoughtGroupsInDisplayOrderCacheActive = true;
                 BreakThresholdMinorCacheActive = true;
                 BreakThresholdMajorCacheActive = true;
                 BreakThresholdExtremeCacheActive = true;

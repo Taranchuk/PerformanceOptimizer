@@ -83,7 +83,6 @@ namespace PerformanceOptimizer
             Patch_QuestUtility_IsQuestLodger.cachedResults.Clear();
             Patch_ExpectationsUtility_CurrentExpectationForPawn.cachedResults.Clear();
             Patch_ExpectationsUtility_CurrentExpectationFor_Map.cachedResults.Clear();
-            Patch_PawnNeedsUIUtility_GetThoughtGroupsInDisplayOrder.cachedResults.Clear();
             Patch_JobDriver_CheckCurrentToilEndOrFail.cachedResults.Clear();
             Patch_Faction_FactionOfPlayer.factionOfPlayer = null;
         }

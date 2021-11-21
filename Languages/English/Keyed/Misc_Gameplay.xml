@@ -9,7 +9,7 @@
 	<PO.HideSpeedButtons>Hide speed buttons</PO.HideSpeedButtons>
 	<PO.DisableSpeedButtons>Disable speed buttons (leave only keybindings)</PO.DisableSpeedButtons>
 	
-	<PO.MiscSettings>Miscellaneous settings</PO.MiscSettings>
+	<PO.MiscSettings>Performance tweaks</PO.MiscSettings>
 	<PO.FasterGetCompReplacement>Faster GetComp methods replacement</PO.FasterGetCompReplacement>
 	<PO.DisableSteamManagerCallbacksChecks>Disable Steam Manager callbacks checks</PO.DisableSteamManagerCallbacksChecks>
 	<PO.DisablePlantSwayShaderUpdateIfSwayDisabled>Disable plant sway calculations if plant sway is disabled</PO.DisablePlantSwayShaderUpdateIfSwayDisabled>

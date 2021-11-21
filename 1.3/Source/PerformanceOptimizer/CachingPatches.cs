@@ -87,11 +87,7 @@ namespace PerformanceOptimizer
                     new HarmonyMethod(AccessTools.Method(typeof(Patch_ExpectationsUtility_CurrentExpectationFor_Map), nameof(Patch_ExpectationsUtility_CurrentExpectationFor_Map.Prefix))),
                     new HarmonyMethod(AccessTools.Method(typeof(Patch_ExpectationsUtility_CurrentExpectationFor_Map), nameof(Patch_ExpectationsUtility_CurrentExpectationFor_Map.Postfix))));
             }
-            
-            PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(PawnNeedsUIUtility), "GetThoughtGroupsInDisplayOrder"),
-            new HarmonyMethod(AccessTools.Method(typeof(Patch_PawnNeedsUIUtility_GetThoughtGroupsInDisplayOrder), nameof(Patch_PawnNeedsUIUtility_GetThoughtGroupsInDisplayOrder.Prefix))),
-            new HarmonyMethod(AccessTools.Method(typeof(Patch_PawnNeedsUIUtility_GetThoughtGroupsInDisplayOrder), nameof(Patch_PawnNeedsUIUtility_GetThoughtGroupsInDisplayOrder.Postfix))));
-            
+
             if (PerformanceOptimizerSettings.FindAllowedDesignatorCacheActive)
             {
                 PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(BuildCopyCommandUtility), "FindAllowedDesignator"),
@@ -642,41 +638,6 @@ namespace PerformanceOptimizer
             }
         }
     }
-    public static class Patch_PawnNeedsUIUtility_GetThoughtGroupsInDisplayOrder
-    {
-        public static Dictionary<Need_Mood, CachedValue<List<Thought>>> cachedResults = new Dictionary<Need_Mood, CachedValue<List<Thought>>>();
-
-        [HarmonyPriority(Priority.First)]
-        public static bool Prefix(Need_Mood mood, ref List<Thought> outThoughtGroupsPresent, out bool __state)
-        {
-            if (!cachedResults.TryGetValue(mood, out var cache))
-            {
-                cachedResults[mood] = new CachedValue<List<Thought>>(new List<Thought>(), PerformanceOptimizerSettings.GetThoughtGroupsInDisplayOrderRefreshRate);
-                __state = true;
-                return true;
-            }
-            else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
-            {
-                __state = true;
-                return true;
-            }
-            else
-            {
-                outThoughtGroupsPresent = cache.GetValue();
-                __state = false;
-                return false;
-            }
-        }
-
-        [HarmonyPriority(Priority.Last)]
-        public static void Postfix(Need_Mood mood, ref List<Thought> outThoughtGroupsPresent, bool __state)
-        {
-            if (__state)
-            {
-                cachedResults[mood].SetValue(outThoughtGroupsPresent, PerformanceOptimizerSettings.GetThoughtGroupsInDisplayOrderRefreshRate);
-            }
-        }
-    }
     public static class Patch_JobDriver_CheckCurrentToilEndOrFail
     {
         public static Dictionary<Pawn, int> cachedResults = new Dictionary<Pawn, int>();
@@ -684,7 +645,11 @@ namespace PerformanceOptimizer
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(JobDriver __instance)
         {
-            if (__instance.pawn.pather.moving || __instance is JobDriver_OperateScanner)
+            if (__instance is JobDriver_Wait || __instance is JobDriver_Goto)
+            {
+                return false;
+            }
+            else if (__instance is JobDriver_HaulToContainer || __instance is JobDriver_OperateScanner)
             {
                 return true;
             }
@@ -699,6 +664,8 @@ namespace PerformanceOptimizer
             }
         }
     }
+
+
     public static class Patch_Pawn_PathFollower_StartPath
     {
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> codeInstructions)
@@ -708,7 +675,7 @@ namespace PerformanceOptimizer
             {
                 if (i + 2 < codes.Count && codes[i + 2].OperandIs(" pathing to destroyed thing "))
                 {
-                    i += 7; // we skip 				Log.Error(string.Concat(pawn, " pathing to destroyed thing ", dest.Thing));
+                    i += 7; // we skip Log.Error(string.Concat(pawn, " pathing to destroyed thing ", dest.Thing));
                 }
                 yield return codes[i];
             }

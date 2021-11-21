@@ -191,8 +191,7 @@ namespace PerformanceOptimizer
         {
             if (PerformanceOptimizerSettings.hideBottomRightOverlayButtons && rowVisibility.FinalY > 0)
             {
-                if (Event.current.mousePosition.x < (UI.screenWidth - xTest) || Event.current.mousePosition.y < (rowVisibility.FinalY + 
-                    (PerformanceOptimizerMod.DubsPerformanceAnalyzerLoaded ? yTest + dubsFix : yTest)))
+                if (Event.current.mousePosition.x < (UI.screenWidth - xTest))
                 {
                     if (!worldView)
                     {
