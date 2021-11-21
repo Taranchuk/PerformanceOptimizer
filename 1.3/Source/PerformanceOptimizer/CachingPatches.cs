@@ -649,10 +649,11 @@ namespace PerformanceOptimizer
             {
                 return false;
             }
-            else if (__instance is JobDriver_HaulToContainer || __instance is JobDriver_OperateScanner)
+            else if (__instance is JobDriver_HaulToContainer || __instance is JobDriver_OperateScanner || __instance is JobDriver_PlantHarvest)
             {
                 return true;
             }
+
             if (!cachedResults.TryGetValue(__instance.pawn, out var cache) || PerformanceOptimizerMod.tickManager.ticksGameInt > cache + PerformanceOptimizerSettings.CheckCurrentToilEndOrFailThrottleRate)
             {
                 cachedResults[__instance.pawn] = PerformanceOptimizerMod.tickManager.ticksGameInt;
