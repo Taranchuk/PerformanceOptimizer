@@ -64,7 +64,6 @@ namespace PerformanceOptimizer
 
         public static void ResetStaticData()
         {
-            Log.Message("We reset static data");
             tickManager = Current.Game?.tickManager;
             ComponentCache.cachedWorldComps.Clear();
             ComponentCache.cachedGameComps.Clear();

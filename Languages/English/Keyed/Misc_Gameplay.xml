@@ -9,8 +9,10 @@
 	<PO.HideSpeedButtons>Hide speed buttons</PO.HideSpeedButtons>
 	<PO.DisableSpeedButtons>Disable speed buttons (leave only keybindings)</PO.DisableSpeedButtons>
 	
-	<PO.MiscSettings>Performance tweaks</PO.MiscSettings>
+	<PO.PerformanceSettings>Performance tweaks</PO.PerformanceSettings>
 	<PO.FasterGetCompReplacement>Faster GetComp methods replacement</PO.FasterGetCompReplacement>
+	<PO.CacheTextSizeCalc>Cache text size calculations</PO.CacheTextSizeCalc>
+	<PO.CacheGizmos>Cache gizmos retrieval from selected objects</PO.CacheGizmos>
 	<PO.DisableSteamManagerCallbacksChecks>Disable Steam Manager callbacks checks</PO.DisableSteamManagerCallbacksChecks>
 	<PO.DisablePlantSwayShaderUpdateIfSwayDisabled>Disable plant sway calculations if plant sway is disabled</PO.DisablePlantSwayShaderUpdateIfSwayDisabled>
 	<PO.DisableSoundsCompletely>Disable sounds completely</PO.DisableSoundsCompletely>
@@ -31,6 +33,7 @@
 	<PO.CurrentInstantBeauty>Need_Beauty:CurrentInstantBeauty</PO.CurrentInstantBeauty>
 	<PO.GetStyleDominance>IdeoUtility:GetStyleDominance</PO.GetStyleDominance>
 	<PO.CheckCurrentToilEndOrFail>JobDriver:CheckCurrentToilEndOrFail</PO.CheckCurrentToilEndOrFail>
+	<PO.InspectGizmoGrid>InspectGizmoGrid:DrawInspectGizmoGridFor GetGizmos</PO.InspectGizmoGrid>
 	<PO.FindAllowedDesignator>BuildCopyCommandUtility:FindAllowedDesignator</PO.FindAllowedDesignator>
 	<PO.GridsUtilityGetRoom>GridsUtility:GetRoom</PO.GridsUtilityGetRoom>
 	<PO.GridsUtilityFogged>GridsUtility:Fogged</PO.GridsUtilityFogged>

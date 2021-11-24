@@ -44,6 +44,8 @@ namespace PerformanceOptimizer
         public static int CurrentInstantBeautyRefreshRate = 600;
         public static int GetStyleDominanceRefreshRate = 2000;
         public static int CheckCurrentToilEndOrFailThrottleRate = 10;
+        public static bool GetGizmosCacheActive = true;
+        public static int GetGizmosRefreshRate = 30;
 
         public static bool IsQuestLodgerCacheActive = true;
         public static bool IsTeetotalerCacheActive = true;
@@ -63,6 +65,7 @@ namespace PerformanceOptimizer
 
         public static int PawnCollisionPosOffsetForRefreshRate = 30;
         public static bool PawnCollisionPosOffsetForCacheActive = true;
+        public static bool CacheTextSizeCalc = true;
 
         public override void ExposeData()
         {
@@ -74,15 +77,14 @@ namespace PerformanceOptimizer
             Scribe_Values.Look(ref hideSpeedButtons, "hideSpeedButtons", true);
             Scribe_Values.Look(ref disableSpeedButtons, "disableSpeedButtons", false);
             Scribe_Values.Look(ref cacheFindAllowedDesignator, "cacheFindAllowedDesignator", true);
+
             Scribe_Values.Look(ref fasterGetCompReplacement, "fasterGetCompReplacement", true);
+            Scribe_Values.Look(ref CacheTextSizeCalc, "CacheTextSizeCalc", true);
             Scribe_Values.Look(ref disableSteamManagerCallbacksChecks, "disableSteamManagerCallbacksChecks", true);
             Scribe_Values.Look(ref disablePlantSwayShaderUpdateIfSwayDisabled, "disablePlantSwayShaderUpdateIfSwayDisabled", true);
             Scribe_Values.Look(ref disableSoundsCompletely, "disableSoundsCompletely", false);
-            Scribe_Values.Look(ref disableReportProbablyMissingAttributes, "disableReportProbablyMissingAttributes", true);
-            Scribe_Values.Look(ref disableLogHarmonyPatchIssueErrors, "disableLogHarmonyPatchIssueErrors", true);
-            Scribe_Values.Look(ref cacheCustomDataLoadMethodOf, "cacheCustomDataLoadMethodOf", true);
-            Scribe_Values.Look(ref cacheHasGenericDefinition, "cacheHasGenericDefinition", true);
             Scribe_Values.Look(ref fixCheckForDuplicateNodes, "fixCheckForDuplicateNodes", true);
+
             Scribe_Values.Look(ref IsQuestLodgerRefreshRate, "IsQuestLodgerRefreshRate", 30);
             Scribe_Values.Look(ref IsTeetotalerRefreshRate, "IsTeetotalerRefreshRate", 500);
             Scribe_Values.Look(ref CurrentExpectationForPawnRefreshRate, "CurrentExpectationForPawnRefreshRate", 1000);
@@ -111,18 +113,19 @@ namespace PerformanceOptimizer
             Scribe_Values.Look(ref CheckCurrentToilEndOrFailThrottleActive, "CheckCurrentToilEndOrFailThrottleActive", true);
             Scribe_Values.Look(ref CacheFactionOfPlayer, "CacheFactionOfPlayer", true);
             Scribe_Values.Look(ref CacheStatWorker_MarketValue, "CacheStatWorker_MarketValue", true);
-
+            Scribe_Values.Look(ref GetGizmosCacheActive, "GetGizmosCacheActive", true);
+            Scribe_Values.Look(ref GetGizmosRefreshRate, "GetGizmosRefreshRate", 30);
             Scribe_Values.Look(ref PawnCollisionPosOffsetForRefreshRate, "PawnCollisionPosOffsetForRefreshRate", 30);
             Scribe_Values.Look(ref PawnCollisionPosOffsetForCacheActive, "PawnCollisionPosOffsetForCacheActive", true);
         }
         public void DoSettingsWindowContents(Rect inRect)
         {
-            var totalHeight = 660;
+            var totalHeight = 710;
             Rect rect = new Rect(inRect.x, inRect.y, inRect.width, inRect.height - 20);
             Rect rect2 = new Rect(0f, 0f, inRect.width - 30f, totalHeight);
             Widgets.BeginScrollView(rect, ref scrollPosition, rect2, true);
 
-            var sectionHeightSize = (8 * 24) + 8 + 10;
+            var sectionHeightSize = (9 * 24) + 8 + 10;
             var sectionWidth = ((inRect.width - 30) / 2f) - 8;
             Rect uiSettingsRect = new Rect(inRect.x, inRect.y - 30, sectionWidth, sectionHeightSize + 20);
             Listing_Standard topLeftSection = new Listing_Standard();
@@ -145,7 +148,8 @@ namespace PerformanceOptimizer
             uiSection.CheckboxLabeled("PO.MinimizeAlertsReadout".Translate(), ref minimizeAlertsReadout);
             uiSection.CheckboxLabeled("PO.HideSpeedButtons".Translate(), ref hideSpeedButtons);
             uiSection.CheckboxLabeled("PO.DisableSpeedButtons".Translate(), ref disableSpeedButtons);
-                        topLeftSection.EndSection(uiSection);
+
+            topLeftSection.EndSection(uiSection);
             topLeftSection.End();
             
             Listing_Standard miscSettingsSection = new Listing_Standard();
@@ -153,7 +157,7 @@ namespace PerformanceOptimizer
             miscSettingsSection.Begin(miscSettingsRect);
             var miscSettings = miscSettingsSection.BeginSection(sectionHeightSize, 10, 10);
 
-            if (miscSettings.ButtonTextLabeled("PO.MiscSettings".Translate(), "Reset".Translate()))
+            if (miscSettings.ButtonTextLabeled("PO.PerformanceSettings".Translate(), "Reset".Translate()))
             {
                 fasterGetCompReplacement = true;
                 cacheFindAllowedDesignator = true;
@@ -163,20 +167,23 @@ namespace PerformanceOptimizer
                 CacheFactionOfPlayer = true;
                 CacheStatWorker_MarketValue = true;
                 fixCheckForDuplicateNodes = true;
+                CacheTextSizeCalc = true;
             }
 
             miscSettings.GapLine(8);
             miscSettings.CheckboxLabeled("PO.FasterGetCompReplacement".Translate(), ref fasterGetCompReplacement);
+            miscSettings.CheckboxLabeled("PO.CacheTextSizeCalc".Translate(), ref CacheTextSizeCalc);
             miscSettings.CheckboxLabeled("PO.CacheFactionOfPlayer".Translate(), ref CacheFactionOfPlayer);
             miscSettings.CheckboxLabeled("PO.CacheStatWorker_MarketValue".Translate(), ref CacheStatWorker_MarketValue);
             miscSettings.CheckboxLabeled("PO.DisableSteamManagerCallbacksChecks".Translate(), ref disableSteamManagerCallbacksChecks);
             miscSettings.CheckboxLabeled("PO.DisablePlantSwayShaderUpdateIfSwayDisabled".Translate(), ref disablePlantSwayShaderUpdateIfSwayDisabled);
             miscSettings.CheckboxLabeled("PO.DisableSoundsCompletely".Translate(), ref disableSoundsCompletely);
             miscSettings.CheckboxLabeled("PO.FixCheckForDuplicateNodes".Translate(), ref fixCheckForDuplicateNodes);
+
             miscSettingsSection.EndSection(miscSettings);
             miscSettingsSection.End();
 
-            var cacheSettingsHeight = (15 * 24) + 8 + 30;
+            var cacheSettingsHeight = (16 * 24) + 8 + 30;
             Listing_Standard cacheSection = new Listing_Standard();
             Rect topRect = new Rect(inRect.x, uiSettingsRect.yMax + 15, inRect.width - 30, cacheSettingsHeight);
             cacheSection.Begin(topRect);
@@ -213,6 +220,8 @@ namespace PerformanceOptimizer
 
                 PawnCollisionPosOffsetForRefreshRate = 30;
                 PawnCollisionPosOffsetForCacheActive = true;
+                GetGizmosCacheActive = true;
+                GetGizmosRefreshRate = 30;
             }
 
             cacheSettings.GapLine(8);
@@ -227,6 +236,7 @@ namespace PerformanceOptimizer
             cacheSettings.CheckboxLabeledWithSlider("PO.AmbientTemperature".Translate(), "PO.RefreshRate", ref AmbientTemperatureCacheActive, ref AmbientTemperatureRefreshRate);
             cacheSettings.CheckboxLabeledWithSlider("PO.CurrentInstantBeauty".Translate(), "PO.RefreshRate", ref CurrentInstantBeautyCacheActive, ref CurrentInstantBeautyRefreshRate);
             cacheSettings.CheckboxLabeledWithSlider("PO.GetStyleDominance".Translate(), "PO.RefreshRate", ref GetStyleDominanceCacheActive, ref GetStyleDominanceRefreshRate);
+            cacheSettings.CheckboxLabeledWithSlider("PO.InspectGizmoGrid".Translate(), "PO.RefreshRate", ref GetGizmosCacheActive, ref GetGizmosRefreshRate);
             cacheSettings.CheckboxLabeledWithSlider("PO.FindAllowedDesignator".Translate(), "PO.RefreshRate", ref FindAllowedDesignatorCacheActive, ref FindAllowedDesignatorRefreshRate);
             cacheSettings.CheckboxLabeledWithSlider("PO.CheckCurrentToilEndOrFail".Translate(), "PO.ThrottleRate", ref CheckCurrentToilEndOrFailThrottleActive, ref CheckCurrentToilEndOrFailThrottleRate);
             cacheSettings.CheckboxLabeledWithSlider("PO.PawnCollisionPosOffsetFor".Translate(), "PO.RefreshRate", ref PawnCollisionPosOffsetForCacheActive, ref PawnCollisionPosOffsetForRefreshRate);

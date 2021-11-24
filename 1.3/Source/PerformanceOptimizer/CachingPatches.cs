@@ -1,11 +1,15 @@
 ﻿using HarmonyLib;
+using Ionic.Zlib;
 using RimWorld;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection.Emit;
 using UnityEngine;
 using Verse;
 using Verse.AI;
+using Verse.Noise;
 
 namespace PerformanceOptimizer
 {
@@ -122,6 +126,22 @@ namespace PerformanceOptimizer
                     new HarmonyMethod(AccessTools.Method(typeof(PawnCollisionPosOffsetFor), nameof(PawnCollisionPosOffsetFor.Prefix))),
                     new HarmonyMethod(AccessTools.Method(typeof(PawnCollisionPosOffsetFor), nameof(PawnCollisionPosOffsetFor.Postfix))));
             }
+
+            if (PerformanceOptimizerSettings.CacheTextSizeCalc)
+            {
+                PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(Text), "CalcSize"),
+                    prefix: new HarmonyMethod(AccessTools.Method(typeof(Patch_Text_CalcSize), nameof(Patch_Text_CalcSize.Prefix))));
+            }
+
+            if (PerformanceOptimizerSettings.GetGizmosCacheActive)
+            {
+                PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(InspectGizmoGrid), "DrawInspectGizmoGridFor"),
+                    transpiler: new HarmonyMethod(AccessTools.Method(typeof(Patch_InspectGizmoGrid_DrawInspectGizmoGridFor), nameof(Patch_InspectGizmoGrid_DrawInspectGizmoGridFor.Transpiler))));
+
+                var method = typeof(GizmoGridDrawer).GetMethods(AccessTools.all).FirstOrDefault(x => x.Name.Contains("<DrawGizmoGrid>") && x.Name.Contains("ProcessGizmoState"));
+                PerformanceOptimizerMod.harmony.Patch(method, 
+                    transpiler: new HarmonyMethod(AccessTools.Method(typeof(Patch_GizmoGridDrawer_ProcessGizmoState), nameof(Patch_GizmoGridDrawer_ProcessGizmoState.Transpiler))));
+            }
         }
     }
 
@@ -131,16 +151,114 @@ namespace PerformanceOptimizer
         public bool state;
     }
 
+    public static class Patch_Text_CalcSize
+    {
+        public static Dictionary<string, Vector2> tinyCachedResults = new Dictionary<string, Vector2>();
+        public static Dictionary<string, Vector2> smallCachedResults = new Dictionary<string, Vector2>();
+        [HarmonyPriority(Priority.First)]
+        public static bool Prefix(string text, ref Vector2 __result)
+        {
+            if (Text.fontInt == GameFont.Tiny && Text.anchorInt == TextAnchor.UpperLeft && Text.wordWrapInt)
+            {
+                var guiStyle = Text.CurFontStyle;
+                if (guiStyle.fontStyle == FontStyle.Normal && guiStyle.wordWrap && guiStyle.alignment == TextAnchor.UpperLeft)
+                {
+                    if (!tinyCachedResults.TryGetValue(text, out __result))
+                    {
+                        Text.tmpTextGUIContent.text = text.StripTags();
+                        tinyCachedResults[text] = __result = guiStyle.CalcSize(Text.tmpTextGUIContent);
+                    }
+                    return false;
+                }
+            }
+            else if (Text.fontInt == GameFont.Small && Text.anchorInt == TextAnchor.UpperLeft && Text.wordWrapInt)
+            {
+                var guiStyle = Text.CurFontStyle;
+                if (guiStyle.fontStyle == FontStyle.Normal && guiStyle.wordWrap && guiStyle.alignment == TextAnchor.UpperLeft)
+                {
+                    if (!smallCachedResults.TryGetValue(text, out __result))
+                    {
+                        Text.tmpTextGUIContent.text = text.StripTags();
+                        smallCachedResults[text] = __result = guiStyle.CalcSize(Text.tmpTextGUIContent);
+                    }
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+
+    public static class Patch_InspectGizmoGrid_DrawInspectGizmoGridFor
+    {
+        public static Dictionary<ISelectable, CachedValueUpdate<List<Gizmo>>> cachedResults = new Dictionary<ISelectable, CachedValueUpdate<List<Gizmo>>>();
+        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var codes = instructions.ToList();
+            var method = AccessTools.Method(typeof(ISelectable), "GetGizmos");
+            for (var i = 0; i < codes.Count; i++)
+            {
+                if (codes[i].Calls(method))
+                {
+                    yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Patch_InspectGizmoGrid_DrawInspectGizmoGridFor), nameof(GetGizmosFast))).MoveLabelsFrom(codes[i]);
+                }
+                else
+                {
+                    yield return codes[i];
+                }
+            }
+        }
+
+        public static ISelectable curSelectable;
+        public static List<Gizmo> GetGizmosFast(ISelectable selectable)
+        {
+            if (!cachedResults.TryGetValue(selectable, out var cache))
+            {
+                cachedResults[selectable] = cache = new CachedValueUpdate<List<Gizmo>>(selectable.GetGizmos().ToList(), PerformanceOptimizerSettings.GetGizmosRefreshRate);
+            }
+            else if (Time.frameCount > cache.refreshUpdate)
+            {
+                cache.SetValue(selectable.GetGizmos().ToList(), PerformanceOptimizerSettings.GetGizmosRefreshRate);
+            }
+            curSelectable = selectable;
+            return cache.GetValue();
+        }
+    }
+
+    public static class Patch_GizmoGridDrawer_ProcessGizmoState
+    {
+        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var codes = instructions.ToList();
+            var method = AccessTools.Method(typeof(ISelectable), "GetGizmos");
+            bool found = false;
+            for (var i = 0; i < codes.Count; i++)
+            {
+                yield return codes[i];
+                if (!found && codes[i].opcode == OpCodes.Stfld)
+                {
+                    found = true;
+                    yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Patch_GizmoGridDrawer_ProcessGizmoState), nameof(ResetSelectable)));
+                }
+            }
+        }
+
+        public static void ResetSelectable()
+        {
+            Patch_InspectGizmoGrid_DrawInspectGizmoGridFor.cachedResults.Remove(Patch_InspectGizmoGrid_DrawInspectGizmoGridFor.curSelectable);
+        }
+    }
+
     public static class PawnCollisionPosOffsetFor
     {
-        public static Dictionary<Pawn, CachedValue<Vector3>> cachedResults = new Dictionary<Pawn, CachedValue<Vector3>>();
+        public static Dictionary<Pawn, CachedValueTick<Vector3>> cachedResults = new Dictionary<Pawn, CachedValueTick<Vector3>>();
 
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(Pawn pawn, out bool __state, ref Vector3 __result)
         {
             if (!cachedResults.TryGetValue(pawn, out var cache))
             {
-                cachedResults[pawn] = new CachedValue<Vector3>(default, PerformanceOptimizerSettings.PawnCollisionPosOffsetForRefreshRate);
+                cachedResults[pawn] = new CachedValueTick<Vector3>(default, PerformanceOptimizerSettings.PawnCollisionPosOffsetForRefreshRate);
                 __state = true;
                 return true;
             }
@@ -222,13 +340,13 @@ namespace PerformanceOptimizer
 
     public static class Patch_BuildCopyCommandUtility_FindAllowedDesignator
     {
-        public static Dictionary<BuildableDef, CachedValue<Designator_Build>> cachedResults = new Dictionary<BuildableDef, CachedValue<Designator_Build>>();
+        public static Dictionary<BuildableDef, CachedValueTick<Designator_Build>> cachedResults = new Dictionary<BuildableDef, CachedValueTick<Designator_Build>>();
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(BuildableDef buildable, out bool __state, ref Designator_Build __result)
         {
             if (!cachedResults.TryGetValue(buildable, out var cache))
             {
-                cachedResults[buildable] = new CachedValue<Designator_Build>(default, PerformanceOptimizerSettings.FindAllowedDesignatorRefreshRate);
+                cachedResults[buildable] = new CachedValueTick<Designator_Build>(default, PerformanceOptimizerSettings.FindAllowedDesignatorRefreshRate);
                 __state = true;
                 return true;
             }
@@ -256,14 +374,14 @@ namespace PerformanceOptimizer
 
     public static class Patch_Thing_AmbientTemperature
     {
-        public static Dictionary<Thing, CachedValue<float>> cachedResults = new Dictionary<Thing, CachedValue<float>>();
+        public static Dictionary<Thing, CachedValueTick<float>> cachedResults = new Dictionary<Thing, CachedValueTick<float>>();
 
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(Thing __instance, out bool __state, ref float __result)
         {
             if (!cachedResults.TryGetValue(__instance, out var cache))
             {
-                cachedResults[__instance] = new CachedValue<float>(0, PerformanceOptimizerSettings.AmbientTemperatureRefreshRate);
+                cachedResults[__instance] = new CachedValueTick<float>(0, PerformanceOptimizerSettings.AmbientTemperatureRefreshRate);
                 __state = true;
                 return true;
             }
@@ -290,7 +408,7 @@ namespace PerformanceOptimizer
     }
     public static class Patch_IdeoUtility_GetStyleDominance
     {
-        public static Dictionary<int, CachedValue<float>> cachedResults = new Dictionary<int, CachedValue<float>>();
+        public static Dictionary<int, CachedValueTick<float>> cachedResults = new Dictionary<int, CachedValueTick<float>>();
 
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(Thing t, Ideo ideo, out Data __state, ref float __result)
@@ -298,7 +416,7 @@ namespace PerformanceOptimizer
             var key = t.GetHashCode() + ideo.GetHashCode();
             if (!cachedResults.TryGetValue(key, out var cache))
             {
-                cachedResults[key] = new CachedValue<float>(0, PerformanceOptimizerSettings.GetStyleDominanceRefreshRate);
+                cachedResults[key] = new CachedValueTick<float>(0, PerformanceOptimizerSettings.GetStyleDominanceRefreshRate);
                 __state = new Data { key = key, state = true };
                 return true;
             }
@@ -325,14 +443,14 @@ namespace PerformanceOptimizer
     }
     public static class Patch_Need_Beauty_CurrentInstantBeauty
     {
-        public static Dictionary<Need_Beauty, CachedValue<float>> cachedResults = new Dictionary<Need_Beauty, CachedValue<float>>();
+        public static Dictionary<Need_Beauty, CachedValueTick<float>> cachedResults = new Dictionary<Need_Beauty, CachedValueTick<float>>();
 
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(Need_Beauty __instance, out bool __state, ref float __result)
         {
             if (!cachedResults.TryGetValue(__instance, out var cache))
             {
-                cachedResults[__instance] = new CachedValue<float>(0, PerformanceOptimizerSettings.CurrentInstantBeautyRefreshRate);
+                cachedResults[__instance] = new CachedValueTick<float>(0, PerformanceOptimizerSettings.CurrentInstantBeautyRefreshRate);
                 __state = true;
                 return true;
             }
@@ -359,14 +477,14 @@ namespace PerformanceOptimizer
     }
     public static class Patch_MentalBreaker_BreakThresholdExtreme
     {
-        public static Dictionary<Pawn, CachedValue<float>> cachedResults = new Dictionary<Pawn, CachedValue<float>>();
+        public static Dictionary<Pawn, CachedValueTick<float>> cachedResults = new Dictionary<Pawn, CachedValueTick<float>>();
 
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(MentalBreaker __instance, out bool __state, ref float __result)
         {
             if (!cachedResults.TryGetValue(__instance.pawn, out var cache))
             {
-                cachedResults[__instance.pawn] = new CachedValue<float>(0, PerformanceOptimizerSettings.BreakThresholdExtremeRefreshRate);
+                cachedResults[__instance.pawn] = new CachedValueTick<float>(0, PerformanceOptimizerSettings.BreakThresholdExtremeRefreshRate);
                 __state = true;
                 return true;
             }
@@ -393,14 +511,14 @@ namespace PerformanceOptimizer
     }
     public static class Patch_MentalBreaker_BreakThresholdMajor
     {
-        public static Dictionary<Pawn, CachedValue<float>> cachedResults = new Dictionary<Pawn, CachedValue<float>>();
+        public static Dictionary<Pawn, CachedValueTick<float>> cachedResults = new Dictionary<Pawn, CachedValueTick<float>>();
 
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(MentalBreaker __instance, out bool __state, ref float __result)
         {
             if (!cachedResults.TryGetValue(__instance.pawn, out var cache))
             {
-                cachedResults[__instance.pawn] = new CachedValue<float>(0, PerformanceOptimizerSettings.BreakThresholdMajorRefreshRate);
+                cachedResults[__instance.pawn] = new CachedValueTick<float>(0, PerformanceOptimizerSettings.BreakThresholdMajorRefreshRate);
                 __state = true;
                 return true;
             }
@@ -428,14 +546,14 @@ namespace PerformanceOptimizer
     }
     public static class Patch_MentalBreaker_BreakThresholdMinor
     {
-        public static Dictionary<Pawn, CachedValue<float>> cachedResults = new Dictionary<Pawn, CachedValue<float>>();
+        public static Dictionary<Pawn, CachedValueTick<float>> cachedResults = new Dictionary<Pawn, CachedValueTick<float>>();
 
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(MentalBreaker __instance, out bool __state, ref float __result)
         {
             if (!cachedResults.TryGetValue(__instance.pawn, out var cache))
             {
-                cachedResults[__instance.pawn] = new CachedValue<float>(0, PerformanceOptimizerSettings.BreakThresholdMinorRefreshRate);
+                cachedResults[__instance.pawn] = new CachedValueTick<float>(0, PerformanceOptimizerSettings.BreakThresholdMinorRefreshRate);
                 __state = true;
                 return true;
             }
@@ -463,14 +581,14 @@ namespace PerformanceOptimizer
     }
     public static class Patch_ThoughtHandler_TotalMoodOffset
     {
-        public static Dictionary<Pawn, CachedValue<float>> cachedResults = new Dictionary<Pawn, CachedValue<float>>();
+        public static Dictionary<Pawn, CachedValueTick<float>> cachedResults = new Dictionary<Pawn, CachedValueTick<float>>();
 
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(ThoughtHandler __instance, out bool __state, ref float __result)
         {
             if (!cachedResults.TryGetValue(__instance.pawn, out var cache))
             {
-                cachedResults[__instance.pawn] = new CachedValue<float>(0, PerformanceOptimizerSettings.TotalMoodOffsetRefreshRate);
+                cachedResults[__instance.pawn] = new CachedValueTick<float>(0, PerformanceOptimizerSettings.TotalMoodOffsetRefreshRate);
                 __state = true;
                 return true;
             }
@@ -499,14 +617,14 @@ namespace PerformanceOptimizer
 
     public static class Patch_PawnUtility_IsTeetotaler
     {
-        public static Dictionary<Pawn, CachedValue<bool>> cachedResults = new Dictionary<Pawn, CachedValue<bool>>();
+        public static Dictionary<Pawn, CachedValueTick<bool>> cachedResults = new Dictionary<Pawn, CachedValueTick<bool>>();
 
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(Pawn pawn, out bool __state, ref bool __result)
         {
             if (!cachedResults.TryGetValue(pawn, out var cache))
             {
-                cachedResults[pawn] = new CachedValue<bool>(false, PerformanceOptimizerSettings.IsTeetotalerRefreshRate);
+                cachedResults[pawn] = new CachedValueTick<bool>(false, PerformanceOptimizerSettings.IsTeetotalerRefreshRate);
                 __state = true;
                 return true;
             }
@@ -535,14 +653,14 @@ namespace PerformanceOptimizer
 
     public static class Patch_QuestUtility_IsQuestLodger
     {
-        public static Dictionary<Pawn, CachedValue<bool>> cachedResults = new Dictionary<Pawn, CachedValue<bool>>();
+        public static Dictionary<Pawn, CachedValueTick<bool>> cachedResults = new Dictionary<Pawn, CachedValueTick<bool>>();
 
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(Pawn p, out bool __state, ref bool __result)
         {
             if (!cachedResults.TryGetValue(p, out var cache))
             {
-                cachedResults[p] = new CachedValue<bool>(false, PerformanceOptimizerSettings.IsQuestLodgerRefreshRate);
+                cachedResults[p] = new CachedValueTick<bool>(false, PerformanceOptimizerSettings.IsQuestLodgerRefreshRate);
                 __state = true;
                 return true;
             }
@@ -570,14 +688,14 @@ namespace PerformanceOptimizer
     }
     public static class Patch_ExpectationsUtility_CurrentExpectationForPawn
     {
-        public static Dictionary<Pawn, CachedValue<ExpectationDef>> cachedResults = new Dictionary<Pawn, CachedValue<ExpectationDef>>();
+        public static Dictionary<Pawn, CachedValueTick<ExpectationDef>> cachedResults = new Dictionary<Pawn, CachedValueTick<ExpectationDef>>();
 
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(Pawn p, out bool __state, ref ExpectationDef __result)
         {
             if (!cachedResults.TryGetValue(p, out var cache))
             {
-                cachedResults[p] = new CachedValue<ExpectationDef>(null, PerformanceOptimizerSettings.CurrentExpectationForPawnRefreshRate);
+                cachedResults[p] = new CachedValueTick<ExpectationDef>(null, PerformanceOptimizerSettings.CurrentExpectationForPawnRefreshRate);
                 __state = true;
                 return true;
             }
@@ -605,14 +723,14 @@ namespace PerformanceOptimizer
     }
     public static class Patch_ExpectationsUtility_CurrentExpectationFor_Map
     {
-        public static Dictionary<Map, CachedValue<ExpectationDef>> cachedResults = new Dictionary<Map, CachedValue<ExpectationDef>>();
+        public static Dictionary<Map, CachedValueTick<ExpectationDef>> cachedResults = new Dictionary<Map, CachedValueTick<ExpectationDef>>();
 
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(Map m, out bool __state, ref ExpectationDef __result)
         {
             if (!cachedResults.TryGetValue(m, out var cache))
             {
-                cachedResults[m] = new CachedValue<ExpectationDef>(null, PerformanceOptimizerSettings.CurrentExpectationForMapRefreshRate);
+                cachedResults[m] = new CachedValueTick<ExpectationDef>(null, PerformanceOptimizerSettings.CurrentExpectationForMapRefreshRate);
                 __state = true;
                 return true;
             }

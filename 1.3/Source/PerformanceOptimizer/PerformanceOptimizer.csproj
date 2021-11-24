@@ -42,7 +42,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CachedValue.cs" />
+    <Compile Include="CachedValueTick.cs" />
+    <Compile Include="CachedValueUpdate.cs" />
     <Compile Include="CachingPatches.cs" />
     <Compile Include="ComponentCache.cs" />
     <Compile Include="GameLoad_Patches.cs" />

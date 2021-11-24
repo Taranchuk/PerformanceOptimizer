@@ -118,11 +118,11 @@ namespace PerformanceOptimizer
     //    }
     //}
 
-    public class CachedValue<T>
+    public class CachedValueTick<T>
     {
         public int refreshTick;
         private T valueInt;
-        public CachedValue(T value, int resetInTicks)
+        public CachedValueTick(T value, int resetInTicks)
         {
             SetValue(value, resetInTicks);
         }
