@@ -18,7 +18,7 @@
 	<PO.CacheFactionOfPlayer>Cache Faction:OfPlayer</PO.CacheFactionOfPlayer>
 	<PO.CacheStatWorker_MarketValue>Cache StatWorker_MarketValue:CalculableRecipe</PO.CacheStatWorker_MarketValue>
 	
-	<PO.CacheSettings>Cache settings</PO.CacheSettings>
+	<PO.CacheSettings>Cache settings (rates are instant, toggles require restart)</PO.CacheSettings>
 	<PO.QuestLodger>QuestUtility:IsQuestLodger</PO.QuestLodger>
 	<PO.IsTeetotaler>PawnUtility:IsTeetotaler</PO.IsTeetotaler>
 	<PO.CurrentExpectationForPawn>ExpectationsUtility:CurrentExpectationForPawn</PO.CurrentExpectationForPawn>

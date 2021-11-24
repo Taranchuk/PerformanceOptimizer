@@ -17,9 +17,6 @@ namespace PerformanceOptimizer
 {
     public static class GetCompPatches
     {
-        private static Stopwatch totalSW = new Stopwatch();
-        private static Stopwatch curSW = new Stopwatch();
-
         public static HashSet<string> assembliesToSkip = new HashSet<string>
         {
             "System", "Cecil", "Multiplayer", "Prepatcher", "HeavyMelee", "0Harmony", "UnityEngine", "mscorlib", "ICSharpCode", "Newtonsoft", "TranspilerExplorer"
@@ -27,12 +24,14 @@ namespace PerformanceOptimizer
 
         public static HashSet<string> typesToSkip = new HashSet<string>
         {
-            "AnimalGenetics.ColonyManager+JobsWrapper", "AutoMachineTool"
+            "AnimalGenetics.ColonyManager+JobsWrapper", "AutoMachineTool", "GearUpAndGo.SetBetterPawnControl"
         };
+
         public static HashSet<string> methodsToSkip = new HashSet<string>
         {
-            "Numbers.MainTabWindow_Numbers", "Numbers.OptionsMaker", "<PawnSelector>g__Action", "<AllBuildingsColonistWithComp>", "<FailOnOwnerStatus>"
+            "Numbers.MainTabWindow_Numbers", "Numbers.OptionsMaker", "<PawnSelector>g__Action", "<AllBuildingsColonistWithComp>", "<FailOnOwnerStatus>", "Transpiler"
         };
+
         private static bool TypeValidator(Type type) => !assembliesToSkip.Any(asmName => type.Assembly?.FullName?.Contains(asmName) ?? false) && !typesToSkip.Any(x => type.FullName.Contains(x));
 
         private static List<Type> types;
@@ -128,13 +127,9 @@ namespace PerformanceOptimizer
             var methodsCallingWorldObjectGetComp = new List<MethodInfo>();
 
             var methodsToParse = new List<MethodInfo>();
-            totalSW.Restart();
             await Task.Run(() => 
             {
-                curSW.Restart();
                 var types = GetTypesToParse();
-                curSW.LogTime("Collected types: ", 0);
-                curSW.Restart();
                 foreach (var type in types)
                 {
                     foreach (var method in type.GetMethodsToParse())
@@ -142,17 +137,13 @@ namespace PerformanceOptimizer
                         methodsToParse.Add(method);
                     }
                 }
-                curSW.LogTime("Methods added to be parsed: ", 0);
-                curSW.Restart();
 
                 for (var i = 0; i < methodsToParse.Count; i++)
                 {
                     ParseMethod(methodsToParse[i], methodsCallingMapGetComp, methodsCallingWorldGetComp, methodsCallingGameGetComp, methodsCallingThingGetComp, 
                         methodsCallingThingTryGetComp, methodsCallingHediffTryGetComp, methodsCallingWorldObjectGetComp);
                 }
-                curSW.LogTime("Methods parsed: ", 0);
             });
-            curSW.Restart();
             Patch(methodsCallingMapGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetMapCompTranspiler))));
             Patch(methodsCallingWorldGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetWorldCompTranspiler))));
             Patch(methodsCallingGameGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetGameCompTranspiler))));
@@ -160,14 +151,6 @@ namespace PerformanceOptimizer
             Patch(methodsCallingThingGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetThingCompTranspiler))));
             Patch(methodsCallingThingTryGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.TryGetThingCompTranspiler))));
             Patch(methodsCallingHediffTryGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.TryGetHediffCompTranspiler))));
-            curSW.LogTime("Patched methods: ", 0);
-            curSW.Restart();
-
-            curSW.LogTime("Patched hooks: ", 0);
-            curSW.Stop();
-
-            totalSW.LogTime("Parsed and Transpiled for get comp replacement, total patched: " + patchedMethodsCount + ", parsed methods: " + methodsToParse.Count + ", total time: ", 0);
-            totalSW.Stop();
         }
 
         private static int patchedMethodsCount = 0;
@@ -264,7 +247,7 @@ namespace PerformanceOptimizer
         {
             public static void Postfix(ThingWithComps __instance)
             {
-                if (__instance.comps != null)
+                if (__instance.comps != null && __instance.def.plant is null && !__instance.def.saveCompressible && __instance.comps.Count > 1)
                 {
                     __instance.comps = __instance.comps.OrderBy(delegate (ThingComp x)
                     {

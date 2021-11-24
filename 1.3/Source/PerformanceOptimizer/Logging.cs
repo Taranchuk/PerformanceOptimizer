@@ -30,7 +30,7 @@ namespace PerformanceOptimizer
 
         private static Dictionary<Stopwatch, StopwatchData> stopwatches = new Dictionary<Stopwatch, StopwatchData>();
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void LogTime(this Stopwatch stopwatch, string log, int limit = 999999)
+        public static void LogTime(this Stopwatch stopwatch, string log, int limit = 1)
         {
             if (!stopwatches.TryGetValue(stopwatch, out var stats))
             {
@@ -40,7 +40,7 @@ namespace PerformanceOptimizer
             var elapsed = (float)stopwatch.ElapsedTicks / Stopwatch.Frequency;
             stats.count++;
             stats.total += elapsed;
-            if (stats.count > limit)
+            if (stats.count >= limit)
             {
                 Log.Message(log + "it took: " + stats.total);
                 stats.total = 0;

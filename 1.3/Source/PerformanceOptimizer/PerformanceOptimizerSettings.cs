@@ -122,9 +122,63 @@ namespace PerformanceOptimizer
             Rect rect2 = new Rect(0f, 0f, inRect.width - 30f, totalHeight);
             Widgets.BeginScrollView(rect, ref scrollPosition, rect2, true);
 
+            var sectionHeightSize = (8 * 24) + 8 + 10;
+            var sectionWidth = ((inRect.width - 30) / 2f) - 8;
+            Rect uiSettingsRect = new Rect(inRect.x, inRect.y - 30, sectionWidth, sectionHeightSize + 20);
+            Listing_Standard topLeftSection = new Listing_Standard();
+            topLeftSection.Begin(uiSettingsRect);
+            var uiSection = topLeftSection.BeginSection(sectionHeightSize, 10, 10);
+            if (uiSection.ButtonTextLabeled("PO.UISettings".Translate(), "Reset".Translate()))
+            {
+                hideResourceReadout = true;
+                hideBottomButtonBar = true;
+                hideBottomRightOverlayButtons = true;
+                minimizeAlertsReadout = true;
+                hideSpeedButtons = true;
+                disableSpeedButtons = false;
+
+            }
+            uiSection.GapLine(8);
+            uiSection.CheckboxLabeled("PO.HideResourceReadout".Translate(), ref hideResourceReadout);
+            uiSection.CheckboxLabeled("PO.HideBottomButtonBar".Translate(), ref hideBottomButtonBar);
+            uiSection.CheckboxLabeled("PO.HideBottomRightOverlayButtons".Translate(), ref hideBottomRightOverlayButtons);
+            uiSection.CheckboxLabeled("PO.MinimizeAlertsReadout".Translate(), ref minimizeAlertsReadout);
+            uiSection.CheckboxLabeled("PO.HideSpeedButtons".Translate(), ref hideSpeedButtons);
+            uiSection.CheckboxLabeled("PO.DisableSpeedButtons".Translate(), ref disableSpeedButtons);
+                        topLeftSection.EndSection(uiSection);
+            topLeftSection.End();
+            
+            Listing_Standard miscSettingsSection = new Listing_Standard();
+            Rect miscSettingsRect = new Rect(uiSettingsRect.xMax + 15, uiSettingsRect.y, sectionWidth, uiSettingsRect.height);
+            miscSettingsSection.Begin(miscSettingsRect);
+            var miscSettings = miscSettingsSection.BeginSection(sectionHeightSize, 10, 10);
+
+            if (miscSettings.ButtonTextLabeled("PO.MiscSettings".Translate(), "Reset".Translate()))
+            {
+                fasterGetCompReplacement = true;
+                cacheFindAllowedDesignator = true;
+                disableSteamManagerCallbacksChecks = true;
+                disablePlantSwayShaderUpdateIfSwayDisabled = true;
+                disableSoundsCompletely = false;
+                CacheFactionOfPlayer = true;
+                CacheStatWorker_MarketValue = true;
+                fixCheckForDuplicateNodes = true;
+            }
+
+            miscSettings.GapLine(8);
+            miscSettings.CheckboxLabeled("PO.FasterGetCompReplacement".Translate(), ref fasterGetCompReplacement);
+            miscSettings.CheckboxLabeled("PO.CacheFactionOfPlayer".Translate(), ref CacheFactionOfPlayer);
+            miscSettings.CheckboxLabeled("PO.CacheStatWorker_MarketValue".Translate(), ref CacheStatWorker_MarketValue);
+            miscSettings.CheckboxLabeled("PO.DisableSteamManagerCallbacksChecks".Translate(), ref disableSteamManagerCallbacksChecks);
+            miscSettings.CheckboxLabeled("PO.DisablePlantSwayShaderUpdateIfSwayDisabled".Translate(), ref disablePlantSwayShaderUpdateIfSwayDisabled);
+            miscSettings.CheckboxLabeled("PO.DisableSoundsCompletely".Translate(), ref disableSoundsCompletely);
+            miscSettings.CheckboxLabeled("PO.FixCheckForDuplicateNodes".Translate(), ref fixCheckForDuplicateNodes);
+            miscSettingsSection.EndSection(miscSettings);
+            miscSettingsSection.End();
+
             var cacheSettingsHeight = (15 * 24) + 8 + 30;
             Listing_Standard cacheSection = new Listing_Standard();
-            Rect topRect = new Rect(inRect.x, inRect.y - 30, inRect.width - 30, cacheSettingsHeight);
+            Rect topRect = new Rect(inRect.x, uiSettingsRect.yMax + 15, inRect.width - 30, cacheSettingsHeight);
             cacheSection.Begin(topRect);
             var cacheSettings = cacheSection.BeginSection(cacheSettingsHeight - 20, 10, 10);
             if (cacheSettings.ButtonTextLabeled("PO.CacheSettings".Translate(), "Reset".Translate()))
@@ -180,59 +234,6 @@ namespace PerformanceOptimizer
             cacheSection.EndSection(cacheSettings);
             cacheSection.End();
 
-            var sectionHeightSize = (8 * 24) + 8 + 10;
-            var sectionWidth = ((inRect.width - 30) / 2f) - 8;
-            Rect uiSettingsRect = new Rect(inRect.x, topRect.yMax + 15, sectionWidth, sectionHeightSize + 20);
-            Listing_Standard topLeftSection = new Listing_Standard();
-            topLeftSection.Begin(uiSettingsRect);
-            var uiSection = topLeftSection.BeginSection(sectionHeightSize, 10, 10);
-            if (uiSection.ButtonTextLabeled("PO.UISettings".Translate(), "Reset".Translate()))
-            {
-                hideResourceReadout = true;
-                hideBottomButtonBar = true;
-                hideBottomRightOverlayButtons = true;
-                minimizeAlertsReadout = true;
-                hideSpeedButtons = true;
-                disableSpeedButtons = false;
-
-            }
-            uiSection.GapLine(8);
-            uiSection.CheckboxLabeled("PO.HideResourceReadout".Translate(), ref hideResourceReadout);
-            uiSection.CheckboxLabeled("PO.HideBottomButtonBar".Translate(), ref hideBottomButtonBar);
-            uiSection.CheckboxLabeled("PO.HideBottomRightOverlayButtons".Translate(), ref hideBottomRightOverlayButtons);
-            uiSection.CheckboxLabeled("PO.MinimizeAlertsReadout".Translate(), ref minimizeAlertsReadout);
-            uiSection.CheckboxLabeled("PO.HideSpeedButtons".Translate(), ref hideSpeedButtons);
-            uiSection.CheckboxLabeled("PO.DisableSpeedButtons".Translate(), ref disableSpeedButtons);
-                        topLeftSection.EndSection(uiSection);
-            topLeftSection.End();
-            
-            Listing_Standard miscSettingsSection = new Listing_Standard();
-            Rect miscSettingsRect = new Rect(uiSettingsRect.xMax + 15, uiSettingsRect.y, sectionWidth, uiSettingsRect.height);
-            miscSettingsSection.Begin(miscSettingsRect);
-            var miscSettings = miscSettingsSection.BeginSection(sectionHeightSize, 10, 10);
-
-            if (miscSettings.ButtonTextLabeled("PO.MiscSettings".Translate(), "Reset".Translate()))
-            {
-                fasterGetCompReplacement = true;
-                cacheFindAllowedDesignator = true;
-                disableSteamManagerCallbacksChecks = true;
-                disablePlantSwayShaderUpdateIfSwayDisabled = true;
-                disableSoundsCompletely = false;
-                CacheFactionOfPlayer = true;
-                CacheStatWorker_MarketValue = true;
-                fixCheckForDuplicateNodes = true;
-            }
-
-            miscSettings.GapLine(8);
-            miscSettings.CheckboxLabeled("PO.FasterGetCompReplacement".Translate(), ref fasterGetCompReplacement);
-            miscSettings.CheckboxLabeled("PO.CacheFactionOfPlayer".Translate(), ref CacheFactionOfPlayer);
-            miscSettings.CheckboxLabeled("PO.CacheStatWorker_MarketValue".Translate(), ref CacheStatWorker_MarketValue);
-            miscSettings.CheckboxLabeled("PO.DisableSteamManagerCallbacksChecks".Translate(), ref disableSteamManagerCallbacksChecks);
-            miscSettings.CheckboxLabeled("PO.DisablePlantSwayShaderUpdateIfSwayDisabled".Translate(), ref disablePlantSwayShaderUpdateIfSwayDisabled);
-            miscSettings.CheckboxLabeled("PO.DisableSoundsCompletely".Translate(), ref disableSoundsCompletely);
-            miscSettings.CheckboxLabeled("PO.FixCheckForDuplicateNodes".Translate(), ref fixCheckForDuplicateNodes);
-            miscSettingsSection.EndSection(miscSettings);
-            miscSettingsSection.End();
             Widgets.EndScrollView();
         }
 
