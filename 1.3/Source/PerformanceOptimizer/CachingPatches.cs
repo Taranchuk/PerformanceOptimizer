@@ -158,30 +158,33 @@ namespace PerformanceOptimizer
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(string text, ref Vector2 __result)
         {
-            if (Text.fontInt == GameFont.Tiny && Text.anchorInt == TextAnchor.UpperLeft && Text.wordWrapInt)
+            if (text != null)
             {
-                var guiStyle = Text.CurFontStyle;
-                if (guiStyle.fontStyle == FontStyle.Normal && guiStyle.wordWrap && guiStyle.alignment == TextAnchor.UpperLeft)
+                if (Text.fontInt == GameFont.Tiny && Text.anchorInt == TextAnchor.UpperLeft && Text.wordWrapInt)
                 {
-                    if (!tinyCachedResults.TryGetValue(text, out __result))
+                    var guiStyle = Text.CurFontStyle;
+                    if (guiStyle.fontStyle == FontStyle.Normal && guiStyle.wordWrap && guiStyle.alignment == TextAnchor.UpperLeft)
                     {
-                        Text.tmpTextGUIContent.text = text.StripTags();
-                        tinyCachedResults[text] = __result = guiStyle.CalcSize(Text.tmpTextGUIContent);
+                        if (!tinyCachedResults.TryGetValue(text, out __result))
+                        {
+                            Text.tmpTextGUIContent.text = text.StripTags();
+                            tinyCachedResults[text] = __result = guiStyle.CalcSize(Text.tmpTextGUIContent);
+                        }
+                        return false;
                     }
-                    return false;
                 }
-            }
-            else if (Text.fontInt == GameFont.Small && Text.anchorInt == TextAnchor.UpperLeft && Text.wordWrapInt)
-            {
-                var guiStyle = Text.CurFontStyle;
-                if (guiStyle.fontStyle == FontStyle.Normal && guiStyle.wordWrap && guiStyle.alignment == TextAnchor.UpperLeft)
+                else if (Text.fontInt == GameFont.Small && Text.anchorInt == TextAnchor.UpperLeft && Text.wordWrapInt)
                 {
-                    if (!smallCachedResults.TryGetValue(text, out __result))
+                    var guiStyle = Text.CurFontStyle;
+                    if (guiStyle.fontStyle == FontStyle.Normal && guiStyle.wordWrap && guiStyle.alignment == TextAnchor.UpperLeft)
                     {
-                        Text.tmpTextGUIContent.text = text.StripTags();
-                        smallCachedResults[text] = __result = guiStyle.CalcSize(Text.tmpTextGUIContent);
+                        if (!smallCachedResults.TryGetValue(text, out __result))
+                        {
+                            Text.tmpTextGUIContent.text = text.StripTags();
+                            smallCachedResults[text] = __result = guiStyle.CalcSize(Text.tmpTextGUIContent);
+                        }
+                        return false;
                     }
-                    return false;
                 }
             }
             return true;
