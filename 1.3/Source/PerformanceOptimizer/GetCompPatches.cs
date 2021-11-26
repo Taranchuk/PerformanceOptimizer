@@ -24,7 +24,7 @@ namespace PerformanceOptimizer
 
         public static HashSet<string> typesToSkip = new HashSet<string>
         {
-            "AnimalGenetics.ColonyManager+JobsWrapper", "AutoMachineTool", "GearUpAndGo.SetBetterPawnControl"
+            "AnimalGenetics.ColonyManager+JobsWrapper", "AutoMachineTool", "GearUpAndGo.SetBetterPawnControl", "AlteredCarbon.ModCompatibility"
         };
 
         public static HashSet<string> methodsToSkip = new HashSet<string>
@@ -129,19 +129,26 @@ namespace PerformanceOptimizer
             var methodsToParse = new List<MethodInfo>();
             await Task.Run(() => 
             {
-                var types = GetTypesToParse();
-                foreach (var type in types)
+                try
                 {
-                    foreach (var method in type.GetMethodsToParse())
+                    var types = GetTypesToParse();
+                    foreach (var type in types)
                     {
-                        methodsToParse.Add(method);
+                        foreach (var method in type.GetMethodsToParse())
+                        {
+                            methodsToParse.Add(method);
+                        }
+                    }
+
+                    for (var i = 0; i < methodsToParse.Count; i++)
+                    {
+                        ParseMethod(methodsToParse[i], methodsCallingMapGetComp, methodsCallingWorldGetComp, methodsCallingGameGetComp, methodsCallingThingGetComp,
+                            methodsCallingThingTryGetComp, methodsCallingHediffTryGetComp, methodsCallingWorldObjectGetComp);
                     }
                 }
-
-                for (var i = 0; i < methodsToParse.Count; i++)
+                catch (Exception ex)
                 {
-                    ParseMethod(methodsToParse[i], methodsCallingMapGetComp, methodsCallingWorldGetComp, methodsCallingGameGetComp, methodsCallingThingGetComp, 
-                        methodsCallingThingTryGetComp, methodsCallingHediffTryGetComp, methodsCallingWorldObjectGetComp);
+                    Log.Error("Exception in Performance Optimizer: " + ex);
                 }
             });
             Patch(methodsCallingMapGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetMapCompTranspiler))));
