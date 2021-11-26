@@ -24,7 +24,7 @@ namespace PerformanceOptimizer
 
         public static HashSet<string> typesToSkip = new HashSet<string>
         {
-            "AnimalGenetics.ColonyManager+JobsWrapper", "AutoMachineTool", "GearUpAndGo.SetBetterPawnControl", "AlteredCarbon.ModCompatibility"
+            "AnimalGenetics.ColonyManager+JobsWrapper", "AutoMachineTool", "GearUpAndGo.SetBetterPawnControl", "AlteredCarbon.ModCompatibility", "TorannMagic.ModCheck"
         };
 
         public static HashSet<string> methodsToSkip = new HashSet<string>
@@ -134,6 +134,8 @@ namespace PerformanceOptimizer
                     var types = GetTypesToParse();
                     foreach (var type in types)
                     {
+                        //Log.Message("Type: " + type);
+                        //Log.ResetMessageCount();
                         foreach (var method in type.GetMethodsToParse())
                         {
                             methodsToParse.Add(method);
