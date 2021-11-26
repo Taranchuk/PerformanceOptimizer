@@ -251,7 +251,6 @@ namespace PerformanceOptimizer
             Patch_InspectGizmoGrid_DrawInspectGizmoGridFor.cachedResults.Remove(Patch_InspectGizmoGrid_DrawInspectGizmoGridFor.curSelectable);
         }
     }
-
     public static class PawnCollisionPosOffsetFor
     {
         public static Dictionary<Pawn, CachedValueTick<Vector3>> cachedResults = new Dictionary<Pawn, CachedValueTick<Vector3>>();

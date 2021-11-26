@@ -105,5 +105,56 @@ namespace PerformanceOptimizer
             return true;
         }
     }
+
+    //[HarmonyPatch(typeof(PawnGenerator), "GenerateSamples")]
+    //public static class PawnGenerator_GenerateSamples
+    //{
+    //    public static void Postfix(ref Pair<Pawn, PawnRelationDef>[] __result)
+    //    {
+    //        __result = __result.Where(x => x.second != PawnRelationDefOf.Sibling).ToArray();
+    //    }
+    //}
+    //
+    //[HarmonyPatch(typeof(PawnGenerator), "GeneratePawn", new Type[] {typeof(PawnGenerationRequest)})]
+    //public static class PawnGenerator_GeneratePawn
+    //{
+    //    public static void Postfix(Pawn __result)
+    //    {
+    //        if (__result != null)
+    //        {
+    //            PawnsFinder_AllMapsWorldAndTemporary_Alive.cachedResult.GetValue().Add(__result);
+    //        }
+    //    }
+    //}
+    //
+    //[HarmonyPatch(typeof(PawnsFinder), "get_AllMapsWorldAndTemporary_Alive")]
+    //public static class PawnsFinder_AllMapsWorldAndTemporary_Alive
+    //{
+    //    public static CachedValueTick<HashSet<Pawn>> cachedResult = new CachedValueTick<HashSet<Pawn>>();
+    //
+    //    [HarmonyPriority(Priority.First)]
+    //    public static bool Prefix(out bool __state, ref List<Pawn> __result)
+    //    {
+    //        if (PerformanceOptimizerMod.tickManager.ticksGameInt > cachedResult.refreshTick)
+    //        {
+    //            __state = true;
+    //            return true;
+    //        }
+    //        else
+    //        {
+    //            __result = cachedResult.GetValue().Where(x => !x.Dead && !x.Discarded).ToList();
+    //            __state = false;
+    //            return false;
+    //        }
+    //    }
+    //    [HarmonyPriority(Priority.Last)]
+    //    public static void Postfix(bool __state, ref List<Pawn> __result)
+    //    {
+    //        if (__state)
+    //        {
+    //            cachedResult.SetValue(__result.ToHashSet(), 30);
+    //        }
+    //    }
+    //}
 }
 

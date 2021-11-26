@@ -122,6 +122,11 @@ namespace PerformanceOptimizer
     {
         public int refreshTick;
         private T valueInt;
+        public CachedValueTick()
+        {
+            valueInt = default(T);
+            refreshTick = -999999999;
+        }
         public CachedValueTick(T value, int resetInTicks)
         {
             SetValue(value, resetInTicks);
