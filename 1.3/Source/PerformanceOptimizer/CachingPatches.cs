@@ -245,10 +245,12 @@ namespace PerformanceOptimizer
                 }
             }
         }
-
         public static void ResetSelectable()
         {
-            Patch_InspectGizmoGrid_DrawInspectGizmoGridFor.cachedResults.Remove(Patch_InspectGizmoGrid_DrawInspectGizmoGridFor.curSelectable);
+            if (Patch_InspectGizmoGrid_DrawInspectGizmoGridFor.curSelectable != null)
+            {
+                Patch_InspectGizmoGrid_DrawInspectGizmoGridFor.cachedResults.Remove(Patch_InspectGizmoGrid_DrawInspectGizmoGridFor.curSelectable);
+            }
         }
     }
     public static class PawnCollisionPosOffsetFor
