@@ -118,7 +118,7 @@ namespace PerformanceOptimizer
     //    }
     //}
 
-    public class CachedValueTick<T>
+    public struct CachedValueTick<T>
     {
         public int refreshTick;
         private T valueInt;
@@ -129,7 +129,8 @@ namespace PerformanceOptimizer
         }
         public CachedValueTick(T value, int resetInTicks)
         {
-            SetValue(value, resetInTicks);
+            this.valueInt = value;
+            refreshTick = Find.TickManager.TicksGame + resetInTicks;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
