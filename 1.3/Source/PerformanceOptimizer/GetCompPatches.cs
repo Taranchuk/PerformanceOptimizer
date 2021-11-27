@@ -24,7 +24,7 @@ namespace PerformanceOptimizer
 
         public static HashSet<string> typesToSkip = new HashSet<string>
         {
-            "AnimalGenetics.ColonyManager+JobsWrapper", "AutoMachineTool", "GearUpAndGo.SetBetterPawnControl", "AlteredCarbon.ModCompatibility", "TorannMagic.ModCheck"
+            "AnimalGenetics.ColonyManager+JobsWrapper", "AutoMachineTool"
         };
 
         public static HashSet<string> methodsToSkip = new HashSet<string>
@@ -44,9 +44,31 @@ namespace PerformanceOptimizer
             return types;
         }
 
-        public static IEnumerable<MethodInfo> GetMethodsToParse(this Type type)
+        public static List<MethodInfo> GetMethodsToParse(this Type type)
         {
-            return AccessTools.GetDeclaredMethods(type).Where(predicate: mi => mi != null && !mi.IsAbstract && !mi.IsGenericMethod && !methodsToSkip.Any(x => mi.FullDescription().Contains(x)));
+            List<MethodInfo> methods = new List<MethodInfo>();
+            foreach (var method in AccessTools.GetDeclaredMethods(type))
+            {
+                if (method != null && !method.IsAbstract)
+                {
+                    try
+                    {
+                        var description = method.FullDescription();
+                        if (!methodsToSkip.Any(x => description.Contains(x)))
+                        {
+                            if (!method.IsGenericMethod)
+                            {
+                                methods.Add(method);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        //Log.Error("Exception: " + ex);
+                    }
+                }
+            }
+            return methods;
         }
         public static void ParseMethod(MethodInfo method, List<MethodInfo> methodsCallingMapGetComp, List<MethodInfo> methodsCallingWorldGetComp, List<MethodInfo> methodsCallingGameGetComp, 
             List<MethodInfo> methodsCallingThingGetComp, List<MethodInfo> methodsCallingThingTryGetComp, List<MethodInfo> methodsCallingHediffTryGetComp
@@ -125,8 +147,7 @@ namespace PerformanceOptimizer
             var methodsCallingThingTryGetComp = new List<MethodInfo>();
             var methodsCallingHediffTryGetComp = new List<MethodInfo>();
             var methodsCallingWorldObjectGetComp = new List<MethodInfo>();
-
-            var methodsToParse = new List<MethodInfo>();
+            var methodsToParse = new HashSet<MethodInfo>();
             await Task.Run(() => 
             {
                 try
@@ -134,17 +155,14 @@ namespace PerformanceOptimizer
                     var types = GetTypesToParse();
                     foreach (var type in types)
                     {
-                        //Log.Message("Type: " + type);
-                        //Log.ResetMessageCount();
                         foreach (var method in type.GetMethodsToParse())
                         {
                             methodsToParse.Add(method);
                         }
                     }
-
-                    for (var i = 0; i < methodsToParse.Count; i++)
+                    foreach (var method in methodsToParse)
                     {
-                        ParseMethod(methodsToParse[i], methodsCallingMapGetComp, methodsCallingWorldGetComp, methodsCallingGameGetComp, methodsCallingThingGetComp,
+                        ParseMethod(method, methodsCallingMapGetComp, methodsCallingWorldGetComp, methodsCallingGameGetComp, methodsCallingThingGetComp,
                             methodsCallingThingTryGetComp, methodsCallingHediffTryGetComp, methodsCallingWorldObjectGetComp);
                     }
                 }
