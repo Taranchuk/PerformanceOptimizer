@@ -118,7 +118,7 @@ namespace PerformanceOptimizer
     //    }
     //}
 
-    public struct CachedValueTick<T>
+    public class CachedValueTick<T>
     {
         public int refreshTick;
         private T valueInt;

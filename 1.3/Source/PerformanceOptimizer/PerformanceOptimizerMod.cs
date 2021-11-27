@@ -69,6 +69,7 @@ namespace PerformanceOptimizer
             ComponentCache.cachedGameComps.Clear();
             CompsOfType<Map>.mapCompsByMap.Clear();
 
+            Patch_InspectGizmoGrid_DrawInspectGizmoGridFor.cachedResults.Clear();
             PawnCollisionPosOffsetFor.cachedResults.Clear();
             Patch_BuildCopyCommandUtility_FindAllowedDesignator.cachedResults.Clear();
             Patch_Thing_AmbientTemperature.cachedResults.Clear();

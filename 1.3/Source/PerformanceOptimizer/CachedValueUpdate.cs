@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace PerformanceOptimizer
 {
-    public struct CachedValueUpdate<T>
+    public class CachedValueUpdate<T>
     {
         public int refreshUpdate;
         private T valueInt;
