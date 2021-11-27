@@ -9,6 +9,7 @@ using System.Reflection.Emit;
 using UnityEngine;
 using Verse;
 using Verse.AI;
+using Verse.AI.Group;
 using Verse.Noise;
 
 namespace PerformanceOptimizer
@@ -190,7 +191,6 @@ namespace PerformanceOptimizer
             return true;
         }
     }
-
 
     public static class Patch_InspectGizmoGrid_DrawInspectGizmoGridFor
     {
@@ -767,16 +767,13 @@ namespace PerformanceOptimizer
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(JobDriver __instance)
         {
-            if (__instance is JobDriver_Wait || __instance is JobDriver_Goto)
-            {
-                return false;
-            }
-            else if (__instance is JobDriver_HaulToContainer || __instance is JobDriver_OperateScanner || __instance is JobDriver_PlantHarvest)
+            if (__instance is JobDriver_OperateScanner || __instance is JobDriver_HaulToContainer || (__instance.job.targetQueueA?.Any() ?? false) 
+                || (__instance.job?.targetQueueB?.Any() ?? false) || __instance.job.count > 0 || __instance.pawn.mindState?.duty != null)
             {
                 return true;
             }
-
-            if (!cachedResults.TryGetValue(__instance.pawn, out var cache) || PerformanceOptimizerMod.tickManager.ticksGameInt > cache + PerformanceOptimizerSettings.CheckCurrentToilEndOrFailThrottleRate)
+            if (!cachedResults.TryGetValue(__instance.pawn, out var cache) 
+                || PerformanceOptimizerMod.tickManager.ticksGameInt > (cache + PerformanceOptimizerSettings.CheckCurrentToilEndOrFailThrottleRate))
             {
                 cachedResults[__instance.pawn] = PerformanceOptimizerMod.tickManager.ticksGameInt;
                 return true;
