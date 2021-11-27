@@ -42,5 +42,5 @@
 	<PO.ThrottleRate>throttle rate {0}</PO.ThrottleRate>
 	
 	<PO.PerformanceOptimizerOverview>Performance Optimizer mod overview</PO.PerformanceOptimizerOverview>
-	<PO.PerformanceOptimizerOverviewDesc>Hey! You have installed Performance Optimizer mod. Have you noticed that half of the UI is gone? Fear not, they are still there, they are made hidden until hovered over because they consume a lot of CPU resources and add to the overall slowdown of the game. The alerts readouts will not show minor alerts unless hovered over too. These changes can be disabled in the mod settings. Except for these UI changes, everything else should remain the same.</PO.PerformanceOptimizerOverviewDesc>
+	<PO.PerformanceOptimizerOverviewDesc>Hey! Did you notice half of the UI is gone? That's because you installed Performance Optimizer, which hides some UI elements until hovered over, as they consume a lot of CPU resources and contribute to slowdown. The alerts readout will not show minor alerts, either. These features can be toggled in the mod settings.</PO.PerformanceOptimizerOverviewDesc>
 </LanguageData>
