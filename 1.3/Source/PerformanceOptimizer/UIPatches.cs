@@ -36,51 +36,6 @@ namespace PerformanceOptimizer
         }
     }
 
-    //[HarmonyPatch(typeof(AlertsReadout), "AlertsReadoutUpdate")]
-    //public static class AlertsReadoutUpdate_Prefix
-    //{
-    //
-    //    [HarmonyPriority(Priority.First)]
-    //    public static bool Prefix(AlertsReadout __instance)
-    //    {
-    //        if (Event.current.mousePosition.x < (UI.screenWidth - AlertsReadoutOnGUI_Prefix.xTest))
-    //        {
-    //            AlertsReadoutUpdate_Mini(__instance);
-    //            return false;
-    //        }
-    //        return true;
-    //    }
-    //
-    //    public static void AlertsReadoutUpdate_Mini(AlertsReadout __instance)
-    //    {
-    //        __instance.curAlertIndex++;
-    //        if (__instance.curAlertIndex >= 24)
-    //        {
-    //            __instance.curAlertIndex = 0;
-    //        }
-    //        var alerts = __instance.AllAlerts.Where(x => x.Priority == AlertPriority.Critical || x.Priority == AlertPriority.High).ToList();
-    //        for (int i = __instance.curAlertIndex; i < alerts.Count; i += 24)
-    //        {
-    //            __instance.CheckAddOrRemoveAlert(alerts[i]);
-    //        }
-    //
-    //        for (int num3 = alerts.Count - 1; num3 >= 0; num3--)
-    //        {
-    //            Alert alert = alerts[num3];
-    //            try
-    //            {
-    //                alerts[num3].AlertActiveUpdate();
-    //            }
-    //            catch (Exception ex)
-    //            {
-    //                Log.ErrorOnce("Exception updating alert " + alert.ToString() + ": " + ex.ToString(), 743575);
-    //                alerts.RemoveAt(num3);
-    //            }
-    //        }
-    //    }
-    //}
-
-
     [HarmonyPatch(typeof(AlertsReadout), "AlertsReadoutOnGUI")]
     public static class AlertsReadoutOnGUI_Prefix
     {
@@ -180,18 +135,28 @@ namespace PerformanceOptimizer
         }
     }
 
+    [HarmonyPatch(typeof(LetterStack), "LettersOnGUI")]
+    public static class LetterStack_LettersOnGUI
+    {
+        public static float lettersBottomY;
+        public static void Prefix(float baseY)
+        {
+            lettersBottomY = baseY;
+        }
+    }
+
     [HarmonyPatch(typeof(GlobalControlsUtility), "DoPlaySettings")]
     public static class DoPlaySettings_DoPlaySettings
     {
         [TweakValue("0", 0, 2000)] public static float xTest = 150;
-        [TweakValue("0", -100, 200)] public static float yTest = -40;
         [TweakValue("0", -100, 200)] public static float dubsFix = -40;
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(WidgetRow rowVisibility, bool worldView, ref float curBaseY)
         {
             if (PerformanceOptimizerSettings.hideBottomRightOverlayButtons && rowVisibility.FinalY > 0)
             {
-                if (Event.current.mousePosition.x < (UI.screenWidth - xTest))
+                bool mouseOnRight = Event.current.mousePosition.x < (UI.screenWidth - xTest);
+                if (mouseOnRight || (!mouseOnRight && LetterStack_LettersOnGUI.lettersBottomY > Event.current.mousePosition.y))
                 {
                     if (!worldView)
                     {
