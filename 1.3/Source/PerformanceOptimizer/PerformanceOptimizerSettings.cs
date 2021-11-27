@@ -66,10 +66,11 @@ namespace PerformanceOptimizer
         public static int PawnCollisionPosOffsetForRefreshRate = 30;
         public static bool PawnCollisionPosOffsetForCacheActive = true;
         public static bool CacheTextSizeCalc = true;
-
+        public static bool overviewLetterSent;
         public override void ExposeData()
         {
             base.ExposeData();
+            Scribe_Values.Look(ref overviewLetterSent, "overviewLetterSent");
             Scribe_Values.Look(ref hideResourceReadout, "hideResourceReadout", true);
             Scribe_Values.Look(ref hideBottomButtonBar, "hideBottomButtonBar", true);
             Scribe_Values.Look(ref hideBottomRightOverlayButtons, "hideBottomRightOverlayButtons", true);

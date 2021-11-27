@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using RimWorld;
 using RimWorld.Planet;
 using System;
 using System.Collections.Concurrent;
@@ -85,6 +86,20 @@ namespace PerformanceOptimizer
             Patch_ExpectationsUtility_CurrentExpectationFor_Map.cachedResults.Clear();
             Patch_JobDriver_CheckCurrentToilEndOrFail.cachedResults.Clear();
             Patch_Faction_FactionOfPlayer.factionOfPlayer = null;
+        }
+    }
+
+    [HarmonyPatch(typeof(Map), "FinalizeInit")]
+    public static class Map_FinalizeInit
+    {
+        public static void Postfix()
+        {
+            if (!PerformanceOptimizerSettings.overviewLetterSent)
+            {
+                Find.LetterStack.ReceiveLetter("PO.PerformanceOptimizerOverview".Translate(), "PO.PerformanceOptimizerOverviewDesc".Translate(), LetterDefOf.PositiveEvent);
+                PerformanceOptimizerSettings.overviewLetterSent = true;
+                LoadedModManager.GetMod<PerformanceOptimizerMod>().WriteSettings();
+            }
         }
     }
 
