@@ -767,22 +767,53 @@ namespace PerformanceOptimizer
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(JobDriver __instance)
         {
-            if (__instance is JobDriver_OperateScanner || __instance is JobDriver_HaulToContainer || __instance is JobDriver_PlantWork || (__instance.job.targetQueueA?.Any() ?? false) 
-                || (__instance.job?.targetQueueB?.Any() ?? false) || __instance.job.count > 0 || __instance.pawn.mindState?.duty != null)
+            if (__instance is JobDriver_Goto || __instance is JobDriver_DoBill || __instance is JobDriver_Research || __instance is JobDriver_Refuel || __instance is JobDriver_PlantSow 
+                || __instance is JobDriver_LayDown || __instance is JobDriver_GoForWalk || __instance is JobDriver_ConstructFinishFrame)
             {
-                return true;
+                if (!cachedResults.TryGetValue(__instance.pawn, out var cache)
+                    || PerformanceOptimizerMod.tickManager.ticksGameInt > (cache + PerformanceOptimizerSettings.CheckCurrentToilEndOrFailThrottleRate))
+                {
+                    cachedResults[__instance.pawn] = PerformanceOptimizerMod.tickManager.ticksGameInt;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
-            if (!cachedResults.TryGetValue(__instance.pawn, out var cache) 
-                || PerformanceOptimizerMod.tickManager.ticksGameInt > (cache + PerformanceOptimizerSettings.CheckCurrentToilEndOrFailThrottleRate))
-            {
-                cachedResults[__instance.pawn] = PerformanceOptimizerMod.tickManager.ticksGameInt;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return true;
         }
+
+        //public static Dictionary<string, float> times = new Dictionary<string, float>();
+        //public static Stopwatch stopwatch = new Stopwatch();
+        //[HarmonyPriority(Priority.First)]
+        //public static void Prefix(JobDriver __instance)
+        //{
+        //    stopwatch.Restart();
+        //}
+        //
+        //public static void Postfix(JobDriver __instance)
+        //{
+        //    stopwatch.Stop();
+        //    var elapsed = (float)stopwatch.ElapsedTicks / Stopwatch.Frequency;
+        //    if (times.ContainsKey(__instance.GetType().ToString()))
+        //    {
+        //        times[__instance.GetType().ToString()] += elapsed;
+        //    }
+        //    else
+        //    {
+        //        times[__instance.GetType().ToString()] = elapsed;
+        //    }
+        //
+        //    if (Find.TickManager.ticksGameInt % 2500 == 0)
+        //    {
+        //        Log.Message("-------------------");
+        //        foreach (var data in times.OrderByDescending(x => x.Value))
+        //        {
+        //            Log.Message(data.Key + " took " + data.Value + " from " + times.Sum(x => x.Value) + " = " + data.Value / times.Sum(x => x.Value));
+        //        }
+        //    }
+        //}
     }
 
 
