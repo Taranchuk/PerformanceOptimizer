@@ -767,7 +767,7 @@ namespace PerformanceOptimizer
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(JobDriver __instance)
         {
-            if (__instance is JobDriver_OperateScanner || __instance is JobDriver_HaulToContainer || (__instance.job.targetQueueA?.Any() ?? false) 
+            if (__instance is JobDriver_OperateScanner || __instance is JobDriver_HaulToContainer || __instance is JobDriver_PlantWork || (__instance.job.targetQueueA?.Any() ?? false) 
                 || (__instance.job?.targetQueueB?.Any() ?? false) || __instance.job.count > 0 || __instance.pawn.mindState?.duty != null)
             {
                 return true;
