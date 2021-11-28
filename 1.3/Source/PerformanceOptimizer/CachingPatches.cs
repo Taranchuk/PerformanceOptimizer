@@ -767,7 +767,7 @@ namespace PerformanceOptimizer
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(JobDriver __instance)
         {
-            if (__instance is JobDriver_Goto || __instance is JobDriver_DoBill || __instance is JobDriver_Research || __instance is JobDriver_Refuel || __instance is JobDriver_PlantSow 
+            if (__instance is JobDriver_Goto || __instance is JobDriver_DoBill || __instance is JobDriver_Research || __instance is JobDriver_Refuel 
                 || __instance is JobDriver_LayDown || __instance is JobDriver_GoForWalk || __instance is JobDriver_ConstructFinishFrame)
             {
                 if (!cachedResults.TryGetValue(__instance.pawn, out var cache)
