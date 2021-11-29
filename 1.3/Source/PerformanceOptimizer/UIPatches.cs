@@ -23,7 +23,7 @@ namespace PerformanceOptimizer
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(ResourceReadout __instance)
         {
-            if (PerformanceOptimizerSettings.hideResourceReadout)
+            if (PerformanceOptimizerSettings.UIToggleOn && PerformanceOptimizerSettings.hideResourceReadout)
             {
                 float width = Prefs.ResourceReadoutCategorized ? 124f : 110f;
                 Rect rect2 = new Rect(0f, 0f, width, Mathf.Max(__instance.lastDrawnHeight + 50, 200));
@@ -39,11 +39,19 @@ namespace PerformanceOptimizer
     [HarmonyPatch(typeof(AlertsReadout), "AlertsReadoutOnGUI")]
     public static class AlertsReadoutOnGUI_Prefix
     {
+        public static int curFrameCount = 0;
+
         [TweakValue("0", 0, 2000)] public static float xTest = 154;
+
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(AlertsReadout __instance)
         {
-            if (PerformanceOptimizerSettings.minimizeAlertsReadout)
+            if (PerformanceOptimizerSettings.UITogglePressed && curFrameCount != Time.frameCount)
+            {
+                curFrameCount = Time.frameCount;
+                PerformanceOptimizerSettings.UIToggleOn = !PerformanceOptimizerSettings.UIToggleOn;
+            }
+            if (PerformanceOptimizerSettings.UIToggleOn && PerformanceOptimizerSettings.minimizeAlertsReadout)
             {
                 if (Event.current.mousePosition.x < (UI.screenWidth - xTest))
                 {
@@ -124,7 +132,7 @@ namespace PerformanceOptimizer
         [HarmonyPriority(Priority.First)]
         public static bool Prefix()
         {
-            if (PerformanceOptimizerSettings.hideBottomButtonBar)
+            if (PerformanceOptimizerSettings.UIToggleOn && PerformanceOptimizerSettings.hideBottomButtonBar)
             {
                 if (Event.current.mousePosition.y < UI.screenHeight - 35)
                 {
@@ -153,7 +161,7 @@ namespace PerformanceOptimizer
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(WidgetRow rowVisibility, bool worldView, ref float curBaseY)
         {
-            if (PerformanceOptimizerSettings.hideBottomRightOverlayButtons && rowVisibility.FinalY > 0)
+            if (PerformanceOptimizerSettings.UIToggleOn && PerformanceOptimizerSettings.hideBottomRightOverlayButtons && rowVisibility.FinalY > 0)
             {
                 bool mouseOnRight = Event.current.mousePosition.x < (UI.screenWidth - xTest);
                 if (mouseOnRight || (!mouseOnRight && LetterStack_LettersOnGUI.lettersBottomY > Event.current.mousePosition.y))
@@ -183,15 +191,18 @@ namespace PerformanceOptimizer
         [HarmonyPriority(Priority.Last)]
         public static bool Prefix()
         {
-            if (PerformanceOptimizerSettings.disableSpeedButtons)
+            if (PerformanceOptimizerSettings.UIToggleOn)
             {
-                DoTimeControlsGUI();
-                return false;
-            }
-            else if (PerformanceOptimizerSettings.hideSpeedButtons && (Event.current.mousePosition.x < (UI.screenWidth - xTest)))
-            {
-                DoTimeControlsGUI();
-                return false;
+                if (PerformanceOptimizerSettings.disableSpeedButtons)
+                {
+                    DoTimeControlsGUI();
+                    return false;
+                }
+                else if (PerformanceOptimizerSettings.hideSpeedButtons && (Event.current.mousePosition.x < (UI.screenWidth - xTest)))
+                {
+                    DoTimeControlsGUI();
+                    return false;
+                }
             }
             return true;
         }

@@ -58,6 +58,12 @@ namespace PerformanceOptimizer
             settings.DoSettingsWindowContents(inRect);
         }
 
+        public override void WriteSettings()
+        {
+            base.WriteSettings();
+            KeyPrefs.Save();
+        }
+
         public override string SettingsCategory()
         {
             return this.Content.Name;
@@ -87,6 +93,8 @@ namespace PerformanceOptimizer
             Patch_JobDriver_CheckCurrentToilEndOrFail.cachedResults.Clear();
             Patch_Faction_FactionOfPlayer.factionOfPlayer = null;
         }
+
+        public static KeyPrefsData keyPrefsData;
     }
 
     [HarmonyPatch(typeof(Map), "FinalizeInit")]
@@ -108,6 +116,7 @@ namespace PerformanceOptimizer
     {
         public static void Postfix()
         {
+            PerformanceOptimizerMod.keyPrefsData = KeyPrefs.KeyPrefsData;
             PerformanceOptimizerMod.DubsPerformanceAnalyzerLoaded = ModLister.AllInstalledMods.Any(x => x.Active && x.Name.Contains("Dubs Performance Analyzer"));
             CachingPatches.DoPatches();
             if (PerformanceOptimizerSettings.fasterGetCompReplacement)

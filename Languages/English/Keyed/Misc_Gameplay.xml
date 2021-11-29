@@ -42,5 +42,7 @@
 	<PO.ThrottleRate>throttle rate {0}</PO.ThrottleRate>
 	
 	<PO.PerformanceOptimizerOverview>Performance Optimizer mod overview</PO.PerformanceOptimizerOverview>
-	<PO.PerformanceOptimizerOverviewDesc>Hey! Did you notice half of the UI is gone? That's because you installed Performance Optimizer, which hides some UI elements until hovered over, as they consume a lot of CPU resources and contribute to slowdown. The alerts readout will not show minor alerts, either. These features can be toggled in the mod settings.</PO.PerformanceOptimizerOverviewDesc>
+	<PO.PerformanceOptimizerOverviewDesc>Hey! Did you notice half of the UI is gone? That's because you installed Performance Optimizer, which hides some UI elements until hovered over, as they consume a lot of CPU resources and contribute to slowdown. The alerts readout will not show minor alerts, either. These features can be toggled in the mod settings. You can also use hotkey to enable/disable them (by default ctrl + U).</PO.PerformanceOptimizerOverviewDesc>
+	<PO.UIToggle>UI hiding key toggle</PO.UIToggle>
+	<PO.OneKeyMode>One key mode</PO.OneKeyMode>
 </LanguageData>

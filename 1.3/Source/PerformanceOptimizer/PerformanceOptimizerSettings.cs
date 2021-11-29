@@ -7,9 +7,15 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
+using static Verse.TKeySystem;
 
 namespace PerformanceOptimizer
 {
+    [DefOf]
+    public static class PODefOf
+    {
+        public static KeyBindingDef PerformanceOptimizerKey;
+    }
     class PerformanceOptimizerSettings : ModSettings
     {
         public static bool hideResourceReadout = true;
@@ -67,9 +73,26 @@ namespace PerformanceOptimizer
         public static bool PawnCollisionPosOffsetForCacheActive = true;
         public static bool CacheTextSizeCalc = true;
         public static bool overviewLetterSent;
+        public static bool UITogglePressed
+        {
+            get
+            {
+                if (OneKeyMode)
+                {
+                    return Input.GetKeyDown(PerformanceOptimizerMod.keyPrefsData.GetBoundKeyCode(PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.B));
+                }
+                return Input.GetKey(PerformanceOptimizerMod.keyPrefsData.GetBoundKeyCode(PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.A)) 
+                    && Input.GetKeyDown(PerformanceOptimizerMod.keyPrefsData.GetBoundKeyCode(PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.B));
+            }
+        }
+            
+        public static bool UIToggleOn = true;
+        public static bool OneKeyMode = true;
         public override void ExposeData()
         {
             base.ExposeData();
+            Scribe_Values.Look(ref UIToggleOn, "UIToggleOn", true);
+            Scribe_Values.Look(ref OneKeyMode, "OneKeyMode", false);
             Scribe_Values.Look(ref overviewLetterSent, "overviewLetterSent");
             Scribe_Values.Look(ref hideResourceReadout, "hideResourceReadout", true);
             Scribe_Values.Look(ref hideBottomButtonBar, "hideBottomButtonBar", true);
@@ -142,6 +165,7 @@ namespace PerformanceOptimizer
                 disableSpeedButtons = false;
 
             }
+
             uiSection.GapLine(8);
             uiSection.CheckboxLabeled("PO.HideResourceReadout".Translate(), ref hideResourceReadout);
             uiSection.CheckboxLabeled("PO.HideBottomButtonBar".Translate(), ref hideBottomButtonBar);
@@ -150,6 +174,33 @@ namespace PerformanceOptimizer
             uiSection.CheckboxLabeled("PO.HideSpeedButtons".Translate(), ref hideSpeedButtons);
             uiSection.CheckboxLabeled("PO.DisableSpeedButtons".Translate(), ref disableSpeedButtons);
 
+            var keyPrefsData = KeyPrefs.KeyPrefsData;
+            var keyHidingText = "PO.UIToggle".Translate();
+            var size = Text.CalcSize(keyHidingText);
+            var keybindingRect = new Rect(uiSection.curX + size.x + 10, uiSection.curY, 50, 24f);
+            var keybindingRectPlus = new Rect(keybindingRect.xMax, uiSection.curY - 3, 24, 24);
+            if (!OneKeyMode)
+            {
+                if (Widgets.ButtonText(keybindingRect, keyPrefsData.GetBoundKeyCode(PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.A).ToStringReadable()))
+                {
+                    Find.WindowStack.Add(new Dialog_DefineBinding(keyPrefsData, PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.A));
+                    Event.current.Use();
+                }
+                Text.Font = GameFont.Medium;
+                Widgets.Label(keybindingRectPlus, " + ");
+                Text.Font = GameFont.Small;
+            }
+            var keybinding2Rect = new Rect(keybindingRectPlus.xMax, uiSection.curY, 50, 24f);
+            if (Widgets.ButtonText(keybinding2Rect, keyPrefsData.GetBoundKeyCode(PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.B).ToStringReadable()))
+            {
+                Find.WindowStack.Add(new Dialog_DefineBinding(keyPrefsData, PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.B));
+                Event.current.Use();
+            }
+
+            var checkboxOneKey = new Rect(keybinding2Rect.xMax + 10, keybinding2Rect.y, 120, 24);
+            Widgets.CheckboxLabeled(checkboxOneKey, "PO.OneKeyMode".Translate(), ref OneKeyMode);
+
+            uiSection.Label(keyHidingText);
             topLeftSection.EndSection(uiSection);
             topLeftSection.End();
             
