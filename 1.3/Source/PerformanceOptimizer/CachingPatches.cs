@@ -194,6 +194,8 @@ namespace PerformanceOptimizer
 
     public static class Patch_InspectGizmoGrid_DrawInspectGizmoGridFor
     {
+        public static ISelectable curSelectable;
+
         public static Dictionary<ISelectable, CachedValueUpdate<List<Gizmo>>> cachedResults = new Dictionary<ISelectable, CachedValueUpdate<List<Gizmo>>>();
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
@@ -212,19 +214,30 @@ namespace PerformanceOptimizer
             }
         }
 
-        public static ISelectable curSelectable;
         public static List<Gizmo> GetGizmosFast(ISelectable selectable)
         {
+            List<Gizmo> gizmos;
             if (!cachedResults.TryGetValue(selectable, out var cache))
             {
-                cachedResults[selectable] = cache = new CachedValueUpdate<List<Gizmo>>(selectable.GetGizmos().ToList(), PerformanceOptimizerSettings.GetGizmosRefreshRate);
+                gizmos = selectable.GetGizmos().ToList();
+                cachedResults[selectable] = new CachedValueUpdate<List<Gizmo>>(gizmos, PerformanceOptimizerSettings.GetGizmosRefreshRate);
             }
             else if (Time.frameCount > cache.refreshUpdate)
             {
-                cache.SetValue(selectable.GetGizmos().ToList(), PerformanceOptimizerSettings.GetGizmosRefreshRate);
+                gizmos = selectable.GetGizmos().ToList();
+                cache.SetValue(gizmos, PerformanceOptimizerSettings.GetGizmosRefreshRate);
+            }
+            else
+            {
+                gizmos = cache.GetValue();
             }
             curSelectable = selectable;
-            return cache.GetValue();
+
+            if (ModCompatUtility.AllowToolActive)
+            {
+                ModCompatUtility.ProcessAllowToolToggle(gizmos);
+            }
+            return gizmos;
         }
     }
 

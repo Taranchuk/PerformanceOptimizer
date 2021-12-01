@@ -46,7 +46,7 @@ namespace PerformanceOptimizer
                         var outerNode = GetFirstMatchingNode(node.ChildNodes, childNode);
                         if (!(outerNode is null))
                         {
-                            if (outerNode.ChildNodes[0].NodeType == XmlNodeType.Element) // if this element is not a value
+                            if (outerNode.ChildNodes?[0]?.NodeType == XmlNodeType.Element) // if this element is not a value
                             {
                                 //Log.Warning("Fixing duplicate XML node name " + childNode.Name + " in this XML block: " + node.OuterXml + ((node != root) ? ("\n\nRoot node: " + root.OuterXml) : ""));
                                 for (var i = 0; i < childNode.ChildNodes.Count; i++)

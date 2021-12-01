@@ -14,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
+using Verse.Noise;
 
 namespace PerformanceOptimizer
 {
