@@ -50,6 +50,7 @@ namespace PerformanceOptimizer
             {
                 curFrameCount = Time.frameCount;
                 PerformanceOptimizerSettings.UIToggleOn = !PerformanceOptimizerSettings.UIToggleOn;
+                LoadedModManager.GetMod<PerformanceOptimizerMod>().WriteSettings();
             }
             if (PerformanceOptimizerSettings.UIToggleOn && PerformanceOptimizerSettings.minimizeAlertsReadout)
             {

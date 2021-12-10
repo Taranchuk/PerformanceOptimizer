@@ -303,7 +303,7 @@ namespace PerformanceOptimizer
 
     public static class Patch_Faction_FactionOfPlayer
     {
-        public static Faction factionOfPlayer;
+        public static Faction cachedResult;
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(ref Faction __result)
         {
@@ -316,12 +316,12 @@ namespace PerformanceOptimizer
                     return false;
                 }
             }
-
-            if (factionOfPlayer is null)
+            
+            if (cachedResult is null)
             {
-                factionOfPlayer = Find.FactionManager.OfPlayer;
+                cachedResult = Find.FactionManager.OfPlayer;
             }
-            __result = factionOfPlayer;
+            __result = cachedResult;
             return false;
         }
     }
@@ -430,22 +430,24 @@ namespace PerformanceOptimizer
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(Thing t, Ideo ideo, out Data __state, ref float __result)
         {
-            var key = t.GetHashCode() + ideo.GetHashCode();
-            if (!cachedResults.TryGetValue(key, out var cache))
+            var hashcode = 23;
+            hashcode = (hashcode * 37) + t.thingIDNumber;
+            hashcode = (hashcode * 37) + ideo.id;
+            if (!cachedResults.TryGetValue(hashcode, out var cache))
             {
-                cachedResults[key] = new CachedValueTick<float>(0, PerformanceOptimizerSettings.GetStyleDominanceRefreshRate);
-                __state = new Data { key = key, state = true };
+                cachedResults[hashcode] = new CachedValueTick<float>(0, PerformanceOptimizerSettings.GetStyleDominanceRefreshRate);
+                __state = new Data { key = hashcode, state = true };
                 return true;
             }
             else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
             {
-                __state = new Data { key = key, state = true };
+                __state = new Data { key = hashcode, state = true };
                 return true;
             }
             else
             {
                 __result = cache.GetValue();
-                __state = new Data { key = key, state = false };
+                __state = new Data { key = hashcode, state = false };
                 return false;
             }
         }

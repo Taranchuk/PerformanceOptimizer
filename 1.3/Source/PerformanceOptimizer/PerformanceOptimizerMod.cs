@@ -92,7 +92,7 @@ namespace PerformanceOptimizer
             Patch_ExpectationsUtility_CurrentExpectationForPawn.cachedResults.Clear();
             Patch_ExpectationsUtility_CurrentExpectationFor_Map.cachedResults.Clear();
             Patch_JobDriver_CheckCurrentToilEndOrFail.cachedResults.Clear();
-            Patch_Faction_FactionOfPlayer.factionOfPlayer = null;
+            Patch_Faction_FactionOfPlayer.cachedResult = null;
         }
 
         public static KeyPrefsData keyPrefsData;

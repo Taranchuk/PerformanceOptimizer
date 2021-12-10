@@ -56,7 +56,7 @@ namespace PerformanceOptimizer
                         var description = method.FullDescription();
                         if (!methodsToSkip.Any(x => description.Contains(x)))
                         {
-                            if (!method.IsGenericMethod)
+                            if (!method.IsGenericMethod && !method.ContainsGenericParameters && !method.IsGenericMethodDefinition)
                             {
                                 methods.Add(method);
                             }
