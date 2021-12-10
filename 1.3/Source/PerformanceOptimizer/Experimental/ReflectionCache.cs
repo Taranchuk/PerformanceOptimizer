@@ -21,6 +21,7 @@ namespace PerformanceOptimizer
         public static Dictionary<object, Traverse> createdTraverses = new Dictionary<object, Traverse>();
         public static Dictionary<Traverse, Dictionary<string, Traverse>> fields = new Dictionary<Traverse, Dictionary<string, Traverse>>();
         public static Dictionary<Traverse, object> fieldValues = new Dictionary<Traverse, object>();
+        public static Dictionary<object, Dictionary<object, object>> objectValues = new Dictionary<object, Dictionary<object, object>>();
 
         static ReflectionCache()
         {
@@ -34,7 +35,7 @@ namespace PerformanceOptimizer
                 new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseFieldPostfix))));
 
             var getValueMethod = AccessTools.FirstMethod(typeof(Traverse), (MethodInfo mi) => mi.Name == "GetValue" && !mi.IsGenericMethod && mi.GetParameters().Count() == 0 
-            && mi.ReturnType == typeof(object));
+                && mi.ReturnType == typeof(object));
             PerformanceOptimizerMod.harmony.Patch(getValueMethod,
                 new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseGetValuePrefix))),
                 new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseGetValuePostfix))));
@@ -75,9 +76,9 @@ namespace PerformanceOptimizer
             return true;
         }
 
-        private static void TraverseFieldPostfix(Traverse __result, bool __state, string name)
+        private static void TraverseFieldPostfix(Traverse __instance, Traverse __result, bool __state, string name)
         {
-            if (__state && fields.TryGetValue(__result, out var dict))
+            if (__state && fields.TryGetValue(__instance, out var dict))
             {
                 dict[name] = __result;
             }
@@ -86,6 +87,11 @@ namespace PerformanceOptimizer
         private static bool TraverseGetValuePrefix(Traverse __instance, ref object __result, out bool __state)
         {
             if (fieldValues.TryGetValue(__instance, out __result))
+            {
+                __state = false;
+                return false;
+            }
+            else if (objectValues.TryGetValue(__instance._root, out var dict) && dict.TryGetValue(__instance._info, out __result))
             {
                 __state = false;
                 return false;
@@ -99,6 +105,18 @@ namespace PerformanceOptimizer
             if (__state)
             {
                 fieldValues[__instance] = __result;
+                if (__instance._root != null && __instance._info != null)
+                {
+                    if (objectValues.ContainsKey(__instance._root))
+                    {
+                        objectValues[__instance._root][__instance._info] = __result;
+                    }
+                    else
+                    {
+                        objectValues[__instance._root] = new Dictionary<object, object> { { __instance._info, __result } };
+                    }
+                }
+
             }
         }
     }

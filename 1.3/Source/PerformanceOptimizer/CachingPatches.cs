@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using Ionic.Zlib;
+using Mono.Cecil.Cil;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 using Verse.Noise;
+using OpCodes = System.Reflection.Emit.OpCodes;
 
 namespace PerformanceOptimizer
 {
@@ -111,7 +113,7 @@ namespace PerformanceOptimizer
             if (PerformanceOptimizerSettings.CacheFactionOfPlayer)
             {
                 PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(Faction), "get_OfPlayer"),
-                    new HarmonyMethod(AccessTools.Method(typeof(Patch_Faction_FactionOfPlayer), nameof(Patch_Faction_FactionOfPlayer.Prefix))));
+                    prefix: new HarmonyMethod(AccessTools.Method(typeof(Patch_Faction_FactionOfPlayer), nameof(Patch_Faction_FactionOfPlayer.Prefix))));
             }
 
             if (PerformanceOptimizerSettings.CacheStatWorker_MarketValue)
@@ -304,6 +306,7 @@ namespace PerformanceOptimizer
     public static class Patch_Faction_FactionOfPlayer
     {
         public static Faction cachedResult;
+
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(ref Faction __result)
         {
