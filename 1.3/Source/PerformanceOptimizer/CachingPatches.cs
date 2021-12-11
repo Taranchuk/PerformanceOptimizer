@@ -116,6 +116,12 @@ namespace PerformanceOptimizer
                     new HarmonyMethod(AccessTools.Method(typeof(Patch_Pawn_JobTracker_DetermineNextConstantThinkTreeJob), nameof(Patch_Pawn_JobTracker_DetermineNextConstantThinkTreeJob.Prefix))));
             }
 
+            if (PerformanceOptimizerSettings.JobGiver_ConfigurableHostilityResponseThrottleActive)
+            {
+                PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(JobGiver_ConfigurableHostilityResponse), "TryGiveJob"),
+                    new HarmonyMethod(AccessTools.Method(typeof(Patch_JobGiver_ConfigurableHostilityResponse), nameof(Patch_JobGiver_ConfigurableHostilityResponse.Prefix))));
+            }
+
             if (PerformanceOptimizerSettings.CacheFactionOfPlayer)
             {
                 PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(Faction), "get_OfPlayer"),
@@ -806,6 +812,27 @@ namespace PerformanceOptimizer
                 }
             }
             return true;
+        }
+    }
+
+    public static class Patch_JobGiver_ConfigurableHostilityResponse
+    {
+        public static Dictionary<Pawn, int> cachedResults = new Dictionary<Pawn, int>();
+
+        [HarmonyPriority(Priority.First)]
+        public static bool Prefix(Pawn pawn)
+        {
+            if (!cachedResults.TryGetValue(pawn, out var cache)
+                || PerformanceOptimizerMod.tickManager.ticksGameInt > (cache + PerformanceOptimizerSettings.JobGiver_ConfigurableHostilityResponseThrottleRate))
+            {
+                cachedResults[pawn] = PerformanceOptimizerMod.tickManager.ticksGameInt;
+                return true;
+            }
+            else
+            {
+                Log.Message("Preventing hostility job from " + pawn);
+                return false;
+            }
         }
     }
 

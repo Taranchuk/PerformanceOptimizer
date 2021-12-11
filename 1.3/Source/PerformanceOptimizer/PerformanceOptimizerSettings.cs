@@ -51,6 +51,7 @@ namespace PerformanceOptimizer
         public static int GetStyleDominanceRefreshRate = 2000;
         public static int CheckCurrentToilEndOrFailThrottleRate = 10;
         public static int DetermineNextConstantThinkTreeJobThrottleRate = 30;
+        public static int JobGiver_ConfigurableHostilityResponseThrottleRate = 30;
         public static bool GetGizmosCacheActive = true;
         public static int GetGizmosRefreshRate = 30;
 
@@ -68,8 +69,10 @@ namespace PerformanceOptimizer
         public static bool FindAllowedDesignatorCacheActive = true;
         public static bool CheckCurrentToilEndOrFailThrottleActive = true;
         public static bool DetermineNextConstantThinkTreeJobThrottleActive = true;
+        public static bool JobGiver_ConfigurableHostilityResponseThrottleActive = true;
         public static bool CacheFactionOfPlayer = true;
         public static bool CacheStatWorker_MarketValue = true;
+        public static bool CacheTraverseReflections = true;
 
         public static int PawnCollisionPosOffsetForRefreshRate = 30;
         public static bool PawnCollisionPosOffsetForCacheActive = true;
@@ -139,6 +142,7 @@ namespace PerformanceOptimizer
             Scribe_Values.Look(ref CheckCurrentToilEndOrFailThrottleActive, "CheckCurrentToilEndOrFailThrottleActive", true);
             Scribe_Values.Look(ref CacheFactionOfPlayer, "CacheFactionOfPlayer", true);
             Scribe_Values.Look(ref CacheStatWorker_MarketValue, "CacheStatWorker_MarketValue", true);
+            Scribe_Values.Look(ref CacheTraverseReflections, "CacheTraverseReflections", true);
             Scribe_Values.Look(ref GetGizmosCacheActive, "GetGizmosCacheActive", true);
             Scribe_Values.Look(ref GetGizmosRefreshRate, "GetGizmosRefreshRate", 30);
             Scribe_Values.Look(ref PawnCollisionPosOffsetForRefreshRate, "PawnCollisionPosOffsetForRefreshRate", 30);
@@ -146,15 +150,22 @@ namespace PerformanceOptimizer
 
             Scribe_Values.Look(ref DetermineNextConstantThinkTreeJobThrottleRate, "DetermineNextConstantThinkTreeJobThrottleRate", 30);
             Scribe_Values.Look(ref DetermineNextConstantThinkTreeJobThrottleActive, "DetermineNextConstantThinkTreeJobThrottleActive", true);
+
+            Scribe_Values.Look(ref JobGiver_ConfigurableHostilityResponseThrottleRate, "JobGiver_ConfigurableHostilityResponseThrottleRate", 30);
+            Scribe_Values.Look(ref JobGiver_ConfigurableHostilityResponseThrottleActive, "JobGiver_ConfigurableHostilityResponseThrottleActive", true);
         }
+
         public void DoSettingsWindowContents(Rect inRect)
         {
-            var totalHeight = 710;
+            Find.WindowStack.currentlyDrawnWindow.absorbInputAroundWindow = false;
+            var sectionHeightSize = (9 * 24) + 8 + 30;
+            var cacheSettingsHeight = (17 * 24) + 8 + 30 + 24;
+            var totalHeight = sectionHeightSize + cacheSettingsHeight + 50;
+
             Rect rect = new Rect(inRect.x, inRect.y, inRect.width, inRect.height - 20);
             Rect rect2 = new Rect(0f, 0f, inRect.width - 30f, totalHeight);
             Widgets.BeginScrollView(rect, ref scrollPosition, rect2, true);
 
-            var sectionHeightSize = (9 * 24) + 8 + 10;
             var sectionWidth = ((inRect.width - 30) / 2f) - 8;
             Rect uiSettingsRect = new Rect(inRect.x, inRect.y - 30, sectionWidth, sectionHeightSize + 20);
             Listing_Standard topLeftSection = new Listing_Standard();
@@ -231,6 +242,7 @@ namespace PerformanceOptimizer
             miscSettings.CheckboxLabeled("PO.CacheTextSizeCalc".Translate(), ref CacheTextSizeCalc);
             miscSettings.CheckboxLabeled("PO.CacheFactionOfPlayer".Translate(), ref CacheFactionOfPlayer);
             miscSettings.CheckboxLabeled("PO.CacheStatWorker_MarketValue".Translate(), ref CacheStatWorker_MarketValue);
+            miscSettings.CheckboxLabeled("PO.CacheTraverseReflections".Translate(), ref CacheTraverseReflections);
             miscSettings.CheckboxLabeled("PO.DisableSteamManagerCallbacksChecks".Translate(), ref disableSteamManagerCallbacksChecks);
             miscSettings.CheckboxLabeled("PO.DisablePlantSwayShaderUpdateIfSwayDisabled".Translate(), ref disablePlantSwayShaderUpdateIfSwayDisabled);
             miscSettings.CheckboxLabeled("PO.DisableSoundsCompletely".Translate(), ref disableSoundsCompletely);
@@ -239,7 +251,6 @@ namespace PerformanceOptimizer
             miscSettingsSection.EndSection(miscSettings);
             miscSettingsSection.End();
 
-            var cacheSettingsHeight = (16 * 24) + 8 + 30;
             Listing_Standard cacheSection = new Listing_Standard();
             Rect topRect = new Rect(inRect.x, uiSettingsRect.yMax + 15, inRect.width - 30, cacheSettingsHeight);
             cacheSection.Begin(topRect);
@@ -278,6 +289,12 @@ namespace PerformanceOptimizer
                 PawnCollisionPosOffsetForCacheActive = true;
                 GetGizmosCacheActive = true;
                 GetGizmosRefreshRate = 30;
+
+                DetermineNextConstantThinkTreeJobThrottleActive = true;
+                DetermineNextConstantThinkTreeJobThrottleRate = 30;
+
+                JobGiver_ConfigurableHostilityResponseThrottleActive = true;
+                JobGiver_ConfigurableHostilityResponseThrottleRate = 30;
             }
 
             cacheSettings.GapLine(8);
@@ -295,6 +312,9 @@ namespace PerformanceOptimizer
             cacheSettings.CheckboxLabeledWithSlider("PO.InspectGizmoGrid".Translate(), "PO.RefreshRate", ref GetGizmosCacheActive, ref GetGizmosRefreshRate);
             cacheSettings.CheckboxLabeledWithSlider("PO.FindAllowedDesignator".Translate(), "PO.RefreshRate", ref FindAllowedDesignatorCacheActive, ref FindAllowedDesignatorRefreshRate);
             cacheSettings.CheckboxLabeledWithSlider("PO.CheckCurrentToilEndOrFail".Translate(), "PO.ThrottleRate", ref CheckCurrentToilEndOrFailThrottleActive, ref CheckCurrentToilEndOrFailThrottleRate);
+            cacheSettings.CheckboxLabeledWithSlider("PO.DetermineNextConstantThinkTreeJob".Translate(), "PO.ThrottleRate", ref DetermineNextConstantThinkTreeJobThrottleActive, ref DetermineNextConstantThinkTreeJobThrottleRate);
+            cacheSettings.CheckboxLabeledWithSlider("PO.JobGiver_ConfigurableHostilityResponse".Translate(), "PO.ThrottleRate", ref JobGiver_ConfigurableHostilityResponseThrottleActive, 
+                ref JobGiver_ConfigurableHostilityResponseThrottleRate);
             cacheSettings.CheckboxLabeledWithSlider("PO.PawnCollisionPosOffsetFor".Translate(), "PO.RefreshRate", ref PawnCollisionPosOffsetForCacheActive, ref PawnCollisionPosOffsetForRefreshRate);
 
             cacheSection.EndSection(cacheSettings);

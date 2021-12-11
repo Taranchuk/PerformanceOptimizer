@@ -158,14 +158,13 @@ namespace PerformanceOptimizer
     public static class DoPlaySettings_DoPlaySettings
     {
         [TweakValue("0", 0, 2000)] public static float xTest = 150;
-        [TweakValue("0", -100, 200)] public static float dubsFix = -40;
         [HarmonyPriority(Priority.First)]
-        public static bool Prefix(WidgetRow rowVisibility, bool worldView, ref float curBaseY)
+        public static bool Prefix(WidgetRow rowVisibility, bool worldView)
         {
             if (PerformanceOptimizerSettings.UIToggleOn && PerformanceOptimizerSettings.hideBottomRightOverlayButtons && rowVisibility.FinalY > 0)
             {
                 bool mouseOnRight = Event.current.mousePosition.x < (UI.screenWidth - xTest);
-                if (mouseOnRight || (!mouseOnRight && LetterStack_LettersOnGUI.lettersBottomY > Event.current.mousePosition.y))
+                if (mouseOnRight || (!mouseOnRight && LetterStack_LettersOnGUI.lettersBottomY + 50 > Event.current.mousePosition.y))
                 {
                     if (!worldView)
                     {

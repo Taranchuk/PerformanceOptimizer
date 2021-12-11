@@ -31,7 +31,7 @@ namespace PerformanceOptimizer
                 new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseFieldPrefix))),
                 new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseFieldPostfix))));
             
-            // look into replacing with actual field reference access. GetValue cache is buggy, it doesn't track changed values
+            // TODO: look into replacing with actual field reference access. GetValue cache is buggy, it doesn't track changed values
 
             //var getValueMethod = AccessTools.FirstMethod(typeof(Traverse), (MethodInfo mi) => mi.Name == "GetValue" && !mi.IsGenericMethod && mi.GetParameters().Count() == 0 
             //    && mi.ReturnType == typeof(object));
