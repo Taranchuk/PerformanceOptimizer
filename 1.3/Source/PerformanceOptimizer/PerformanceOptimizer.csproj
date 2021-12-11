@@ -74,6 +74,7 @@
     </PackageReference>
     <PackageReference Include="Lib.Harmony">
       <Version>2.1.1</Version>
+	  <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

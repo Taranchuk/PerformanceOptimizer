@@ -22,22 +22,25 @@ namespace PerformanceOptimizer
 
         static ReflectionCache()
         {
-            PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(Traverse), "Create", new Type[] { typeof(object) }),
-                new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseCreatePrefix))),
-                new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseCreatePostfix))));
-            
-            var fieldMethod = AccessTools.FirstMethod(typeof(Traverse), (MethodInfo mi) => mi.Name == "Field" && !mi.IsGenericMethod && mi.GetParameters().Count() == 1);
-            PerformanceOptimizerMod.harmony.Patch(fieldMethod,
-                new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseFieldPrefix))),
-                new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseFieldPostfix))));
-            
-            // TODO: look into replacing with actual field reference access. GetValue cache is buggy, it doesn't track changed values
+            if (PerformanceOptimizerSettings.CacheTraverseReflections)
+            {
+                PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(Traverse), "Create", new Type[] { typeof(object) }),
+                    new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseCreatePrefix))),
+                    new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseCreatePostfix))));
 
-            //var getValueMethod = AccessTools.FirstMethod(typeof(Traverse), (MethodInfo mi) => mi.Name == "GetValue" && !mi.IsGenericMethod && mi.GetParameters().Count() == 0 
-            //    && mi.ReturnType == typeof(object));
-            //PerformanceOptimizerMod.harmony.Patch(getValueMethod,
-            //    new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseGetValuePrefix))),
-            //    new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseGetValuePostfix))));
+                var fieldMethod = AccessTools.FirstMethod(typeof(Traverse), (MethodInfo mi) => mi.Name == "Field" && !mi.IsGenericMethod && mi.GetParameters().Count() == 1);
+                PerformanceOptimizerMod.harmony.Patch(fieldMethod,
+                    new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseFieldPrefix))),
+                    new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseFieldPostfix))));
+
+                // TODO: look into replacing with actual field reference access. GetValue cache is buggy, it doesn't track changed values
+
+                //var getValueMethod = AccessTools.FirstMethod(typeof(Traverse), (MethodInfo mi) => mi.Name == "GetValue" && !mi.IsGenericMethod && mi.GetParameters().Count() == 0 
+                //    && mi.ReturnType == typeof(object));
+                //PerformanceOptimizerMod.harmony.Patch(getValueMethod,
+                //    new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseGetValuePrefix))),
+                //    new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseGetValuePostfix))));
+            }
         }
 
         //[HarmonyPatch(typeof(Pawn), nameof(Pawn.Tick))]
