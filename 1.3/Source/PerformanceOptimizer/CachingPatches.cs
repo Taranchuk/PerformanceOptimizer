@@ -830,7 +830,6 @@ namespace PerformanceOptimizer
             }
             else
             {
-                Log.Message("Preventing hostility job from " + pawn);
                 return false;
             }
         }
