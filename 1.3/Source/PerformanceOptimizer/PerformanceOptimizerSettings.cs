@@ -240,6 +240,7 @@ namespace PerformanceOptimizer
                 cacheFindAllowedDesignator = true;
                 disableSteamManagerCallbacksChecks = true;
                 disablePlantSwayShaderUpdateIfSwayDisabled = true;
+                CacheTraverseReflections = true;
                 disableSoundsCompletely = false;
                 CacheFactionOfPlayer = true;
                 CacheStatWorker_MarketValue = true;
