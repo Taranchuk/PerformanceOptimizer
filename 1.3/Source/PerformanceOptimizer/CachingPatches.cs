@@ -208,8 +208,6 @@ namespace PerformanceOptimizer
 
     public static class Patch_InspectGizmoGrid_DrawInspectGizmoGridFor
     {
-        public static ISelectable curSelectable;
-
         public static Dictionary<ISelectable, CachedValueUpdate<List<Gizmo>>> cachedResults = new Dictionary<ISelectable, CachedValueUpdate<List<Gizmo>>>();
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
@@ -245,8 +243,6 @@ namespace PerformanceOptimizer
             {
                 gizmos = cache.GetValue();
             }
-            curSelectable = selectable;
-
             if (ModCompatUtility.AllowToolActive)
             {
                 ModCompatUtility.ProcessAllowToolToggle(gizmos);
@@ -274,10 +270,7 @@ namespace PerformanceOptimizer
         }
         public static void ResetSelectable()
         {
-            if (Patch_InspectGizmoGrid_DrawInspectGizmoGridFor.curSelectable != null)
-            {
-                Patch_InspectGizmoGrid_DrawInspectGizmoGridFor.cachedResults.Remove(Patch_InspectGizmoGrid_DrawInspectGizmoGridFor.curSelectable);
-            }
+            Patch_InspectGizmoGrid_DrawInspectGizmoGridFor.cachedResults.Clear();
         }
     }
     public static class PawnCollisionPosOffsetFor
