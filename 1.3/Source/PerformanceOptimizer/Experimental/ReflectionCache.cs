@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Xml;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Verse;
 
 namespace PerformanceOptimizer
@@ -102,13 +103,8 @@ namespace PerformanceOptimizer
         }
 
         private static bool TraverseGetValuePrefix(Traverse __instance, ref object __result, out bool __state)
-        {
-            if (fieldValues.TryGetValue(__instance, out __result))
-            {
-                __state = false;
-                return false;
-            }
-            else if (objectValues.TryGetValue(__instance._root, out var dict) && dict.TryGetValue(__instance._info, out __result))
+        {     
+            if (objectValues.TryGetValue(__instance._root, out var dict) && dict.TryGetValue(__instance._info, out __result))
             {
                 __state = false;
                 return false;
@@ -121,17 +117,15 @@ namespace PerformanceOptimizer
         {
             if (__state)
             {
-                fieldValues[__instance] = __result;
                 if (__instance._root != null && __instance._info != null)
                 {
-                    if (objectValues.ContainsKey(__instance._root))
-                    {
-                        objectValues[__instance._root][__instance._info] = __result;
-                    }
-                    else
-                    {
-                        objectValues[__instance._root] = new Dictionary<object, object> { { __instance._info, __result } };
-                    }
+                    // doesn't work
+                    var fieldRefType = AccessTools.Method(typeof(AccessTools), "FieldRefAccess", new Type[] { typeof(string) }, new Type[] { __instance._root?.GetType(), __instance._info.GetUnderlyingType() });
+                    var method = fieldRefType.Invoke(null, new object[] { __instance._info.Name });
+                    var methodInvoke = method.GetType().GetMethods(AccessTools.all).FirstOrDefault(mi => mi.Name.StartsWith("Invoke"));
+                    var value = methodInvoke.Invoke(method, new object[] { __instance._root });
+
+                    Log.Message("VALUE: " + value);
                 }
             }
         }

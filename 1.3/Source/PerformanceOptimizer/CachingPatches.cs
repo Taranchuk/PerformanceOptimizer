@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
 using Verse;
@@ -142,6 +143,42 @@ namespace PerformanceOptimizer
                     new HarmonyMethod(AccessTools.Method(typeof(PawnCollisionPosOffsetFor), nameof(PawnCollisionPosOffsetFor.Postfix))));
             }
 
+            if (PerformanceOptimizerSettings.PawnDrawPosCacheActive)
+            {
+                bool cache = false;
+                List<MethodInfo> methods = new List<MethodInfo>();
+                methods.Add(AccessTools.Method("DubsMintMinimap.MainTabWindow_MiniMap:DrawAllPawns"));
+                methods.Add(AccessTools.Method(typeof(Designation), "Draw"));
+                foreach (var method in methods)
+                {
+                    if (method != null)
+                    {
+                        cache = true;
+                        PerformanceOptimizerMod.harmony.Patch(method,
+                            new HarmonyMethod(AccessTools.Method(typeof(Pawn_DrawPos), nameof(Pawn_DrawPos.EnableCache))),
+                            new HarmonyMethod(AccessTools.Method(typeof(Pawn_DrawPos), nameof(Pawn_DrawPos.DisableCache))));
+                    }
+                }
+
+                if (cache)
+                {
+                    PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(Pawn), "get_DrawPos"),
+                        new HarmonyMethod(AccessTools.Method(typeof(Pawn_DrawPos), nameof(Pawn_DrawPos.Prefix))),
+                        new HarmonyMethod(AccessTools.Method(typeof(Pawn_DrawPos), nameof(Pawn_DrawPos.Postfix))));
+                }
+            }
+
+            if (PerformanceOptimizerSettings.PawnLabelCacheActive)
+            {
+                PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(Pawn), "get_LabelNoCount"),
+                    new HarmonyMethod(AccessTools.Method(typeof(Pawn_LabelNoCountCache), nameof(Pawn_LabelNoCountCache.Prefix))),
+                    new HarmonyMethod(AccessTools.Method(typeof(Pawn_LabelNoCountCache), nameof(Pawn_LabelNoCountCache.Postfix))));
+
+                PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(Pawn), "get_LabelShort"),
+                    new HarmonyMethod(AccessTools.Method(typeof(Pawn_LabelShortCache), nameof(Pawn_LabelShortCache.Prefix))),
+                    new HarmonyMethod(AccessTools.Method(typeof(Pawn_LabelShortCache), nameof(Pawn_LabelShortCache.Postfix))));
+            }
+
             if (PerformanceOptimizerSettings.CacheTextSizeCalc)
             {
                 PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(Text), "CalcSize"),
@@ -241,7 +278,7 @@ namespace PerformanceOptimizer
             }
             else
             {
-                gizmos = cache.GetValue();
+                gizmos = cache.valueInt;
             }
             if (ModCompatUtility.AllowToolActive)
             {
@@ -273,6 +310,133 @@ namespace PerformanceOptimizer
             Patch_InspectGizmoGrid_DrawInspectGizmoGridFor.cachedResults.Clear();
         }
     }
+
+    public static class Pawn_DrawPos
+    {
+        public static Dictionary<Pawn, CachedValueTick<Vector3>> cachedResults = new Dictionary<Pawn, CachedValueTick<Vector3>>();
+
+        public static bool shouldReturnCachedValue;
+
+        [HarmonyPriority(Priority.First)]
+        public static bool Prefix(Pawn __instance, out bool __state, ref Vector3 __result)
+        {
+            if (shouldReturnCachedValue)
+            {
+                if (!cachedResults.TryGetValue(__instance, out var cache))
+                {
+                    cachedResults[__instance] = new CachedValueTick<Vector3>(default, 30);
+                    __state = true;
+                    return true;
+                }
+                else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
+                {
+                    __state = true;
+                    return true;
+                }
+                else
+                {
+                    __result = cache.valueInt;
+                    __state = false;
+                    return false;
+                }
+            }
+            __state = false;
+            return true;
+        }
+
+        [HarmonyPriority(Priority.Last)]
+        public static void Postfix(Pawn __instance, bool __state, ref Vector3 __result)
+        {
+            if (__state)
+            {
+                cachedResults[__instance].SetValue(__result, 30);
+            }
+        }
+
+        public static void EnableCache()
+        {
+            shouldReturnCachedValue = true;
+        }
+
+        public static void DisableCache()
+        {
+            shouldReturnCachedValue = false;
+
+        }
+    }
+
+    public static class Pawn_LabelNoCountCache
+    {
+        public static Dictionary<Pawn, CachedValueTick<string>> cachedResults = new Dictionary<Pawn, CachedValueTick<string>>();
+
+        [HarmonyPriority(Priority.First)]
+        public static bool Prefix(Pawn __instance, out bool __state, ref string __result)
+        {
+            if (!cachedResults.TryGetValue(__instance, out var cache))
+            {
+                cachedResults[__instance] = new CachedValueTick<string>(default, PerformanceOptimizerSettings.PawnLabelRefreshRate);
+                __state = true;
+                return true;
+            }
+            else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
+            {
+                __state = true;
+                return true;
+            }
+            else
+            {
+                __result = cache.valueInt;
+                __state = false;
+                return false;
+            }
+        }
+
+        [HarmonyPriority(Priority.Last)]
+        public static void Postfix(Pawn __instance, bool __state, ref string __result)
+        {
+            if (__state)
+            {
+                cachedResults[__instance].SetValue(__result, PerformanceOptimizerSettings.PawnLabelRefreshRate);
+            }
+        }
+    }
+
+    public static class Pawn_LabelShortCache
+    {
+        public static Dictionary<Pawn, CachedValueTick<string>> cachedResults = new Dictionary<Pawn, CachedValueTick<string>>();
+
+        [HarmonyPriority(Priority.First)]
+        public static bool Prefix(Pawn __instance, out bool __state, ref string __result)
+        {
+            if (!cachedResults.TryGetValue(__instance, out var cache))
+            {
+                cachedResults[__instance] = new CachedValueTick<string>(default, PerformanceOptimizerSettings.PawnLabelRefreshRate);
+                __state = true;
+                return true;
+            }
+            else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
+            {
+                __state = true;
+                return true;
+            }
+            else
+            {
+                __result = cache.valueInt;
+                __state = false;
+                return false;
+            }
+        }
+
+        [HarmonyPriority(Priority.Last)]
+        public static void Postfix(Pawn __instance, bool __state, ref string __result)
+        {
+            if (__state)
+            {
+                cachedResults[__instance].SetValue(__result, PerformanceOptimizerSettings.PawnLabelRefreshRate);
+            }
+        }
+    }
+
     public static class PawnCollisionPosOffsetFor
     {
         public static Dictionary<Pawn, CachedValueTick<Vector3>> cachedResults = new Dictionary<Pawn, CachedValueTick<Vector3>>();
@@ -293,11 +457,12 @@ namespace PerformanceOptimizer
             }
             else
             {
-                __result = cache.GetValue();
+                __result = cache.valueInt;
                 __state = false;
                 return false;
             }
         }
+
         [HarmonyPriority(Priority.Last)]
         public static void Postfix(Pawn pawn, bool __state, ref Vector3 __result)
         {
@@ -382,7 +547,7 @@ namespace PerformanceOptimizer
             }
             else
             {
-                __result = cache.GetValue();
+                __result = cache.valueInt;
                 __state = false;
                 return false;
             }
@@ -417,7 +582,7 @@ namespace PerformanceOptimizer
             }
             else
             {
-                __result = cache.GetValue();
+                __result = cache.valueInt;
                 __state = false;
                 return false;
             }
@@ -454,7 +619,7 @@ namespace PerformanceOptimizer
             }
             else
             {
-                __result = cache.GetValue();
+                __result = cache.valueInt;
                 __state = new Data { key = hashcode, state = false };
                 return false;
             }
@@ -488,7 +653,7 @@ namespace PerformanceOptimizer
             }
             else
             {
-                __result = cache.GetValue();
+                __result = cache.valueInt;
                 __state = false;
                 return false;
             }
@@ -522,7 +687,7 @@ namespace PerformanceOptimizer
             }
             else
             {
-                __result = cache.GetValue();
+                __result = cache.valueInt;
                 __state = false;
                 return false;
             }
@@ -556,7 +721,7 @@ namespace PerformanceOptimizer
             }
             else
             {
-                __result = cache.GetValue();
+                __result = cache.valueInt;
                 __state = false;
                 return false;
             }
@@ -591,7 +756,7 @@ namespace PerformanceOptimizer
             }
             else
             {
-                __result = cache.GetValue();
+                __result = cache.valueInt;
                 __state = false;
                 return false;
             }
@@ -626,7 +791,7 @@ namespace PerformanceOptimizer
             }
             else
             {
-                __result = cache.GetValue();
+                __result = cache.valueInt;
                 __state = false;
                 return false;
             }
@@ -662,7 +827,7 @@ namespace PerformanceOptimizer
             }
             else
             {
-                __result = cache.GetValue();
+                __result = cache.valueInt;
                 __state = false;
                 return false;
             }
@@ -698,7 +863,7 @@ namespace PerformanceOptimizer
             }
             else
             {
-                __result = cache.GetValue();
+                __result = cache.valueInt;
                 __state = false;
                 return false;
             }
@@ -733,7 +898,7 @@ namespace PerformanceOptimizer
             }
             else
             {
-                __result = cache.GetValue();
+                __result = cache.valueInt;
                 __state = false;
                 return false;
             }
@@ -768,7 +933,7 @@ namespace PerformanceOptimizer
             }
             else
             {
-                __result = cache.GetValue();
+                __result = cache.valueInt;
                 __state = false;
                 return false;
             }

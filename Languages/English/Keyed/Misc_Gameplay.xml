@@ -48,4 +48,6 @@
 	<PO.CacheTraverseReflections>Cache Traverse reflections</PO.CacheTraverseReflections>
 	<PO.DetermineNextConstantThinkTreeJob>Pawn_JobTracker:DetermineNextConstantThinkTreeJob</PO.DetermineNextConstantThinkTreeJob>
 	<PO.JobGiver_ConfigurableHostilityResponse>JobGiver_ConfigurableHostilityResponse:TryGiveJob</PO.JobGiver_ConfigurableHostilityResponse>
+	<PO.PawnLabel>Pawn:Label</PO.PawnLabel>
+	<PO.PawnDrawPos>Pawn:DrawPos</PO.PawnDrawPos>
 </LanguageData>

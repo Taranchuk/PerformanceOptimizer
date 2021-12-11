@@ -6,17 +6,11 @@ namespace PerformanceOptimizer
     public class CachedValueUpdate<T>
     {
         public int refreshUpdate;
-        private T valueInt;
+        public T valueInt;
         public CachedValueUpdate(T value, int resetInFrames)
         {
             this.valueInt = value;
             refreshUpdate = Time.frameCount + resetInFrames;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T GetValue()
-        {
-            return valueInt;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

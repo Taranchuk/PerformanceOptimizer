@@ -74,8 +74,12 @@ namespace PerformanceOptimizer
         public static bool CacheStatWorker_MarketValue = true;
         public static bool CacheTraverseReflections = true;
 
+        public static int PawnDrawPosRefreshRate = 30;
+        public static int PawnLabelRefreshRate = 30;
         public static int PawnCollisionPosOffsetForRefreshRate = 30;
         public static bool PawnCollisionPosOffsetForCacheActive = true;
+        public static bool PawnDrawPosCacheActive = true;
+        public static bool PawnLabelCacheActive = true;
         public static bool CacheTextSizeCalc = true;
         public static bool overviewLetterSent;
         public static bool UITogglePressed
@@ -153,13 +157,19 @@ namespace PerformanceOptimizer
 
             Scribe_Values.Look(ref JobGiver_ConfigurableHostilityResponseThrottleRate, "JobGiver_ConfigurableHostilityResponseThrottleRate", 30);
             Scribe_Values.Look(ref JobGiver_ConfigurableHostilityResponseThrottleActive, "JobGiver_ConfigurableHostilityResponseThrottleActive", true);
+
+            Scribe_Values.Look(ref PawnDrawPosRefreshRate, "PawnDrawPosRefreshRate", 30);
+            Scribe_Values.Look(ref PawnDrawPosCacheActive, "PawnDrawPosCacheActive", true);
+
+            Scribe_Values.Look(ref PawnLabelRefreshRate, "PawnLabelRefreshRate", 30);
+            Scribe_Values.Look(ref PawnLabelCacheActive, "PawnLabelCacheActive", true);
         }
 
         public void DoSettingsWindowContents(Rect inRect)
         {
             Find.WindowStack.currentlyDrawnWindow.absorbInputAroundWindow = false;
             var sectionHeightSize = (9 * 24) + 8 + 30;
-            var cacheSettingsHeight = (17 * 24) + 8 + 30 + 24;
+            var cacheSettingsHeight = (19 * 24) + 8 + 30 + 24;
             var totalHeight = sectionHeightSize + cacheSettingsHeight + 50;
 
             Rect rect = new Rect(inRect.x, inRect.y, inRect.width, inRect.height - 20);
@@ -295,6 +305,12 @@ namespace PerformanceOptimizer
 
                 JobGiver_ConfigurableHostilityResponseThrottleActive = true;
                 JobGiver_ConfigurableHostilityResponseThrottleRate = 30;
+
+                PawnDrawPosRefreshRate = 30;
+                PawnDrawPosCacheActive = true;
+
+                PawnLabelRefreshRate = 30;
+                PawnLabelCacheActive = true;
             }
 
             cacheSettings.GapLine(8);
@@ -316,6 +332,8 @@ namespace PerformanceOptimizer
             cacheSettings.CheckboxLabeledWithSlider("PO.JobGiver_ConfigurableHostilityResponse".Translate(), "PO.ThrottleRate", ref JobGiver_ConfigurableHostilityResponseThrottleActive, 
                 ref JobGiver_ConfigurableHostilityResponseThrottleRate);
             cacheSettings.CheckboxLabeledWithSlider("PO.PawnCollisionPosOffsetFor".Translate(), "PO.RefreshRate", ref PawnCollisionPosOffsetForCacheActive, ref PawnCollisionPosOffsetForRefreshRate);
+            cacheSettings.CheckboxLabeledWithSlider("PO.PawnLabel".Translate(), "PO.RefreshRate", ref PawnLabelCacheActive, ref PawnLabelRefreshRate);
+            cacheSettings.CheckboxLabeledWithSlider("PO.PawnDrawPos".Translate(), "PO.RefreshRate", ref PawnDrawPosCacheActive, ref PawnDrawPosRefreshRate);
 
             cacheSection.EndSection(cacheSettings);
             cacheSection.End();

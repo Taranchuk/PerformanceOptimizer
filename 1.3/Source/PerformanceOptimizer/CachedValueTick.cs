@@ -29,7 +29,7 @@ namespace PerformanceOptimizer
     //    }
     //
     //    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    //    public T GetValue()
+    //    public T valueInt
     //    {
     //        getCount++;
     //
@@ -121,7 +121,7 @@ namespace PerformanceOptimizer
     public class CachedValueTick<T>
     {
         public int refreshTick;
-        private T valueInt;
+        public T valueInt;
         public CachedValueTick()
         {
             valueInt = default(T);
@@ -131,12 +131,6 @@ namespace PerformanceOptimizer
         {
             this.valueInt = value;
             refreshTick = Find.TickManager.TicksGame + resetInTicks;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T GetValue()
-        {
-            return valueInt;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
