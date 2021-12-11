@@ -50,6 +50,7 @@ namespace PerformanceOptimizer
         public static int CurrentInstantBeautyRefreshRate = 600;
         public static int GetStyleDominanceRefreshRate = 2000;
         public static int CheckCurrentToilEndOrFailThrottleRate = 10;
+        public static int DetermineNextConstantThinkTreeJobThrottleRate = 30;
         public static bool GetGizmosCacheActive = true;
         public static int GetGizmosRefreshRate = 30;
 
@@ -66,6 +67,7 @@ namespace PerformanceOptimizer
         public static bool GetStyleDominanceCacheActive = true;
         public static bool FindAllowedDesignatorCacheActive = true;
         public static bool CheckCurrentToilEndOrFailThrottleActive = true;
+        public static bool DetermineNextConstantThinkTreeJobThrottleActive = true;
         public static bool CacheFactionOfPlayer = true;
         public static bool CacheStatWorker_MarketValue = true;
 
@@ -141,6 +143,9 @@ namespace PerformanceOptimizer
             Scribe_Values.Look(ref GetGizmosRefreshRate, "GetGizmosRefreshRate", 30);
             Scribe_Values.Look(ref PawnCollisionPosOffsetForRefreshRate, "PawnCollisionPosOffsetForRefreshRate", 30);
             Scribe_Values.Look(ref PawnCollisionPosOffsetForCacheActive, "PawnCollisionPosOffsetForCacheActive", true);
+
+            Scribe_Values.Look(ref DetermineNextConstantThinkTreeJobThrottleRate, "DetermineNextConstantThinkTreeJobThrottleRate", 30);
+            Scribe_Values.Look(ref DetermineNextConstantThinkTreeJobThrottleActive, "DetermineNextConstantThinkTreeJobThrottleActive", true);
         }
         public void DoSettingsWindowContents(Rect inRect)
         {
@@ -163,7 +168,6 @@ namespace PerformanceOptimizer
                 minimizeAlertsReadout = true;
                 hideSpeedButtons = true;
                 disableSpeedButtons = false;
-
             }
 
             uiSection.GapLine(8);

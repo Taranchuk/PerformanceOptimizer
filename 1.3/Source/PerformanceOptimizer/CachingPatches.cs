@@ -109,7 +109,13 @@ namespace PerformanceOptimizer
                 PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(Pawn_PathFollower), "StartPath"),
                     transpiler: new HarmonyMethod(AccessTools.Method(typeof(Patch_Pawn_PathFollower_StartPath), nameof(Patch_Pawn_PathFollower_StartPath.Transpiler))));
             }
-            
+
+            if (PerformanceOptimizerSettings.DetermineNextConstantThinkTreeJobThrottleActive)
+            {
+                PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(Pawn_JobTracker), "DetermineNextConstantThinkTreeJob"),
+                    new HarmonyMethod(AccessTools.Method(typeof(Patch_Pawn_JobTracker_DetermineNextConstantThinkTreeJob), nameof(Patch_Pawn_JobTracker_DetermineNextConstantThinkTreeJob.Prefix))));
+            }
+
             if (PerformanceOptimizerSettings.CacheFactionOfPlayer)
             {
                 PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(Faction), "get_OfPlayer"),
@@ -801,39 +807,31 @@ namespace PerformanceOptimizer
             }
             return true;
         }
-
-        //public static Dictionary<string, float> times = new Dictionary<string, float>();
-        //public static Stopwatch stopwatch = new Stopwatch();
-        //[HarmonyPriority(Priority.First)]
-        //public static void Prefix(JobDriver __instance)
-        //{
-        //    stopwatch.Restart();
-        //}
-        //
-        //public static void Postfix(JobDriver __instance)
-        //{
-        //    stopwatch.Stop();
-        //    var elapsed = (float)stopwatch.ElapsedTicks / Stopwatch.Frequency;
-        //    if (times.ContainsKey(__instance.GetType().ToString()))
-        //    {
-        //        times[__instance.GetType().ToString()] += elapsed;
-        //    }
-        //    else
-        //    {
-        //        times[__instance.GetType().ToString()] = elapsed;
-        //    }
-        //
-        //    if (Find.TickManager.ticksGameInt % 2500 == 0)
-        //    {
-        //        Log.Message("-------------------");
-        //        foreach (var data in times.OrderByDescending(x => x.Value))
-        //        {
-        //            Log.Message(data.Key + " took " + data.Value + " from " + times.Sum(x => x.Value) + " = " + data.Value / times.Sum(x => x.Value));
-        //        }
-        //    }
-        //}
     }
 
+    public static class Patch_Pawn_JobTracker_DetermineNextConstantThinkTreeJob
+    {
+        public static Dictionary<Pawn, int> cachedResults = new Dictionary<Pawn, int>();
+
+        [HarmonyPriority(Priority.First)]
+        public static bool Prefix(Pawn_JobTracker __instance)
+        {
+            if (__instance.pawn.factionInt != Faction.OfPlayer)
+            {
+                if (!cachedResults.TryGetValue(__instance.pawn, out var cache)
+                    || PerformanceOptimizerMod.tickManager.ticksGameInt > (cache + PerformanceOptimizerSettings.DetermineNextConstantThinkTreeJobThrottleRate))
+                {
+                    cachedResults[__instance.pawn] = PerformanceOptimizerMod.tickManager.ticksGameInt;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
 
     public static class Patch_Pawn_PathFollower_StartPath
     {

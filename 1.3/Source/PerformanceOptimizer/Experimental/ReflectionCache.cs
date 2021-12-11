@@ -31,27 +31,29 @@ namespace PerformanceOptimizer
                 new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseFieldPrefix))),
                 new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseFieldPostfix))));
             
-            var getValueMethod = AccessTools.FirstMethod(typeof(Traverse), (MethodInfo mi) => mi.Name == "GetValue" && !mi.IsGenericMethod && mi.GetParameters().Count() == 0 
-                && mi.ReturnType == typeof(object));
-            PerformanceOptimizerMod.harmony.Patch(getValueMethod,
-                new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseGetValuePrefix))),
-                new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseGetValuePostfix))));
+            // look into replacing with actual field reference access. GetValue cache is buggy, it doesn't track changed values
+
+            //var getValueMethod = AccessTools.FirstMethod(typeof(Traverse), (MethodInfo mi) => mi.Name == "GetValue" && !mi.IsGenericMethod && mi.GetParameters().Count() == 0 
+            //    && mi.ReturnType == typeof(object));
+            //PerformanceOptimizerMod.harmony.Patch(getValueMethod,
+            //    new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseGetValuePrefix))),
+            //    new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseGetValuePostfix))));
         }
 
-        [HarmonyPatch(typeof(Pawn), nameof(Pawn.Tick))]
-        public static class Pawn_Tick_Patch
-        {
-            static void Postfix(Pawn __instance)
-            {
-                var name = __instance.nameInt;
-                var nameField = Traverse.Create(__instance).Field("nameInt").GetValue();
-                __instance.nameInt = new NameSingle("TEST");
-                var name2 = __instance.nameInt;
-                var nameField2 = Traverse.Create(__instance).Field("nameInt").GetValue();
-                Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
-                Log.Message("Before: " + name + " - " + nameField + " - after: " + name2 + " - " + nameField2);
-            }
-        }
+        //[HarmonyPatch(typeof(Pawn), nameof(Pawn.Tick))]
+        //public static class Pawn_Tick_Patch
+        //{
+        //    static void Postfix(Pawn __instance)
+        //    {
+        //        var name = __instance.nameInt;
+        //        var nameField = Traverse.Create(__instance).Field("nameInt").GetValue();
+        //        __instance.nameInt = new NameSingle("TEST");
+        //        var name2 = __instance.nameInt;
+        //        var nameField2 = Traverse.Create(__instance).Field("nameInt").GetValue();
+        //        Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
+        //        Log.Message("Before: " + name + " - " + nameField + " - after: " + name2 + " - " + nameField2);
+        //    }
+        //}
 
         private static bool TraverseCreatePrefix(ref Traverse __result, out bool __state, object root)
         {
