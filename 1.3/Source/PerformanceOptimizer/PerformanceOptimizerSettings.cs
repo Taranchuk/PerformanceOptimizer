@@ -16,7 +16,7 @@ namespace PerformanceOptimizer
     {
         public static KeyBindingDef PerformanceOptimizerKey;
     }
-    class PerformanceOptimizerSettings : ModSettings
+    public class PerformanceOptimizerSettings : ModSettings
     {
         public static bool hideResourceReadout = true;
         public static bool hideBottomButtonBar = true;
@@ -94,6 +94,8 @@ namespace PerformanceOptimizer
                     && Input.GetKeyDown(PerformanceOptimizerMod.keyPrefsData.GetBoundKeyCode(PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.B));
             }
         }
+
+        public static List<Optimization> optimizations;
             
         public static bool UIToggleOn = true;
         public static bool OneKeyMode = true;
@@ -163,11 +165,18 @@ namespace PerformanceOptimizer
 
             Scribe_Values.Look(ref PawnLabelRefreshRate, "PawnLabelRefreshRate", 30);
             Scribe_Values.Look(ref PawnLabelCacheActive, "PawnLabelCacheActive", true);
+
+            Scribe_Collections.Look(ref optimizations, "optimizations", LookMode.Deep);
         }
 
         public void DoSettingsWindowContents(Rect inRect)
         {
             Find.WindowStack.currentlyDrawnWindow.absorbInputAroundWindow = false;
+            var uiTweaks = optimizations.Where(x => x.OptimizationType == OptimizationType.UITweak).ToList();
+            var performanceTweaks = optimizations.Where(x => x.OptimizationType == OptimizationType.Cache).ToList();
+            var throttles = optimizations.Where(x => x.OptimizationType == OptimizationType.Throttle 
+                || x.OptimizationType == OptimizationType.CacheWithRefreshRate).Cast<Optimization_RefreshRate>().ToList();
+
             var sectionHeightSize = (9 * 24) + 8 + 30;
             var cacheSettingsHeight = (19 * 24) + 8 + 30 + 24;
             var totalHeight = sectionHeightSize + cacheSettingsHeight + 50;
@@ -268,6 +277,11 @@ namespace PerformanceOptimizer
             var cacheSettings = cacheSection.BeginSection(cacheSettingsHeight - 20, 10, 10);
             if (cacheSettings.ButtonTextLabeled("PO.CacheSettings".Translate(), "Reset".Translate()))
             {
+                foreach (var optimization in throttles)
+                {
+                    optimization.Reset();
+                }
+
                 IsQuestLodgerRefreshRate = 30;
                 IsTeetotalerRefreshRate = 500;
                 CurrentExpectationForPawnRefreshRate = 1000;
@@ -315,6 +329,13 @@ namespace PerformanceOptimizer
             }
 
             cacheSettings.GapLine(8);
+            foreach (var optimization in throttles)
+            {
+                if (optimization.OptimizationType == OptimizationType.CacheWithRefreshRate)
+                {
+                    cacheSettings.CheckboxLabeledWithSlider(optimization.Name, "PO.RefreshRate", ref optimization.enabled, ref optimization.refreshRate);
+                }
+            }
             cacheSettings.CheckboxLabeledWithSlider("PO.QuestLodger".Translate(), "PO.RefreshRate", ref IsQuestLodgerCacheActive, ref IsQuestLodgerRefreshRate);
             cacheSettings.CheckboxLabeledWithSlider("PO.IsTeetotaler".Translate(), "PO.RefreshRate", ref IsTeetotalerCacheActive, ref IsTeetotalerRefreshRate);
             cacheSettings.CheckboxLabeledWithSlider("PO.CurrentExpectationForPawn".Translate(), "PO.RefreshRate", ref CurrentExpectationForPawnCacheActive, ref CurrentExpectationForPawnRefreshRate);

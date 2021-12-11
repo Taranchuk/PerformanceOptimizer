@@ -63,6 +63,7 @@ namespace PerformanceOptimizer
         {
             base.WriteSettings();
             KeyPrefs.Save();
+            PerformanceOptimizerSettings.optimizations.ForEach(x => x.Apply());
         }
 
         public override string SettingsCategory()
@@ -119,6 +120,24 @@ namespace PerformanceOptimizer
         {
             PerformanceOptimizerMod.keyPrefsData = KeyPrefs.KeyPrefsData;
             PerformanceOptimizerMod.DubsPerformanceAnalyzerLoaded = ModLister.AllInstalledMods.Any(x => x.Active && x.Name.Contains("Dubs Performance Analyzer"));
+            
+            PerformanceOptimizerSettings.optimizations ??= new List<Optimization>();
+            var optimizationTypes = GenTypes.AllSubclassesNonAbstract(typeof(Optimization));
+            foreach (var optimizationType in optimizationTypes)
+            {
+                if (!PerformanceOptimizerSettings.optimizations.Any(x => x.GetType() == optimizationType))
+                {
+                    var optimization = Activator.CreateInstance(optimizationType) as Optimization;
+                    optimization.Initialize();
+                    PerformanceOptimizerSettings.optimizations.Add(optimization);
+                }
+            }
+
+            foreach (var optimization in PerformanceOptimizerSettings.optimizations)
+            {
+                optimization.Apply();
+            }
+
             CachingPatches.DoPatches();
             if (PerformanceOptimizerSettings.fasterGetCompReplacement)
             {

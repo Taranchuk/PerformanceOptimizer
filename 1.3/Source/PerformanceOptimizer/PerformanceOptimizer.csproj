@@ -60,6 +60,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Logging.cs" />
     <Compile Include="Misc_Patches.cs" />
+    <Compile Include="Rework\Optimization.cs" />
+    <Compile Include="Rework\Optimization_DoorRotationAt.cs" />
+    <Compile Include="Rework\OptimizationType.cs" />
+    <Compile Include="Rework\Optimization_RefreshRate.cs" />
     <Compile Include="SettingsHelper.cs" />
     <Compile Include="UIPatches.cs" />
   </ItemGroup>
@@ -74,7 +78,7 @@
     </PackageReference>
     <PackageReference Include="Lib.Harmony">
       <Version>2.1.1</Version>
-	  <ExcludeAssets>runtime</ExcludeAssets>
+      <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

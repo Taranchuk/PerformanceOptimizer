@@ -50,4 +50,5 @@
 	<PO.JobGiver_ConfigurableHostilityResponse>JobGiver_ConfigurableHostilityResponse:TryGiveJob</PO.JobGiver_ConfigurableHostilityResponse>
 	<PO.PawnLabel>Pawn:Label</PO.PawnLabel>
 	<PO.PawnDrawPos>Pawn:DrawPos</PO.PawnDrawPos>
+	<PO.DoorRotationAt>Building_Door:DoorRotationAt</PO.DoorRotationAt>
 </LanguageData>
