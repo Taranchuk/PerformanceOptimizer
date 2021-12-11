@@ -18,6 +18,8 @@ namespace PerformanceOptimizer
     }
     public class PerformanceOptimizerSettings : ModSettings
     {
+        public static List<Optimization> optimizations;
+
         public static bool hideResourceReadout = true;
         public static bool hideBottomButtonBar = true;
         public static bool hideBottomRightOverlayButtons = true;
@@ -37,50 +39,6 @@ namespace PerformanceOptimizer
         public static bool cacheHasGenericDefinition = true;
         public static bool fixCheckForDuplicateNodes = true;
 
-        public static int IsQuestLodgerRefreshRate = 30;
-        public static int IsTeetotalerRefreshRate = 500;
-        public static int CurrentExpectationForPawnRefreshRate = 1000;
-        public static int CurrentExpectationForMapRefreshRate = 1000;
-        public static int TotalMoodOffsetRefreshRate = 500;
-        public static int BreakThresholdMinorRefreshRate = 300;
-        public static int BreakThresholdMajorRefreshRate = 300;
-        public static int BreakThresholdExtremeRefreshRate = 300;
-        public static int AmbientTemperatureRefreshRate = 120;
-        public static int FindAllowedDesignatorRefreshRate = 120;
-        public static int CurrentInstantBeautyRefreshRate = 600;
-        public static int GetStyleDominanceRefreshRate = 2000;
-        public static int CheckCurrentToilEndOrFailThrottleRate = 10;
-        public static int DetermineNextConstantThinkTreeJobThrottleRate = 30;
-        public static int JobGiver_ConfigurableHostilityResponseThrottleRate = 30;
-        public static bool GetGizmosCacheActive = true;
-        public static int GetGizmosRefreshRate = 30;
-
-        public static bool IsQuestLodgerCacheActive = true;
-        public static bool IsTeetotalerCacheActive = true;
-        public static bool CurrentExpectationForPawnCacheActive = true;
-        public static bool CurrentExpectationForMapCacheActive = true;
-        public static bool TotalMoodOffsetCacheActive = true;
-        public static bool BreakThresholdMinorCacheActive = true;
-        public static bool BreakThresholdMajorCacheActive = true;
-        public static bool BreakThresholdExtremeCacheActive = true;
-        public static bool AmbientTemperatureCacheActive = true;
-        public static bool CurrentInstantBeautyCacheActive = true;
-        public static bool GetStyleDominanceCacheActive = true;
-        public static bool FindAllowedDesignatorCacheActive = true;
-        public static bool CheckCurrentToilEndOrFailThrottleActive = true;
-        public static bool DetermineNextConstantThinkTreeJobThrottleActive = true;
-        public static bool JobGiver_ConfigurableHostilityResponseThrottleActive = true;
-        public static bool CacheFactionOfPlayer = true;
-        public static bool CacheStatWorker_MarketValue = true;
-        public static bool CacheTraverseReflections = true;
-
-        public static int PawnDrawPosRefreshRate = 30;
-        public static int PawnLabelRefreshRate = 30;
-        public static int PawnCollisionPosOffsetForRefreshRate = 30;
-        public static bool PawnCollisionPosOffsetForCacheActive = true;
-        public static bool PawnDrawPosCacheActive = true;
-        public static bool PawnLabelCacheActive = true;
-        public static bool CacheTextSizeCalc = true;
         public static bool overviewLetterSent;
         public static bool UITogglePressed
         {
@@ -93,10 +51,7 @@ namespace PerformanceOptimizer
                 return Input.GetKey(PerformanceOptimizerMod.keyPrefsData.GetBoundKeyCode(PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.A)) 
                     && Input.GetKeyDown(PerformanceOptimizerMod.keyPrefsData.GetBoundKeyCode(PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.B));
             }
-        }
-
-        public static List<Optimization> optimizations;
-            
+        }            
         public static bool UIToggleOn = true;
         public static bool OneKeyMode = true;
         public override void ExposeData()
@@ -114,57 +69,10 @@ namespace PerformanceOptimizer
             Scribe_Values.Look(ref cacheFindAllowedDesignator, "cacheFindAllowedDesignator", true);
 
             Scribe_Values.Look(ref fasterGetCompReplacement, "fasterGetCompReplacement", true);
-            Scribe_Values.Look(ref CacheTextSizeCalc, "CacheTextSizeCalc", true);
             Scribe_Values.Look(ref disableSteamManagerCallbacksChecks, "disableSteamManagerCallbacksChecks", true);
             Scribe_Values.Look(ref disablePlantSwayShaderUpdateIfSwayDisabled, "disablePlantSwayShaderUpdateIfSwayDisabled", true);
             Scribe_Values.Look(ref disableSoundsCompletely, "disableSoundsCompletely", false);
             Scribe_Values.Look(ref fixCheckForDuplicateNodes, "fixCheckForDuplicateNodes", true);
-
-            Scribe_Values.Look(ref IsQuestLodgerRefreshRate, "IsQuestLodgerRefreshRate", 30);
-            Scribe_Values.Look(ref IsTeetotalerRefreshRate, "IsTeetotalerRefreshRate", 500);
-            Scribe_Values.Look(ref CurrentExpectationForPawnRefreshRate, "CurrentExpectationForPawnRefreshRate", 1000);
-            Scribe_Values.Look(ref CurrentExpectationForMapRefreshRate, "CurrentExpectationForMapRefreshRate", 1000);
-            Scribe_Values.Look(ref TotalMoodOffsetRefreshRate, "TotalMoodOffsetRefreshRate", 500);
-            Scribe_Values.Look(ref BreakThresholdMinorRefreshRate, "BreakThresholdMinorRefreshRate", 300);
-            Scribe_Values.Look(ref BreakThresholdMajorRefreshRate, "BreakThresholdMajorRefreshRate", 300);
-            Scribe_Values.Look(ref BreakThresholdExtremeRefreshRate, "BreakThresholdExtremeRefreshRate", 300);
-            Scribe_Values.Look(ref AmbientTemperatureRefreshRate, "AmbientTemperatureRefreshRate", 120);
-            Scribe_Values.Look(ref FindAllowedDesignatorRefreshRate, "FindAllowedDesignatorRefreshRate", 120);
-            Scribe_Values.Look(ref CurrentInstantBeautyRefreshRate, "CurrentInstantBeautyRefreshRate", 600);
-            Scribe_Values.Look(ref GetStyleDominanceRefreshRate, "GetStyleDominanceRefreshRate", 2000);
-            Scribe_Values.Look(ref CheckCurrentToilEndOrFailThrottleRate, "CheckCurrentToilEndOrFailThrottleRate", 10);
-            Scribe_Values.Look(ref IsQuestLodgerCacheActive, "IsQuestLodgerCacheActive", true);
-            Scribe_Values.Look(ref IsTeetotalerCacheActive, "IsTeetotalerCacheActive", true);
-            Scribe_Values.Look(ref CurrentExpectationForPawnCacheActive, "CurrentExpectationForPawnCacheActive", true);
-            Scribe_Values.Look(ref CurrentExpectationForMapCacheActive, "CurrentExpectationForMapCacheActive", true);
-            Scribe_Values.Look(ref TotalMoodOffsetCacheActive, "TotalMoodOffsetCacheActive", true);
-            Scribe_Values.Look(ref BreakThresholdMinorCacheActive, "BreakThresholdMinorCacheActive", true);
-            Scribe_Values.Look(ref BreakThresholdMajorCacheActive, "BreakThresholdMajorCacheActive", true);
-            Scribe_Values.Look(ref BreakThresholdExtremeCacheActive, "BreakThresholdExtremeCacheActive", true);
-            Scribe_Values.Look(ref AmbientTemperatureCacheActive, "AmbientTemperatureCacheActive", true);
-            Scribe_Values.Look(ref CurrentInstantBeautyCacheActive, "CurrentInstantBeautyCacheActive", true);
-            Scribe_Values.Look(ref GetStyleDominanceCacheActive, "GetStyleDominanceCacheActive", true);
-            Scribe_Values.Look(ref FindAllowedDesignatorCacheActive, "FindAllowedDesignatorCacheActive", true);
-            Scribe_Values.Look(ref CheckCurrentToilEndOrFailThrottleActive, "CheckCurrentToilEndOrFailThrottleActive", true);
-            Scribe_Values.Look(ref CacheFactionOfPlayer, "CacheFactionOfPlayer", true);
-            Scribe_Values.Look(ref CacheStatWorker_MarketValue, "CacheStatWorker_MarketValue", true);
-            Scribe_Values.Look(ref CacheTraverseReflections, "CacheTraverseReflections", true);
-            Scribe_Values.Look(ref GetGizmosCacheActive, "GetGizmosCacheActive", true);
-            Scribe_Values.Look(ref GetGizmosRefreshRate, "GetGizmosRefreshRate", 30);
-            Scribe_Values.Look(ref PawnCollisionPosOffsetForRefreshRate, "PawnCollisionPosOffsetForRefreshRate", 30);
-            Scribe_Values.Look(ref PawnCollisionPosOffsetForCacheActive, "PawnCollisionPosOffsetForCacheActive", true);
-
-            Scribe_Values.Look(ref DetermineNextConstantThinkTreeJobThrottleRate, "DetermineNextConstantThinkTreeJobThrottleRate", 30);
-            Scribe_Values.Look(ref DetermineNextConstantThinkTreeJobThrottleActive, "DetermineNextConstantThinkTreeJobThrottleActive", true);
-
-            Scribe_Values.Look(ref JobGiver_ConfigurableHostilityResponseThrottleRate, "JobGiver_ConfigurableHostilityResponseThrottleRate", 30);
-            Scribe_Values.Look(ref JobGiver_ConfigurableHostilityResponseThrottleActive, "JobGiver_ConfigurableHostilityResponseThrottleActive", true);
-
-            Scribe_Values.Look(ref PawnDrawPosRefreshRate, "PawnDrawPosRefreshRate", 30);
-            Scribe_Values.Look(ref PawnDrawPosCacheActive, "PawnDrawPosCacheActive", true);
-
-            Scribe_Values.Look(ref PawnLabelRefreshRate, "PawnLabelRefreshRate", 30);
-            Scribe_Values.Look(ref PawnLabelCacheActive, "PawnLabelCacheActive", true);
 
             Scribe_Collections.Look(ref optimizations, "optimizations", LookMode.Deep);
         }
@@ -174,6 +82,7 @@ namespace PerformanceOptimizer
             Find.WindowStack.currentlyDrawnWindow.absorbInputAroundWindow = false;
             var uiTweaks = optimizations.Where(x => x.OptimizationType == OptimizationType.UITweak).ToList();
             var performanceTweaks = optimizations.Where(x => x.OptimizationType == OptimizationType.Cache).ToList();
+            var miscTweaks = optimizations.Where(x => x.OptimizationType == OptimizationType.Misc).ToList();
             var throttles = optimizations.Where(x => x.OptimizationType == OptimizationType.Throttle 
                 || x.OptimizationType == OptimizationType.CacheWithRefreshRate).Cast<Optimization_RefreshRate>().ToList();
 
@@ -249,20 +158,27 @@ namespace PerformanceOptimizer
                 cacheFindAllowedDesignator = true;
                 disableSteamManagerCallbacksChecks = true;
                 disablePlantSwayShaderUpdateIfSwayDisabled = true;
-                CacheTraverseReflections = true;
                 disableSoundsCompletely = false;
-                CacheFactionOfPlayer = true;
-                CacheStatWorker_MarketValue = true;
                 fixCheckForDuplicateNodes = true;
-                CacheTextSizeCalc = true;
+                foreach (var performanceTweak in performanceTweaks)
+                {
+                    performanceTweak.Reset();
+                }
             }
 
             miscSettings.GapLine(8);
             miscSettings.CheckboxLabeled("PO.FasterGetCompReplacement".Translate(), ref fasterGetCompReplacement);
-            miscSettings.CheckboxLabeled("PO.CacheTextSizeCalc".Translate(), ref CacheTextSizeCalc);
-            miscSettings.CheckboxLabeled("PO.CacheFactionOfPlayer".Translate(), ref CacheFactionOfPlayer);
-            miscSettings.CheckboxLabeled("PO.CacheStatWorker_MarketValue".Translate(), ref CacheStatWorker_MarketValue);
-            miscSettings.CheckboxLabeled("PO.CacheTraverseReflections".Translate(), ref CacheTraverseReflections);
+
+            foreach (var tweak in performanceTweaks)
+            {
+                miscSettings.CheckboxLabeled(tweak.Name, ref tweak.enabled);
+            }
+
+            foreach (var tweak in miscTweaks)
+            {
+                miscSettings.CheckboxLabeled(tweak.Name, ref tweak.enabled);
+            }
+
             miscSettings.CheckboxLabeled("PO.DisableSteamManagerCallbacksChecks".Translate(), ref disableSteamManagerCallbacksChecks);
             miscSettings.CheckboxLabeled("PO.DisablePlantSwayShaderUpdateIfSwayDisabled".Translate(), ref disablePlantSwayShaderUpdateIfSwayDisabled);
             miscSettings.CheckboxLabeled("PO.DisableSoundsCompletely".Translate(), ref disableSoundsCompletely);
@@ -281,53 +197,7 @@ namespace PerformanceOptimizer
                 {
                     optimization.Reset();
                 }
-
-                IsQuestLodgerRefreshRate = 30;
-                IsTeetotalerRefreshRate = 500;
-                CurrentExpectationForPawnRefreshRate = 1000;
-                CurrentExpectationForMapRefreshRate = 1000;
-                TotalMoodOffsetRefreshRate = 500;
-                BreakThresholdMinorRefreshRate = 300;
-                BreakThresholdMajorRefreshRate = 300;
-                BreakThresholdExtremeRefreshRate = 300;
-                AmbientTemperatureRefreshRate = 120;
-                FindAllowedDesignatorRefreshRate = 120;
-                CurrentInstantBeautyRefreshRate = 600;
-                GetStyleDominanceRefreshRate = 2000;
-                CheckCurrentToilEndOrFailThrottleRate = 10;
-
-                IsQuestLodgerCacheActive = true;
-                IsTeetotalerCacheActive = true;
-                CurrentExpectationForPawnCacheActive = true;
-                CurrentExpectationForMapCacheActive = true;
-                TotalMoodOffsetCacheActive = true;
-                BreakThresholdMinorCacheActive = true;
-                BreakThresholdMajorCacheActive = true;
-                BreakThresholdExtremeCacheActive = true;
-                AmbientTemperatureCacheActive = true;
-                CurrentInstantBeautyCacheActive = true;
-                GetStyleDominanceCacheActive = true;
-                FindAllowedDesignatorCacheActive = true;
-                CheckCurrentToilEndOrFailThrottleActive = true;
-
-                PawnCollisionPosOffsetForRefreshRate = 30;
-                PawnCollisionPosOffsetForCacheActive = true;
-                GetGizmosCacheActive = true;
-                GetGizmosRefreshRate = 30;
-
-                DetermineNextConstantThinkTreeJobThrottleActive = true;
-                DetermineNextConstantThinkTreeJobThrottleRate = 30;
-
-                JobGiver_ConfigurableHostilityResponseThrottleActive = true;
-                JobGiver_ConfigurableHostilityResponseThrottleRate = 30;
-
-                PawnDrawPosRefreshRate = 30;
-                PawnDrawPosCacheActive = true;
-
-                PawnLabelRefreshRate = 30;
-                PawnLabelCacheActive = true;
             }
-
             cacheSettings.GapLine(8);
             foreach (var optimization in throttles)
             {
@@ -336,26 +206,6 @@ namespace PerformanceOptimizer
                     cacheSettings.CheckboxLabeledWithSlider(optimization.Name, "PO.RefreshRate", ref optimization.enabled, ref optimization.refreshRate);
                 }
             }
-            cacheSettings.CheckboxLabeledWithSlider("PO.QuestLodger".Translate(), "PO.RefreshRate", ref IsQuestLodgerCacheActive, ref IsQuestLodgerRefreshRate);
-            cacheSettings.CheckboxLabeledWithSlider("PO.IsTeetotaler".Translate(), "PO.RefreshRate", ref IsTeetotalerCacheActive, ref IsTeetotalerRefreshRate);
-            cacheSettings.CheckboxLabeledWithSlider("PO.CurrentExpectationForPawn".Translate(), "PO.RefreshRate", ref CurrentExpectationForPawnCacheActive, ref CurrentExpectationForPawnRefreshRate);
-            cacheSettings.CheckboxLabeledWithSlider("PO.CurrentExpectationForMap".Translate(), "PO.RefreshRate", ref CurrentExpectationForMapCacheActive, ref CurrentExpectationForMapRefreshRate);
-            cacheSettings.CheckboxLabeledWithSlider("PO.TotalMoodOffset".Translate(), "PO.RefreshRate", ref TotalMoodOffsetCacheActive, ref TotalMoodOffsetRefreshRate);
-            cacheSettings.CheckboxLabeledWithSlider("PO.BreakThresholdMinor".Translate(), "PO.RefreshRate", ref BreakThresholdMinorCacheActive, ref BreakThresholdMinorRefreshRate);
-            cacheSettings.CheckboxLabeledWithSlider("PO.BreakThresholdMajor".Translate(), "PO.RefreshRate", ref BreakThresholdMajorCacheActive, ref BreakThresholdMajorRefreshRate);
-            cacheSettings.CheckboxLabeledWithSlider("PO.BreakThresholdExtreme".Translate(), "PO.RefreshRate", ref BreakThresholdExtremeCacheActive, ref BreakThresholdExtremeRefreshRate);
-            cacheSettings.CheckboxLabeledWithSlider("PO.AmbientTemperature".Translate(), "PO.RefreshRate", ref AmbientTemperatureCacheActive, ref AmbientTemperatureRefreshRate);
-            cacheSettings.CheckboxLabeledWithSlider("PO.CurrentInstantBeauty".Translate(), "PO.RefreshRate", ref CurrentInstantBeautyCacheActive, ref CurrentInstantBeautyRefreshRate);
-            cacheSettings.CheckboxLabeledWithSlider("PO.GetStyleDominance".Translate(), "PO.RefreshRate", ref GetStyleDominanceCacheActive, ref GetStyleDominanceRefreshRate);
-            cacheSettings.CheckboxLabeledWithSlider("PO.InspectGizmoGrid".Translate(), "PO.RefreshRate", ref GetGizmosCacheActive, ref GetGizmosRefreshRate);
-            cacheSettings.CheckboxLabeledWithSlider("PO.FindAllowedDesignator".Translate(), "PO.RefreshRate", ref FindAllowedDesignatorCacheActive, ref FindAllowedDesignatorRefreshRate);
-            cacheSettings.CheckboxLabeledWithSlider("PO.CheckCurrentToilEndOrFail".Translate(), "PO.ThrottleRate", ref CheckCurrentToilEndOrFailThrottleActive, ref CheckCurrentToilEndOrFailThrottleRate);
-            cacheSettings.CheckboxLabeledWithSlider("PO.DetermineNextConstantThinkTreeJob".Translate(), "PO.ThrottleRate", ref DetermineNextConstantThinkTreeJobThrottleActive, ref DetermineNextConstantThinkTreeJobThrottleRate);
-            cacheSettings.CheckboxLabeledWithSlider("PO.JobGiver_ConfigurableHostilityResponse".Translate(), "PO.ThrottleRate", ref JobGiver_ConfigurableHostilityResponseThrottleActive, 
-                ref JobGiver_ConfigurableHostilityResponseThrottleRate);
-            cacheSettings.CheckboxLabeledWithSlider("PO.PawnCollisionPosOffsetFor".Translate(), "PO.RefreshRate", ref PawnCollisionPosOffsetForCacheActive, ref PawnCollisionPosOffsetForRefreshRate);
-            cacheSettings.CheckboxLabeledWithSlider("PO.PawnLabel".Translate(), "PO.RefreshRate", ref PawnLabelCacheActive, ref PawnLabelRefreshRate);
-            cacheSettings.CheckboxLabeledWithSlider("PO.PawnDrawPos".Translate(), "PO.RefreshRate", ref PawnDrawPosCacheActive, ref PawnDrawPosRefreshRate);
 
             cacheSection.EndSection(cacheSettings);
             cacheSection.End();

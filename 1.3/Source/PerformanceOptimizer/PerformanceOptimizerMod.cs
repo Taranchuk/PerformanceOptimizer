@@ -78,22 +78,10 @@ namespace PerformanceOptimizer
             ComponentCache.cachedGameComps.Clear();
             CompsOfType<Map>.mapCompsByMap.Clear();
 
-            Patch_InspectGizmoGrid_DrawInspectGizmoGridFor.cachedResults.Clear();
-            PawnCollisionPosOffsetFor.cachedResults.Clear();
-            Patch_BuildCopyCommandUtility_FindAllowedDesignator.cachedResults.Clear();
-            Patch_Thing_AmbientTemperature.cachedResults.Clear();
-            Patch_IdeoUtility_GetStyleDominance.cachedResults.Clear();
-            Patch_Need_Beauty_CurrentInstantBeauty.cachedResults.Clear();
-            Patch_MentalBreaker_BreakThresholdExtreme.cachedResults.Clear();
-            Patch_MentalBreaker_BreakThresholdMajor.cachedResults.Clear();
-            Patch_MentalBreaker_BreakThresholdMinor.cachedResults.Clear();
-            Patch_ThoughtHandler_TotalMoodOffset.cachedResults.Clear();
-            Patch_PawnUtility_IsTeetotaler.cachedResults.Clear();
-            Patch_QuestUtility_IsQuestLodger.cachedResults.Clear();
-            Patch_ExpectationsUtility_CurrentExpectationForPawn.cachedResults.Clear();
-            Patch_ExpectationsUtility_CurrentExpectationFor_Map.cachedResults.Clear();
-            Patch_JobDriver_CheckCurrentToilEndOrFail.cachedResults.Clear();
-            Patch_Faction_FactionOfPlayer.cachedResult = null;
+            foreach (var optimization in PerformanceOptimizerSettings.optimizations)
+            {
+                optimization.Clear();
+            }
         }
 
         public static KeyPrefsData keyPrefsData;
@@ -138,7 +126,6 @@ namespace PerformanceOptimizer
                 optimization.Apply();
             }
 
-            CachingPatches.DoPatches();
             if (PerformanceOptimizerSettings.fasterGetCompReplacement)
             {
                 GetCompPatches.DoPatchesAsync();

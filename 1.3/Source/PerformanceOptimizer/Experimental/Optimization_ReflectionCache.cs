@@ -13,35 +13,30 @@ using Verse;
 
 namespace PerformanceOptimizer
 {
-    [StaticConstructorOnStartup]
-    public static class ReflectionCache
+    public class Optimization_ReflectionCache : Optimization
     {
         public static Dictionary<object, Traverse> createdTraverses = new Dictionary<object, Traverse>();
         public static Dictionary<Traverse, Dictionary<string, Traverse>> fields = new Dictionary<Traverse, Dictionary<string, Traverse>>();
         public static Dictionary<Traverse, object> fieldValues = new Dictionary<Traverse, object>();
         public static Dictionary<object, Dictionary<object, object>> objectValues = new Dictionary<object, Dictionary<object, object>>();
-
-        static ReflectionCache()
+        public override OptimizationType OptimizationType => OptimizationType.Cache;
+        public override string Name => "PO.".Translate();
+        public override void DoPatches()
         {
-            if (PerformanceOptimizerSettings.CacheTraverseReflections)
-            {
-                PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(Traverse), "Create", new Type[] { typeof(object) }),
-                    new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseCreatePrefix))),
-                    new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseCreatePostfix))));
+            base.DoPatches();
 
-                var fieldMethod = AccessTools.FirstMethod(typeof(Traverse), (MethodInfo mi) => mi.Name == "Field" && !mi.IsGenericMethod && mi.GetParameters().Count() == 1);
-                PerformanceOptimizerMod.harmony.Patch(fieldMethod,
-                    new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseFieldPrefix))),
-                    new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseFieldPostfix))));
+            Patch(AccessTools.Method(typeof(Traverse), "Create", new Type[] { typeof(object) }), GetMethod(nameof(TraverseCreatePrefix)), GetMethod(nameof(TraverseCreatePostfix)));
 
-                // TODO: look into replacing with actual field reference access. GetValue cache is buggy, it doesn't track changed values
+            var fieldMethod = AccessTools.FirstMethod(typeof(Traverse), (MethodInfo mi) => mi.Name == "Field" && !mi.IsGenericMethod && mi.GetParameters().Count() == 1);
+            Patch(fieldMethod, GetMethod(nameof(TraverseFieldPrefix)), GetMethod(nameof(TraverseFieldPostfix)));
 
-                //var getValueMethod = AccessTools.FirstMethod(typeof(Traverse), (MethodInfo mi) => mi.Name == "GetValue" && !mi.IsGenericMethod && mi.GetParameters().Count() == 0 
-                //    && mi.ReturnType == typeof(object));
-                //PerformanceOptimizerMod.harmony.Patch(getValueMethod,
-                //    new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseGetValuePrefix))),
-                //    new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseGetValuePostfix))));
-            }
+            // TODO: look into replacing with actual field reference access. GetValue cache is buggy, it doesn't track changed values
+
+            //var getValueMethod = AccessTools.FirstMethod(typeof(Traverse), (MethodInfo mi) => mi.Name == "GetValue" && !mi.IsGenericMethod && mi.GetParameters().Count() == 0 
+            //    && mi.ReturnType == typeof(object));
+            //PerformanceOptimizerMod.harmony.Patch(getValueMethod,
+            //    new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseGetValuePrefix))),
+            //    new HarmonyMethod(AccessTools.Method(typeof(ReflectionCache), nameof(TraverseGetValuePostfix))));
         }
 
         //[HarmonyPatch(typeof(Pawn), nameof(Pawn.Tick))]
@@ -139,6 +134,11 @@ namespace PerformanceOptimizer
                     Log.Message("VALUE: " + value);
                 }
             }
+        }
+
+        public override void Clear()
+        {
+
         }
     }
 }

@@ -49,9 +49,8 @@
   <ItemGroup>
     <Compile Include="CachedValueTick.cs" />
     <Compile Include="CachedValueUpdate.cs" />
-    <Compile Include="CachingPatches.cs" />
     <Compile Include="ComponentCache.cs" />
-    <Compile Include="Experimental\ReflectionCache.cs" />
+    <Compile Include="Experimental\Optimization_ReflectionCache.cs" />
     <Compile Include="GameLoad_Patches.cs" />
     <Compile Include="ModCompatUtility.cs" />
     <Compile Include="PerformanceOptimizerMod.cs" />
@@ -60,10 +59,32 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Logging.cs" />
     <Compile Include="Misc_Patches.cs" />
-    <Compile Include="Rework\Optimization.cs" />
+    <Compile Include="Rework\Bases\Optimization.cs" />
+    <Compile Include="Rework\Optimization_BuildCopyCommandUtility_FindAllowedDesignator.cs" />
     <Compile Include="Rework\Optimization_DoorRotationAt.cs" />
-    <Compile Include="Rework\OptimizationType.cs" />
-    <Compile Include="Rework\Optimization_RefreshRate.cs" />
+    <Compile Include="Rework\Bases\OptimizationType.cs" />
+    <Compile Include="Rework\Optimization_ExpectationsUtility_CurrentExpectationForPawn.cs" />
+    <Compile Include="Rework\Optimization_ExpectationsUtility_CurrentExpectationFor_Map.cs" />
+    <Compile Include="Rework\Optimization_Faction_FactionOfPlayer.cs" />
+    <Compile Include="Rework\Optimization_IdeoUtility_GetStyleDominance.cs" />
+    <Compile Include="Rework\Optimization_InspectGizmoGrid_DrawInspectGizmoGridFor.cs" />
+    <Compile Include="Rework\Optimization_JobDriver_CheckCurrentToilEndOrFail.cs" />
+    <Compile Include="Rework\Optimization_JobGiver_ConfigurableHostilityResponse.cs" />
+    <Compile Include="Rework\Optimization_MentalBreaker_BreakThresholdExtreme.cs" />
+    <Compile Include="Rework\Optimization_MentalBreaker_BreakThresholdMajor.cs" />
+    <Compile Include="Rework\Optimization_MentalBreaker_BreakThresholdMinor.cs" />
+    <Compile Include="Rework\Optimization_Need_Beauty_CurrentInstantBeauty.cs" />
+    <Compile Include="Rework\Optimization_PawnCollisionPosOffsetFor.cs" />
+    <Compile Include="Rework\Optimization_PawnUtility_IsTeetotaler.cs" />
+    <Compile Include="Rework\Optimization_Pawn_DrawPos.cs" />
+    <Compile Include="Rework\Optimization_Pawn_JobTracker_DetermineNextConstantThinkTreeJob.cs" />
+    <Compile Include="Rework\Optimization_QuestUtility_IsQuestLodger.cs" />
+    <Compile Include="Rework\Bases\Optimization_RefreshRate.cs" />
+    <Compile Include="Rework\Optimization_StatWorker_MarketValue_CalculableRecipe.cs" />
+    <Compile Include="Rework\Optimization_Text_CalcSize.cs" />
+    <Compile Include="Rework\Optimization_Pawn_LabelCache.cs" />
+    <Compile Include="Rework\Optimization_Thing_AmbientTemperature.cs" />
+    <Compile Include="Rework\Optimization_ThoughtHandler_TotalMoodOffset.cs" />
     <Compile Include="SettingsHelper.cs" />
     <Compile Include="UIPatches.cs" />
   </ItemGroup>

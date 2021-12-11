@@ -75,5 +75,10 @@ namespace PerformanceOptimizer
                 cachedResults[curDoor].SetValue(__result, refreshRateStatic);
             }
         }
+
+        public override void Clear()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

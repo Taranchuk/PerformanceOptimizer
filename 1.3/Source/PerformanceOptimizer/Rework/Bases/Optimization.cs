@@ -7,6 +7,11 @@ using Verse;
 
 namespace PerformanceOptimizer
 {
+    public struct CacheData
+    {
+        public int key;
+        public bool state;
+    }
     public abstract class Optimization : IExposable
     {
         public List<MethodBase> originals;
@@ -27,6 +32,8 @@ namespace PerformanceOptimizer
         {
             enabled = EnabledByDefault;
         }
+
+        public abstract void Clear();
         public void Apply()
         {
             if (!enabled && patches != null && patches.Any())
@@ -49,8 +56,13 @@ namespace PerformanceOptimizer
         public void Patch(Type type, string methodName, MethodInfo prefix = null, MethodInfo postfix = null, MethodInfo transpiler = null)
         {
             var originalMethod = AccessTools.Method(type, methodName);
-            var patch = PerformanceOptimizerMod.harmony.Patch(originalMethod, prefix != null ? new HarmonyMethod(prefix) : null, postfix != null ? new HarmonyMethod(postfix) : null, transpiler != null ? new HarmonyMethod(transpiler) : null);
-            originals.Add(originalMethod);
+            Patch(originalMethod, prefix, postfix, transpiler);
+        }
+
+        public void Patch(MethodInfo methodInfo, MethodInfo prefix = null, MethodInfo postfix = null, MethodInfo transpiler = null)
+        {
+            var patch = PerformanceOptimizerMod.harmony.Patch(methodInfo, prefix != null ? new HarmonyMethod(prefix) : null, postfix != null ? new HarmonyMethod(postfix) : null, transpiler != null ? new HarmonyMethod(transpiler) : null);
+            originals.Add(methodInfo);
             patches.Add(patch);
         }
 

@@ -9,7 +9,7 @@ namespace PerformanceOptimizer
             base.Reset();
             refreshRateStatic = refreshRate = RefreshRateByDefault;
         }
-        public virtual int RefreshRateByDefault => 0;
+        public abstract int RefreshRateByDefault { get; }
 
         public int refreshRate;
 
