@@ -2,7 +2,7 @@
 {
     public enum OptimizationType
     {
-        Cache,
+        Optimization,
         CacheWithRefreshRate,
         Throttle,
         UITweak,

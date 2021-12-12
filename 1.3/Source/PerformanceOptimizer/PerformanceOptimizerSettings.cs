@@ -1,13 +1,8 @@
 ﻿using RimWorld;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Assertions;
 using Verse;
-using static Verse.TKeySystem;
 
 namespace PerformanceOptimizer
 {
@@ -19,27 +14,15 @@ namespace PerformanceOptimizer
     public class PerformanceOptimizerSettings : ModSettings
     {
         public static List<Optimization> optimizations;
-
         public static bool hideResourceReadout = true;
         public static bool hideBottomButtonBar = true;
         public static bool hideBottomRightOverlayButtons = true;
         public static bool minimizeAlertsReadout = true;
         public static bool hideSpeedButtons = true;
         public static bool disableSpeedButtons = false;
-        public static bool cacheFindAllowedDesignator = true;
-
-        public static bool fasterGetCompReplacement = true;
-        public static bool disableSteamManagerCallbacksChecks = true;
-        public static bool disablePlantSwayShaderUpdateIfSwayDisabled = true;
-        public static bool disableSoundsCompletely = false;
-
-        public static bool disableReportProbablyMissingAttributes = true;
-        public static bool disableLogHarmonyPatchIssueErrors = true;
-        public static bool cacheCustomDataLoadMethodOf = true;
-        public static bool cacheHasGenericDefinition = true;
-        public static bool fixCheckForDuplicateNodes = true;
-
         public static bool overviewLetterSent;
+        public static bool UIToggleOn = true;
+        public static bool OneKeyMode = true;
         public static bool UITogglePressed
         {
             get
@@ -51,9 +34,8 @@ namespace PerformanceOptimizer
                 return Input.GetKey(PerformanceOptimizerMod.keyPrefsData.GetBoundKeyCode(PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.A)) 
                     && Input.GetKeyDown(PerformanceOptimizerMod.keyPrefsData.GetBoundKeyCode(PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.B));
             }
-        }            
-        public static bool UIToggleOn = true;
-        public static bool OneKeyMode = true;
+        }
+
         public override void ExposeData()
         {
             base.ExposeData();
@@ -66,28 +48,25 @@ namespace PerformanceOptimizer
             Scribe_Values.Look(ref minimizeAlertsReadout, "minimizeAlertsReadout", true);
             Scribe_Values.Look(ref hideSpeedButtons, "hideSpeedButtons", true);
             Scribe_Values.Look(ref disableSpeedButtons, "disableSpeedButtons", false);
-            Scribe_Values.Look(ref cacheFindAllowedDesignator, "cacheFindAllowedDesignator", true);
 
-            Scribe_Values.Look(ref fasterGetCompReplacement, "fasterGetCompReplacement", true);
-            Scribe_Values.Look(ref disableSteamManagerCallbacksChecks, "disableSteamManagerCallbacksChecks", true);
-            Scribe_Values.Look(ref disablePlantSwayShaderUpdateIfSwayDisabled, "disablePlantSwayShaderUpdateIfSwayDisabled", true);
-            Scribe_Values.Look(ref disableSoundsCompletely, "disableSoundsCompletely", false);
-            Scribe_Values.Look(ref fixCheckForDuplicateNodes, "fixCheckForDuplicateNodes", true);
-
+            Log_Error_Patch.suppressErrorMessages = true;
             Scribe_Collections.Look(ref optimizations, "optimizations", LookMode.Deep);
+            Log_Error_Patch.suppressErrorMessages = false;
         }
 
         public void DoSettingsWindowContents(Rect inRect)
         {
             Find.WindowStack.currentlyDrawnWindow.absorbInputAroundWindow = false;
             var uiTweaks = optimizations.Where(x => x.OptimizationType == OptimizationType.UITweak).ToList();
-            var performanceTweaks = optimizations.Where(x => x.OptimizationType == OptimizationType.Cache).ToList();
-            var miscTweaks = optimizations.Where(x => x.OptimizationType == OptimizationType.Misc).ToList();
+            var performanceTweaks = optimizations.Where(x => x.OptimizationType == OptimizationType.Optimization);
+            var miscTweaks = optimizations.Where(x => x.OptimizationType == OptimizationType.Misc);
+            var tweaks = performanceTweaks.Concat(miscTweaks).ToList();
+
             var throttles = optimizations.Where(x => x.OptimizationType == OptimizationType.Throttle 
                 || x.OptimizationType == OptimizationType.CacheWithRefreshRate).Cast<Optimization_RefreshRate>().ToList();
 
-            var sectionHeightSize = (9 * 24) + 8 + 30;
-            var cacheSettingsHeight = (19 * 24) + 8 + 30 + 24;
+            var sectionHeightSize = (tweaks.Count * 24) + 8 + 30;
+            var cacheSettingsHeight = (throttles.Count * 24) + 8 + 30 + 24;
             var totalHeight = sectionHeightSize + cacheSettingsHeight + 50;
 
             Rect rect = new Rect(inRect.x, inRect.y, inRect.width, inRect.height - 20);
@@ -154,36 +133,17 @@ namespace PerformanceOptimizer
 
             if (miscSettings.ButtonTextLabeled("PO.PerformanceSettings".Translate(), "Reset".Translate()))
             {
-                fasterGetCompReplacement = true;
-                cacheFindAllowedDesignator = true;
-                disableSteamManagerCallbacksChecks = true;
-                disablePlantSwayShaderUpdateIfSwayDisabled = true;
-                disableSoundsCompletely = false;
-                fixCheckForDuplicateNodes = true;
-                foreach (var performanceTweak in performanceTweaks)
+                foreach (var tweak in tweaks)
                 {
-                    performanceTweak.Reset();
+                    tweak.Reset();
                 }
             }
 
             miscSettings.GapLine(8);
-            miscSettings.CheckboxLabeled("PO.FasterGetCompReplacement".Translate(), ref fasterGetCompReplacement);
-
-            foreach (var tweak in performanceTweaks)
+            foreach (var tweak in tweaks)
             {
                 miscSettings.CheckboxLabeled(tweak.Name, ref tweak.enabled);
             }
-
-            foreach (var tweak in miscTweaks)
-            {
-                miscSettings.CheckboxLabeled(tweak.Name, ref tweak.enabled);
-            }
-
-            miscSettings.CheckboxLabeled("PO.DisableSteamManagerCallbacksChecks".Translate(), ref disableSteamManagerCallbacksChecks);
-            miscSettings.CheckboxLabeled("PO.DisablePlantSwayShaderUpdateIfSwayDisabled".Translate(), ref disablePlantSwayShaderUpdateIfSwayDisabled);
-            miscSettings.CheckboxLabeled("PO.DisableSoundsCompletely".Translate(), ref disableSoundsCompletely);
-            miscSettings.CheckboxLabeled("PO.FixCheckForDuplicateNodes".Translate(), ref fixCheckForDuplicateNodes);
-
             miscSettingsSection.EndSection(miscSettings);
             miscSettingsSection.End();
 

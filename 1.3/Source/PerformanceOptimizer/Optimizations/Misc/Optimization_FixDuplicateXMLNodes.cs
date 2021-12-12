@@ -9,25 +9,20 @@ using System.Xml;
 using Verse;
 using Verse.Sound;
 using Verse.Steam;
-using static UnityEngine.GraphicsBuffer;
 using static Verse.XmlInheritance;
 
 namespace PerformanceOptimizer
 {
-    public static class GameLoad_Patches
+    public class Optimization_FixDuplicateXMLNodes : Optimization
     {
-        public static void DoPatches()
+        public override OptimizationType OptimizationType => OptimizationType.Misc;
+        public override string Name => "PO.FixCheckForDuplicateNodes".Translate();
+        public override void DoPatches()
         {
-            if (PerformanceOptimizerSettings.fixCheckForDuplicateNodes)
-            {
-                PerformanceOptimizerMod.harmony.Patch(AccessTools.Method(typeof(XmlInheritance), "CheckForDuplicateNodes"),
-                    new HarmonyMethod(typeof(Patch_CheckForDuplicateNodes), nameof(Patch_CheckForDuplicateNodes.Prefix)));
-            }
+            base.DoPatches();
+            Patch(typeof(XmlInheritance), "CheckForDuplicateNodes", GetMethod(nameof(Prefix)));
         }
-    }
 
-    public static class Patch_CheckForDuplicateNodes
-    {
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(XmlNode node, XmlNode root)
         {
@@ -89,6 +84,10 @@ namespace PerformanceOptimizer
                 }
             }
             return null;
+        }
+
+        public override void Clear()
+        {
         }
     }
 }

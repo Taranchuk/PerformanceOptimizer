@@ -33,7 +33,10 @@ namespace PerformanceOptimizer
             enabled = EnabledByDefault;
         }
 
-        public abstract void Clear();
+        public virtual void Clear()
+        {
+
+        }
         public void Apply()
         {
             if (!enabled && patches != null && patches.Any())
@@ -48,7 +51,6 @@ namespace PerformanceOptimizer
 
         public virtual void DoPatches()
         {
-            Log.Message("Patching it: " + GetType());
             originals ??= new List<MethodBase>();
             patches ??= new List<MethodInfo>();
         }
@@ -62,13 +64,14 @@ namespace PerformanceOptimizer
         public void Patch(MethodInfo methodInfo, MethodInfo prefix = null, MethodInfo postfix = null, MethodInfo transpiler = null)
         {
             var patch = PerformanceOptimizerMod.harmony.Patch(methodInfo, prefix != null ? new HarmonyMethod(prefix) : null, postfix != null ? new HarmonyMethod(postfix) : null, transpiler != null ? new HarmonyMethod(transpiler) : null);
+            //Log.Message(this.GetType() +  " - Patching " + methodInfo.FullDescription());
+            //Log.ResetMessageCount();
             originals.Add(methodInfo);
             patches.Add(patch);
         }
 
         public void UnPatchAll()
         {
-            Log.Message("Unpatching it: " + GetType());
             if (originals != null)
             {
                 for (var i = 0; i < originals.Count; i++)
@@ -76,6 +79,8 @@ namespace PerformanceOptimizer
                     var original = originals[i];
                     var patch = patches[i];
                     PerformanceOptimizerMod.harmony.Unpatch(original, patch);
+                    //Log.Message(this.GetType() +  " - unpatching " + original.FullDescription());
+                    //Log.ResetMessageCount();
                 }
             }
             originals.Clear();

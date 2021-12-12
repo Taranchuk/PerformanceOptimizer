@@ -7,7 +7,7 @@ namespace PerformanceOptimizer
 {
     public class Optimization_Faction_FactionOfPlayer : Optimization
     {
-        public override OptimizationType OptimizationType => OptimizationType.Cache;
+        public override OptimizationType OptimizationType => OptimizationType.Optimization;
         public override string Name => "PO.CacheFactionOfPlayer".Translate();
         public override void DoPatches()
         {

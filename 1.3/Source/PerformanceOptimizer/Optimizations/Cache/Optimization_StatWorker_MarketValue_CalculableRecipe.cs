@@ -8,7 +8,7 @@ namespace PerformanceOptimizer
 {
     public class Optimization_StatWorker_MarketValue_CalculableRecipe : Optimization
     {
-        public override OptimizationType OptimizationType => OptimizationType.Cache;
+        public override OptimizationType OptimizationType => OptimizationType.Optimization;
         public override string Name => "PO.CacheStatWorker_MarketValue".Translate();
         public override void DoPatches()
         {

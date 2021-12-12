@@ -19,7 +19,7 @@ namespace PerformanceOptimizer
         public static Dictionary<Traverse, Dictionary<string, Traverse>> fields = new Dictionary<Traverse, Dictionary<string, Traverse>>();
         public static Dictionary<Traverse, object> fieldValues = new Dictionary<Traverse, object>();
         public static Dictionary<object, Dictionary<object, object>> objectValues = new Dictionary<object, Dictionary<object, object>>();
-        public override OptimizationType OptimizationType => OptimizationType.Cache;
+        public override OptimizationType OptimizationType => OptimizationType.Optimization;
         public override string Name => "PO.CacheTraverseReflections".Translate();
         public override void DoPatches()
         {

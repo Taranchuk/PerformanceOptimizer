@@ -30,7 +30,6 @@ namespace PerformanceOptimizer
         public PerformanceOptimizerMod(ModContentPack mod) : base(mod)
         {
             harmony = new Harmony("PerformanceOptimizer.Main");
-            GameLoad_Patches.DoPatches();
             harmony.PatchAll();
             var hooks = new List<MethodInfo>
             {
@@ -110,6 +109,8 @@ namespace PerformanceOptimizer
             PerformanceOptimizerMod.DubsPerformanceAnalyzerLoaded = ModLister.AllInstalledMods.Any(x => x.Active && x.Name.Contains("Dubs Performance Analyzer"));
             
             PerformanceOptimizerSettings.optimizations ??= new List<Optimization>();
+            PerformanceOptimizerSettings.optimizations.RemoveAll(x => x is null);
+
             var optimizationTypes = GenTypes.AllSubclassesNonAbstract(typeof(Optimization));
             foreach (var optimizationType in optimizationTypes)
             {
@@ -125,11 +126,20 @@ namespace PerformanceOptimizer
             {
                 optimization.Apply();
             }
+        }
+    }
 
-            if (PerformanceOptimizerSettings.fasterGetCompReplacement)
+    [HarmonyPatch(typeof(Log), nameof(Log.Error), new Type[] {typeof(string) })]
+    public static class Log_Error_Patch
+    {
+        public static bool suppressErrorMessages;
+        public static bool Prefix()
+        {
+            if (suppressErrorMessages)
             {
-                GetCompPatches.DoPatchesAsync();
+                return false;
             }
+            return true;
         }
     }
 }

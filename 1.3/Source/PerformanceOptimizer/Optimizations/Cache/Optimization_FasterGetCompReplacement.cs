@@ -15,8 +15,16 @@ using Verse;
 
 namespace PerformanceOptimizer
 {
-    public static class GetCompPatches
+    public class Optimization_FasterGetCompReplacement : Optimization
     {
+        public List<MethodInfo> methodsCallingMapGetComp;
+        public List<MethodInfo> methodsCallingWorldGetComp;
+        public List<MethodInfo> methodsCallingGameGetComp;
+        public List<MethodInfo> methodsCallingThingGetComp;
+        public List<MethodInfo> methodsCallingThingTryGetComp;
+        public List<MethodInfo> methodsCallingHediffTryGetComp;
+        public List<MethodInfo> methodsCallingWorldObjectGetComp;
+
         public static HashSet<string> assembliesToSkip = new HashSet<string>
         {
             "System", "Cecil", "Multiplayer", "Prepatcher", "HeavyMelee", "0Harmony", "UnityEngine", "mscorlib", "ICSharpCode", "Newtonsoft", "TranspilerExplorer"
@@ -44,7 +52,7 @@ namespace PerformanceOptimizer
             return types;
         }
 
-        public static List<MethodInfo> GetMethodsToParse(this Type type)
+        public static List<MethodInfo> GetMethodsToParse(Type type)
         {
             List<MethodInfo> methods = new List<MethodInfo>();
             foreach (var method in AccessTools.GetDeclaredMethods(type))
@@ -138,64 +146,6 @@ namespace PerformanceOptimizer
             }
             catch { }
         }
-        public static async void DoPatchesAsync()
-        {
-            var methodsCallingMapGetComp = new List<MethodInfo>();
-            var methodsCallingWorldGetComp = new List<MethodInfo>();
-            var methodsCallingGameGetComp = new List<MethodInfo>();
-            var methodsCallingThingGetComp = new List<MethodInfo>();
-            var methodsCallingThingTryGetComp = new List<MethodInfo>();
-            var methodsCallingHediffTryGetComp = new List<MethodInfo>();
-            var methodsCallingWorldObjectGetComp = new List<MethodInfo>();
-            var methodsToParse = new HashSet<MethodInfo>();
-            await Task.Run(() => 
-            {
-                try
-                {
-                    var types = GetTypesToParse();
-                    foreach (var type in types)
-                    {
-                        foreach (var method in type.GetMethodsToParse())
-                        {
-                            methodsToParse.Add(method);
-                        }
-                    }
-                    foreach (var method in methodsToParse)
-                    {
-                        ParseMethod(method, methodsCallingMapGetComp, methodsCallingWorldGetComp, methodsCallingGameGetComp, methodsCallingThingGetComp,
-                            methodsCallingThingTryGetComp, methodsCallingHediffTryGetComp, methodsCallingWorldObjectGetComp);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("Exception in Performance Optimizer: " + ex);
-                }
-            });
-            Patch(methodsCallingMapGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetMapCompTranspiler))));
-            Patch(methodsCallingWorldGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetWorldCompTranspiler))));
-            Patch(methodsCallingGameGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetGameCompTranspiler))));
-            Patch(methodsCallingWorldObjectGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetWorldObjectCompTranspiler))));
-            Patch(methodsCallingThingGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.GetThingCompTranspiler))));
-            Patch(methodsCallingThingTryGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.TryGetThingCompTranspiler))));
-            Patch(methodsCallingHediffTryGetComp, new HarmonyMethod(AccessTools.Method(typeof(GetCompPatches), nameof(GetCompPatches.TryGetHediffCompTranspiler))));
-        }
-
-        private static int patchedMethodsCount = 0;
-        private static void Patch(List<MethodInfo> methodsToPatch, HarmonyMethod transpiler)
-        {
-            foreach (var method in methodsToPatch)
-            {
-                try
-                {
-                    PerformanceOptimizerMod.harmony.Patch(method, transpiler: transpiler);
-                    patchedMethodsCount++;
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.GetType() + " - Error in transpiling: " + method.FullDescription() + ", type: " + method.DeclaringType + ", exception: " + ex + " - InnerException: " + ex.InnerException);
-                }
-            }
-        }
 
         public static MethodInfo genericMapGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetMapComponentDict));
         private static IEnumerable<CodeInstruction> GetMapCompTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase source, ILGenerator il)
@@ -234,11 +184,93 @@ namespace PerformanceOptimizer
         }
 
         public static MethodInfo genericWorldObjectGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetWorldObjectCompFast));
+
+        public override OptimizationType OptimizationType => OptimizationType.Optimization;
+
+        public override string Name => "PO.FasterGetCompReplacement".Translate();
+
+        public override void DoPatches()
+        {
+            base.DoPatches();
+            Patch(typeof(ThingWithComps), "InitializeComps", postfix: GetMethod(nameof(InitializeCompsPostfix)));
+            bool parse = false;
+            if (methodsCallingMapGetComp is null)
+            {
+                methodsCallingMapGetComp = new List<MethodInfo>();
+                methodsCallingWorldGetComp = new List<MethodInfo>();
+                methodsCallingGameGetComp = new List<MethodInfo>();
+                methodsCallingThingGetComp = new List<MethodInfo>();
+                methodsCallingThingTryGetComp = new List<MethodInfo>();
+                methodsCallingHediffTryGetComp = new List<MethodInfo>();
+                methodsCallingWorldObjectGetComp = new List<MethodInfo>();
+                parse = true;
+            }
+            DoPatchesAsync(parse);
+        }
+        public async void DoPatchesAsync(bool parse)
+        {
+            if (parse)
+            {
+                var methodsToParse = new HashSet<MethodInfo>();
+                await Task.Run(() =>
+                {
+                    try
+                    {
+                        var types = GetTypesToParse();
+                        foreach (var type in types)
+                        {
+                            foreach (var method in GetMethodsToParse(type))
+                            {
+                                methodsToParse.Add(method);
+                            }
+                        }
+                        foreach (var method in methodsToParse)
+                        {
+                            ParseMethod(method, methodsCallingMapGetComp, methodsCallingWorldGetComp, methodsCallingGameGetComp, methodsCallingThingGetComp,
+                                methodsCallingThingTryGetComp, methodsCallingHediffTryGetComp, methodsCallingWorldObjectGetComp);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error("Exception in Performance Optimizer: " + ex);
+                    }
+                });
+            }
+
+            foreach (var method in methodsCallingGameGetComp)
+            {
+                Patch(method, transpiler: GetMethod(nameof(Optimization_FasterGetCompReplacement.GetGameCompTranspiler)));
+            }
+            foreach (var method in methodsCallingWorldGetComp)
+            {
+                Patch(method, transpiler: GetMethod(nameof(Optimization_FasterGetCompReplacement.GetWorldCompTranspiler)));
+            }
+            foreach (var method in methodsCallingWorldObjectGetComp)
+            {
+                Patch(method, transpiler: GetMethod(nameof(Optimization_FasterGetCompReplacement.GetWorldObjectCompTranspiler)));
+            }
+            foreach (var method in methodsCallingMapGetComp)
+            {
+                Patch(method, transpiler: GetMethod(nameof(Optimization_FasterGetCompReplacement.GetMapCompTranspiler)));
+            }
+            foreach (var method in methodsCallingThingGetComp)
+            {
+                Patch(method, transpiler: GetMethod(nameof(Optimization_FasterGetCompReplacement.GetThingCompTranspiler)));
+            }
+            foreach (var method in methodsCallingThingTryGetComp)
+            {
+                Patch(method, transpiler: GetMethod(nameof(Optimization_FasterGetCompReplacement.TryGetThingCompTranspiler)));
+            }
+            foreach (var method in methodsCallingHediffTryGetComp)
+            {
+                Patch(method, transpiler: GetMethod(nameof(Optimization_FasterGetCompReplacement.TryGetHediffCompTranspiler)));
+            }
+        }
         private static IEnumerable<CodeInstruction> GetWorldObjectCompTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase source, ILGenerator il)
         {
             return PerformTranspiler("GetComponent", typeof(WorldObjectComp), genericWorldObjectGetComp, OpCodes.Callvirt, 0, instructions, source, il);
         }
-        public static bool CallsComponent(this CodeInstruction codeInstruction, OpCode opcode, string methodName, Type baseCompType, int parameterLength, out Type curType)
+        public static bool CallsComponent(CodeInstruction codeInstruction, OpCode opcode, string methodName, Type baseCompType, int parameterLength, out Type curType)
         {
             if (codeInstruction.opcode == opcode && codeInstruction.operand is MethodInfo mi && mi.Name == methodName && mi.IsGenericMethod && mi.GetParameters().Length == parameterLength)
             {
@@ -259,7 +291,7 @@ namespace PerformanceOptimizer
             for (var i = 0; i < codes.Count; i++)
             {
                 var instr = codes[i];
-                if (instr.CallsComponent(opcode, methodName, baseType, parameterLength, out Type type))
+                if (CallsComponent(instr, opcode, methodName, baseType, parameterLength, out Type type))
                 {
                     var methodToReplace = genericMethod.MakeGenericMethod(new Type[] { type });
                     instr.opcode = OpCodes.Call;
@@ -269,26 +301,23 @@ namespace PerformanceOptimizer
             }
         }
 
-        [HarmonyPatch(typeof(ThingWithComps), "InitializeComps")]
-        public static class Thing_InitializeComps_Patch
+        public static void InitializeCompsPostfix(ThingWithComps __instance)
         {
-            public static void Postfix(ThingWithComps __instance)
+            if (__instance.comps != null && __instance.def.plant is null && !__instance.def.saveCompressible && __instance.comps.Count > 1)
             {
-                if (__instance.comps != null && __instance.def.plant is null && !__instance.def.saveCompressible && __instance.comps.Count > 1)
+                __instance.comps = __instance.comps.OrderBy(delegate (ThingComp x)
                 {
-                    __instance.comps = __instance.comps.OrderBy(delegate (ThingComp x)
+                    var index = mostCalledComps.FirstIndexOf(y => y == x.GetType().ToString());
+                    if (index == -1)
                     {
-                        var index = mostCalledComps.FirstIndexOf(y => y == x.GetType().ToString());
-                        if (index == -1)
-                        {
-                            return 99999;
-                        }
-                        return index;
-                    }).ToList();
-                }
+                        return 99999;
+                    }
+                    return index;
+                }).ToList();
             }
-        
-            public static List<string> mostCalledComps = new List<string>
+        }
+
+        public static List<string> mostCalledComps = new List<string>
             {
                 "RimWorld.CompQuality",
                 "Verse.CompAttachBase",
@@ -330,6 +359,176 @@ namespace PerformanceOptimizer
                 "RimWorld.CompTransporter",
                 "DubsBadHygiene.CompBlockage",
             };
+    }
+
+    public static class CompsOfType<T>
+    {
+        public static Dictionary<Map, T> mapCompsByMap = new Dictionary<Map, T>();
+    }
+
+    [StaticConstructorOnStartup]
+    public static class ComponentCache
+    {
+        //private static Stopwatch dictStopwatch = new Stopwatch();
+
+        //public static Dictionary<Type, int> calledStats = new Dictionary<Type, int>();
+        //private static void RegisterComp(Type type)
+        //{
+        //	if (calledStats.ContainsKey(type))
+        //    {
+        //		calledStats[type]++;
+        //	}
+        //	else
+        //    {
+        //		calledStats[type] = 1;
+        //	}
+        //}
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T GetThingCompFast<T>(this ThingWithComps thingWithComps) where T : ThingComp
+        {
+            //dictStopwatch.Restart();
+            if (thingWithComps.comps == null)
+            {
+                //dictStopwatch.LogTime("Dict approach: ");
+                return null;
+            }
+            for (int i = 0; i < thingWithComps.comps.Count; i++)
+            {
+                if (thingWithComps.comps[i].GetType() == typeof(T))
+                {
+                    //RegisterComp(thingWithComps.comps[i].GetType());
+                    //dictStopwatch.LogTime("Dict approach: ");
+                    return thingWithComps.comps[i] as T;
+                }
+            }
+
+            for (int i = 0; i < thingWithComps.comps.Count; i++)
+            {
+                T val = thingWithComps.comps[i] as T;
+                if (val != null)
+                {
+                    //dictStopwatch.LogTime("Dict approach: ");
+                    return val;
+                }
+            }
+
+            //dictStopwatch.LogTime("Dict approach: ");
+            return null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T GetWorldObjectCompFast<T>(this WorldObject worldObject) where T : WorldObjectComp
+        {
+            //dictStopwatch.Restart();
+            if (worldObject.comps == null)
+            {
+                //dictStopwatch.LogTime("Dict approach: ");
+                return null;
+            }
+            for (int i = 0; i < worldObject.comps.Count; i++)
+            {
+                if (worldObject.comps[i].GetType() == typeof(T))
+                {
+                    //RegisterComp(thingWithComps.comps[i].GetType());
+                    //dictStopwatch.LogTime("Dict approach: ");
+                    return worldObject.comps[i] as T;
+                }
+            }
+
+            for (int i = 0; i < worldObject.comps.Count; i++)
+            {
+                T val = worldObject.comps[i] as T;
+                if (val != null)
+                {
+                    return val;
+                }
+            }
+            return null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T TryGetThingCompFast<T>(this Thing thing) where T : ThingComp
+        {
+            ThingWithComps thingWithComps = thing as ThingWithComps;
+            if (thingWithComps == null)
+            {
+                return null;
+            }
+            return thingWithComps.GetThingCompFast<T>();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T TryGetHediffCompFast<T>(this Hediff hd) where T : HediffComp
+        {
+            HediffWithComps hediffWithComps = hd as HediffWithComps;
+            if (hediffWithComps == null)
+            {
+                return null;
+            }
+            //dictStopwatch.Restart();
+            if (hediffWithComps.comps == null)
+            {
+                //dictStopwatch.LogTime("Dict approach: ");
+                return null;
+            }
+
+            for (int i = 0; i < hediffWithComps.comps.Count; i++)
+            {
+                if (hediffWithComps.comps[i].GetType() == typeof(T))
+                {
+                    //RegisterComp(thingWithComps.comps[i].GetType());
+                    //dictStopwatch.LogTime("Dict approach: ");
+                    return hediffWithComps.comps[i] as T;
+                }
+            }
+
+            for (int i = 0; i < hediffWithComps.comps.Count; i++)
+            {
+                T val = hediffWithComps.comps[i] as T;
+                if (val != null)
+                {
+                    return val;
+                }
+            }
+            return null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T GetMapComponentDict<T>(this Map map) where T : MapComponent
+        {
+            if (!CompsOfType<T>.mapCompsByMap.TryGetValue(map, out T mapComp) || mapComp is null)
+            {
+                CompsOfType<T>.mapCompsByMap[map] = mapComp = map.GetComponent<T>();
+            }
+            //Log.Message("Returning map comp: " + mapComp + ", total count of map comps is " + map.components.Count);
+            return mapComp as T;
+        }
+
+        public static Dictionary<Type, WorldComponent> cachedWorldComps = new Dictionary<Type, WorldComponent>();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T GetWorldComponentDict<T>(this World world) where T : WorldComponent
+        {
+            var type = typeof(T);
+            if (!cachedWorldComps.TryGetValue(type, out var worldComp) || worldComp is null)
+            {
+                cachedWorldComps[type] = worldComp = world.GetComponent<T>();
+            }
+            //Log.Message("Returning world comp: " + worldComp + ", total count of world comps is " + world.components.Count);
+            return worldComp as T;
+        }
+
+        public static Dictionary<Type, GameComponent> cachedGameComps = new Dictionary<Type, GameComponent>();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T GetGameComponentDict<T>(this Game game) where T : GameComponent
+        {
+            var type = typeof(T);
+            if (!cachedGameComps.TryGetValue(type, out var gameComp) || gameComp is null)
+            {
+                cachedGameComps[type] = gameComp = game.GetComponent<T>();
+            }
+            //Log.Message("Returning game comp: " + gameComp + ", total count of game comps is " + game.components.Count);
+            return gameComp as T;
         }
     }
 }
