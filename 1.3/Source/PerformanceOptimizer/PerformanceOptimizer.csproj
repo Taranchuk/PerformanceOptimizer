@@ -65,7 +65,7 @@
     <Compile Include="Optimizations\Throttling\Optimization_JobDriver_CheckCurrentToilEndOrFail.cs" />
     <Compile Include="Optimizations\Optimizing\Optimization_SteamManager_Update.cs" />
     <Compile Include="Optimizations\Optimizing\Optimization_WindManager_WindManagerTick.cs" />
-    <Compile Include="Optimizations\Throttling\Optimization_Plant_CheckTemperatureMakeLeafless.cs" />
+    <Compile Include="Optimizations\Throttling\Optimization_Plant_TickLong.cs" />
     <Compile Include="PerformanceOptimizerMod.cs" />
     <Compile Include="Optimizations\Cache\Optimization_FasterGetCompReplacement.cs" />
     <Compile Include="PerformanceOptimizerSettings.cs" />
