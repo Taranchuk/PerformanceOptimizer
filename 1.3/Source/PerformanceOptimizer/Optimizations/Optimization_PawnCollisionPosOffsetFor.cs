@@ -1,29 +1,33 @@
 ﻿using HarmonyLib;
-using RimWorld;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using Verse;
 
 namespace PerformanceOptimizer
 {
-    public class Optimization_PawnUtility_IsTeetotaler : Optimization_RefreshRate
+    public class Optimization_PawnCollisionPosOffsetFor : Optimization_RefreshRate
     {
-        public static Dictionary<Pawn, CachedValueTick<bool>> cachedResults = new Dictionary<Pawn, CachedValueTick<bool>>();
-        public override int RefreshRateByDefault => throw new NotImplementedException();
-        public override OptimizationType OptimizationType => throw new NotImplementedException();
-        public override string Name => throw new NotImplementedException();
+        public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
+
+        public override string Name => "PO.PawnCollisionPosOffsetFor".Translate();
+
+        public override int RefreshRateByDefault => 30;
+
         public override void DoPatches()
         {
             base.DoPatches();
-            Patch(typeof(PawnUtility), "IsTeetotaler", GetMethod(nameof(Prefix)), GetMethod(nameof(Postfix)));
+            Patch(typeof(PawnCollisionTweenerUtility), "PawnCollisionPosOffsetFor", GetMethod(nameof(Optimization_PawnCollisionPosOffsetFor.Prefix)), GetMethod(nameof(Optimization_PawnCollisionPosOffsetFor.Postfix)));
         }
 
+        public static Dictionary<Pawn, CachedValueTick<Vector3>> cachedResults = new Dictionary<Pawn, CachedValueTick<Vector3>>();
+
         [HarmonyPriority(Priority.First)]
-        public static bool Prefix(Pawn pawn, out bool __state, ref bool __result)
+        public static bool Prefix(Pawn pawn, out bool __state, ref Vector3 __result)
         {
             if (!cachedResults.TryGetValue(pawn, out var cache))
             {
-                cachedResults[pawn] = new CachedValueTick<bool>(false, refreshRateStatic);
+                cachedResults[pawn] = new CachedValueTick<Vector3>(default, refreshRateStatic);
                 __state = true;
                 return true;
             }
@@ -41,7 +45,7 @@ namespace PerformanceOptimizer
         }
 
         [HarmonyPriority(Priority.Last)]
-        public static void Postfix(Pawn pawn, bool __state, bool __result)
+        public static void Postfix(Pawn pawn, bool __state, ref Vector3 __result)
         {
             if (__state)
             {
@@ -51,7 +55,7 @@ namespace PerformanceOptimizer
 
         public override void Clear()
         {
-            throw new NotImplementedException();
+            cachedResults.Clear();
         }
     }
 }

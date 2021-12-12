@@ -10,8 +10,8 @@ namespace PerformanceOptimizer
     {
         public static Dictionary<BuildableDef, CachedValueTick<Designator_Build>> cachedResults = new Dictionary<BuildableDef, CachedValueTick<Designator_Build>>();
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
-        public override string Name => throw new NotImplementedException();
-        public override int RefreshRateByDefault => throw new NotImplementedException();
+        public override string Name => "PO.FindAllowedDesignator".Translate();
+        public override int RefreshRateByDefault => 120;
         public override void DoPatches()
         {
             base.DoPatches();
@@ -50,7 +50,7 @@ namespace PerformanceOptimizer
 
         public override void Clear()
         {
-            throw new NotImplementedException();
+            cachedResults.Clear();
         }
     }
 }

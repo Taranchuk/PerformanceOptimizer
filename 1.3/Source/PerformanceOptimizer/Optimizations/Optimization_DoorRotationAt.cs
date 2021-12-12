@@ -78,7 +78,7 @@ namespace PerformanceOptimizer
 
         public override void Clear()
         {
-            throw new System.NotImplementedException();
+            cachedResults.Clear();
         }
     }
 }

@@ -201,10 +201,8 @@ namespace PerformanceOptimizer
             cacheSettings.GapLine(8);
             foreach (var optimization in throttles)
             {
-                if (optimization.OptimizationType == OptimizationType.CacheWithRefreshRate)
-                {
-                    cacheSettings.CheckboxLabeledWithSlider(optimization.Name, "PO.RefreshRate", ref optimization.enabled, ref optimization.refreshRate);
-                }
+                var sliderName = optimization.OptimizationType == OptimizationType.CacheWithRefreshRate ? "PO.RefreshRate" : "PO.ThrottleRate";
+                cacheSettings.CheckboxLabeledWithSlider(optimization.Name, sliderName, ref optimization.enabled, ref optimization.refreshRate);
             }
 
             cacheSection.EndSection(cacheSettings);

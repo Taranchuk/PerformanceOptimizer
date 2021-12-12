@@ -9,9 +9,9 @@ namespace PerformanceOptimizer
     public class Optimization_Pawn_JobTracker_DetermineNextConstantThinkTreeJob : Optimization_RefreshRate
     {
         public static Dictionary<Pawn, int> cachedResults = new Dictionary<Pawn, int>();
-        public override int RefreshRateByDefault => throw new System.NotImplementedException();
-        public override OptimizationType OptimizationType => throw new System.NotImplementedException();
-        public override string Name => throw new System.NotImplementedException();
+        public override int RefreshRateByDefault => 30;
+        public override OptimizationType OptimizationType => OptimizationType.Throttle;
+        public override string Name => "PO.DetermineNextConstantThinkTreeJob".Translate();
         public override void DoPatches()
         {
             base.DoPatches();
@@ -39,7 +39,7 @@ namespace PerformanceOptimizer
 
         public override void Clear()
         {
-            throw new System.NotImplementedException();
+            cachedResults.Clear();
         }
     }
 }

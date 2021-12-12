@@ -9,7 +9,7 @@ namespace PerformanceOptimizer
     public class Optimization_StatWorker_MarketValue_CalculableRecipe : Optimization
     {
         public override OptimizationType OptimizationType => OptimizationType.Cache;
-        public override string Name => throw new NotImplementedException();
+        public override string Name => "PO.CacheStatWorker_MarketValue".Translate();
         public override void DoPatches()
         {
             base.DoPatches();
@@ -45,7 +45,7 @@ namespace PerformanceOptimizer
 
         public override void Clear()
         {
-            throw new NotImplementedException();
+            cachedResults.Clear();
         }
     }
 }

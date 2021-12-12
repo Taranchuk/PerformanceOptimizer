@@ -9,7 +9,7 @@ namespace PerformanceOptimizer
     public class Optimization_Text_CalcSize : Optimization
     {
         public override OptimizationType OptimizationType => OptimizationType.Cache;
-        public override string Name => throw new NotImplementedException();
+        public override string Name => "PO.CacheTextSizeCalc".Translate();
         public override void DoPatches()
         {
             base.DoPatches();
@@ -56,7 +56,8 @@ namespace PerformanceOptimizer
 
         public override void Clear()
         {
-            throw new NotImplementedException();
+            tinyCachedResults.Clear();
+            smallCachedResults.Clear();
         }
     }
 }

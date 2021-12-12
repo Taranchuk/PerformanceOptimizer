@@ -9,8 +9,8 @@ namespace PerformanceOptimizer
     {
         public static Dictionary<Pawn, CachedValueTick<string>> cachedResultsLabelNoCountCache = new Dictionary<Pawn, CachedValueTick<string>>();
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
-        public override string Name => throw new NotImplementedException();
-        public override int RefreshRateByDefault => throw new NotImplementedException();
+        public override string Name => "PO.PawnLabel".Translate();
+        public override int RefreshRateByDefault => 30;
         public override void DoPatches()
         {
             base.DoPatches();
@@ -84,7 +84,8 @@ namespace PerformanceOptimizer
 
         public override void Clear()
         {
-            throw new NotImplementedException();
+            cachedResultsLabelNoCountCache.Clear();
+            cachedResultsLabelShortCache.Clear();
         }
     }
 }

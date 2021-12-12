@@ -6,21 +6,17 @@ using Verse.AI;
 
 namespace PerformanceOptimizer
 {
-    public class Optimization_MentalBreaker_BreakThresholdExtreme : Optimization_RefreshRate
+    public class Optimization_MentalBreaker_BreakThresholdMajor : Optimization_RefreshRate
     {
-
         public static Dictionary<Pawn, CachedValueTick<float>> cachedResults = new Dictionary<Pawn, CachedValueTick<float>>();
-
-        public override int RefreshRateByDefault => throw new NotImplementedException();
-
-        public override OptimizationType OptimizationType => throw new NotImplementedException();
-
-        public override string Name => throw new NotImplementedException();
+        public override int RefreshRateByDefault => 300;
+        public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
+        public override string Name => "PO.BreakThresholdMajor".Translate();
 
         public override void DoPatches()
         {
             base.DoPatches();
-            Patch(typeof(MentalBreaker), "get_BreakThresholdExtreme", GetMethod(nameof(Prefix)), GetMethod(nameof(Postfix)));
+            Patch(typeof(MentalBreaker), "get_BreakThresholdMajor", GetMethod(nameof(Prefix)), GetMethod(nameof(Postfix)));
         }
 
         [HarmonyPriority(Priority.First)]
@@ -44,6 +40,7 @@ namespace PerformanceOptimizer
                 return false;
             }
         }
+
         [HarmonyPriority(Priority.Last)]
         public static void Postfix(MentalBreaker __instance, bool __state, float __result)
         {
@@ -55,7 +52,7 @@ namespace PerformanceOptimizer
 
         public override void Clear()
         {
-            throw new NotImplementedException();
+            cachedResults.Clear();
         }
     }
 }

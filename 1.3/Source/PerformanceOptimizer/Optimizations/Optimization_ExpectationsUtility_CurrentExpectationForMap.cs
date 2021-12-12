@@ -6,12 +6,12 @@ using Verse;
 
 namespace PerformanceOptimizer
 {
-    public class Optimization_ExpectationsUtility_CurrentExpectationFor_Map : Optimization_RefreshRate
+    public class Optimization_ExpectationsUtility_CurrentExpectationForMap : Optimization_RefreshRate
     {
         public static Dictionary<Map, CachedValueTick<ExpectationDef>> cachedResults = new Dictionary<Map, CachedValueTick<ExpectationDef>>();
-        public override int RefreshRateByDefault => throw new NotImplementedException();
-        public override OptimizationType OptimizationType => throw new NotImplementedException();
-        public override string Name => throw new NotImplementedException();
+        public override int RefreshRateByDefault => 1000;
+        public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
+        public override string Name => "PO.CurrentExpectationForMap".Translate();
         public override void DoPatches()
         {
             base.DoPatches();
@@ -51,7 +51,7 @@ namespace PerformanceOptimizer
 
         public override void Clear()
         {
-            throw new NotImplementedException();
+            cachedResults.Clear();
         }
     }
 }
