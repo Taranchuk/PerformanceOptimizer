@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="CachedValueTick.cs" />
     <Compile Include="CachedValueUpdate.cs" />
+    <Compile Include="Optimizations\CacheWithRefresh\Optimization_Pawn_InteractionsTracker_CurrentSocialMode.cs" />
     <Compile Include="Optimizations\Cache\Optimization_ReflectionCache.cs" />
     <Compile Include="Optimizations\Cache\Optimization_HediffDef_PossibleToDevelopImmunityNaturally.cs" />
     <Compile Include="Optimizations\Misc\Optimization_FixDuplicateXMLNodes.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="Optimizations\Throttling\Optimization_JobDriver_CheckCurrentToilEndOrFail.cs" />
     <Compile Include="Optimizations\Optimizing\Optimization_SteamManager_Update.cs" />
     <Compile Include="Optimizations\Optimizing\Optimization_WindManager_WindManagerTick.cs" />
+    <Compile Include="Optimizations\Throttling\Optimization_Plant_CheckTemperatureMakeLeafless.cs" />
     <Compile Include="PerformanceOptimizerMod.cs" />
     <Compile Include="Optimizations\Cache\Optimization_FasterGetCompReplacement.cs" />
     <Compile Include="PerformanceOptimizerSettings.cs" />

@@ -4,6 +4,7 @@ namespace PerformanceOptimizer
 {
     public abstract class Optimization_RefreshRate : Optimization
     {
+        public virtual int MaxSliderValue => 2500;
         public override void Reset()
         {
             base.Reset();
@@ -14,8 +15,10 @@ namespace PerformanceOptimizer
         public int refreshRate;
 
         public static int refreshRateStatic;
-        public void SetRefreshRate()
+
+        public override void Apply()
         {
+            base.Apply();
             refreshRateStatic = refreshRate;
         }
         public override void ExposeData()

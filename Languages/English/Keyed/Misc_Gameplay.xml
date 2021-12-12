@@ -53,4 +53,6 @@
 	<PO.DoorRotationAt>Building_Door:DoorRotationAt</PO.DoorRotationAt>
 	<PO.CacheHediffDef_PossibleToDevelopImmunityNaturally>Cache HediffDef:PossibleToDevelopImmunityNaturally</PO.CacheHediffDef_PossibleToDevelopImmunityNaturally>
 	<PO.OptimizeThingSpawned>Optimize Thing:Spawned</PO.OptimizeThingSpawned>
+	<PO.Pawn_InteractionsTracker_CurrentSocialMode>Pawn_InteractionsTracker:CurrentSocialMode</PO.Pawn_InteractionsTracker_CurrentSocialMode>
+	<PO.Plant_CheckTemperatureMakeLeafless>Plant:CheckTemperatureMakeLeafless</PO.Plant_CheckTemperatureMakeLeafless>
 </LanguageData>

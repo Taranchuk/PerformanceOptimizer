@@ -162,7 +162,8 @@ namespace PerformanceOptimizer
             foreach (var optimization in throttles)
             {
                 var sliderName = optimization.OptimizationType == OptimizationType.CacheWithRefreshRate ? "PO.RefreshRate" : "PO.ThrottleRate";
-                cacheSettings.CheckboxLabeledWithSlider(optimization.Name, sliderName, ref optimization.enabled, ref optimization.refreshRate);
+
+                cacheSettings.CheckboxLabeledWithSlider(optimization.Name, sliderName, ref optimization.enabled, ref optimization.refreshRate, optimization.MaxSliderValue);
             }
 
             cacheSection.EndSection(cacheSettings);

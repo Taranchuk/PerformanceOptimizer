@@ -13,7 +13,7 @@ namespace PerformanceOptimizer
 {
 	internal static class SettingsHelper
 	{
-		public static void CheckboxLabeledWithSlider(this Listing_Standard ls, string label, string sliderLabelKey, ref bool checkOn, ref int value, string tooltip = null)
+		public static void CheckboxLabeledWithSlider(this Listing_Standard ls, string label, string sliderLabelKey, ref bool checkOn, ref int value, int maxSliderValue = 2500, string tooltip = null)
 		{
 			float lineHeight = Text.LineHeight;
 			Rect rect = ls.GetRect(lineHeight);
@@ -47,7 +47,7 @@ namespace PerformanceOptimizer
 				if (checkOn)
                 {
 					Widgets.Label(sliderLabelRect, sliderLabelKey.Translate(value.TicksToSeconds().ToString("F1") + "s"));
-					value = (int)Widgets.HorizontalSlider(sliderRect, value, 0, 2500, false);
+					value = (int)Widgets.HorizontalSlider(sliderRect, value, 0, maxSliderValue, false);
 				}
 				if (ButtonInvisible(checkboxRect))
 				{

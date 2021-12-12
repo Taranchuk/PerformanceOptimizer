@@ -35,7 +35,7 @@ namespace PerformanceOptimizer
         {
 
         }
-        public void Apply()
+        public virtual void Apply()
         {
             if (!enabled && patchedMethods != null && patchedMethods.Any())
             {
