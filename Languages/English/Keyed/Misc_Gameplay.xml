@@ -51,4 +51,6 @@
 	<PO.PawnLabel>Pawn:Label</PO.PawnLabel>
 	<PO.PawnDrawPos>Pawn:DrawPos</PO.PawnDrawPos>
 	<PO.DoorRotationAt>Building_Door:DoorRotationAt</PO.DoorRotationAt>
+	<PO.CacheHediffDef_PossibleToDevelopImmunityNaturally>Cache HediffDef:PossibleToDevelopImmunityNaturally</PO.CacheHediffDef_PossibleToDevelopImmunityNaturally>
+	<PO.OptimizeThingSpawned>Optimize Thing:Spawned</PO.OptimizeThingSpawned>
 </LanguageData>

@@ -6,12 +6,16 @@ using Verse;
 
 namespace PerformanceOptimizer
 {
-    [HarmonyPatch(typeof(WindManager), "WindManagerTick")]
     public class Optimization_WindManager_WindManagerTick : Optimization
     {
         public override OptimizationType OptimizationType => OptimizationType.Optimization;
         public override string Name => "PO.DisablePlantSwayShaderUpdateIfSwayDisabled".Translate();
 
+        public override void DoPatches()
+        {
+            base.DoPatches();
+            Patch(typeof(WindManager), "WindManagerTick", transpiler: GetMethod(nameof(Transpiler)));
+        }
         [HarmonyPriority(Priority.First)]
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
@@ -37,10 +41,6 @@ namespace PerformanceOptimizer
                 return true;
             }
             return false;
-        }
-
-        public override void Clear()
-        {
         }
     }
 }

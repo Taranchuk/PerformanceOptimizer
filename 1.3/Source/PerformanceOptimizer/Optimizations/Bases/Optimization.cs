@@ -14,9 +14,7 @@ namespace PerformanceOptimizer
     }
     public abstract class Optimization : IExposable
     {
-        public List<MethodBase> originals;
-
-        public List<MethodInfo> patches;
+        public Dictionary<MethodInfo, List<MethodInfo>> patchedMethods;
         public virtual bool EnabledByDefault => true;
         public abstract OptimizationType OptimizationType { get; }
 
@@ -39,21 +37,18 @@ namespace PerformanceOptimizer
         }
         public void Apply()
         {
-            if (!enabled && patches != null && patches.Any())
+            if (!enabled && patchedMethods != null && patchedMethods.Any())
             {
                 UnPatchAll();
             }
-            else if (enabled && (patches is null || !patches.Any()))
+            else if (enabled && (patchedMethods is null || !patchedMethods.Any()))
             {
+                patchedMethods ??= new Dictionary<MethodInfo, List<MethodInfo>>();
                 DoPatches();
             }
         }
 
-        public virtual void DoPatches()
-        {
-            originals ??= new List<MethodBase>();
-            patches ??= new List<MethodInfo>();
-        }
+        public virtual void DoPatches() { }
 
         public void Patch(Type type, string methodName, MethodInfo prefix = null, MethodInfo postfix = null, MethodInfo transpiler = null)
         {
@@ -63,28 +58,30 @@ namespace PerformanceOptimizer
 
         public void Patch(MethodInfo methodInfo, MethodInfo prefix = null, MethodInfo postfix = null, MethodInfo transpiler = null)
         {
-            var patch = PerformanceOptimizerMod.harmony.Patch(methodInfo, prefix != null ? new HarmonyMethod(prefix) : null, postfix != null ? new HarmonyMethod(postfix) : null, transpiler != null ? new HarmonyMethod(transpiler) : null);
+            PerformanceOptimizerMod.harmony.Patch(methodInfo, prefix != null ? new HarmonyMethod(prefix) : null, postfix != null ? new HarmonyMethod(postfix) : null, transpiler != null ? new HarmonyMethod(transpiler) : null);
             //Log.Message(this.GetType() +  " - Patching " + methodInfo.FullDescription());
             //Log.ResetMessageCount();
-            originals.Add(methodInfo);
-            patches.Add(patch);
+            List<MethodInfo> patches = new List<MethodInfo>();
+            if (prefix != null) patches.Add(prefix);
+            if (postfix != null) patches.Add(postfix);
+            if (transpiler != null) patches.Add(transpiler);
+            patchedMethods[methodInfo] = patches;
         }
 
         public void UnPatchAll()
         {
-            if (originals != null)
+            if (patchedMethods != null)
             {
-                for (var i = 0; i < originals.Count; i++)
+                foreach (var kvp in patchedMethods)
                 {
-                    var original = originals[i];
-                    var patch = patches[i];
-                    PerformanceOptimizerMod.harmony.Unpatch(original, patch);
-                    //Log.Message(this.GetType() +  " - unpatching " + original.FullDescription());
-                    //Log.ResetMessageCount();
+                    MethodInfo method = kvp.Key;
+                    foreach (var patch in kvp.Value)
+                    {
+                        PerformanceOptimizerMod.harmony.Unpatch(method, patch);
+                    }
                 }
             }
-            originals.Clear();
-            patches.Clear();
+            patchedMethods.Clear();
         }
         public virtual void ExposeData()
         {

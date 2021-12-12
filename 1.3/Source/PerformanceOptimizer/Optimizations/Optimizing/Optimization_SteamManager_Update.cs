@@ -23,10 +23,6 @@ namespace PerformanceOptimizer
             }
             return true;
         }
-
-        public override void Clear()
-        {
-        }
     }
 }
 

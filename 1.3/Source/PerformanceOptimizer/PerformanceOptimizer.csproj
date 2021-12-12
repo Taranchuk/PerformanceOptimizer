@@ -50,6 +50,7 @@
     <Compile Include="CachedValueTick.cs" />
     <Compile Include="CachedValueUpdate.cs" />
     <Compile Include="Optimizations\Cache\Optimization_ReflectionCache.cs" />
+    <Compile Include="Optimizations\Cache\Optimization_HediffDef_PossibleToDevelopImmunityNaturally.cs" />
     <Compile Include="Optimizations\Misc\Optimization_FixDuplicateXMLNodes.cs" />
     <Compile Include="ModCompatUtility.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_BuildCopyCommandUtility_FindAllowedDesignator.cs" />
@@ -107,5 +108,7 @@
   <ItemGroup>
     <Publicize Include="Assembly-CSharp;AllowTool;0Harmony" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Optimizations\WIP\" />
+  </ItemGroup>
 </Project>

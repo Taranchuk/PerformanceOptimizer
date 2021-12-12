@@ -10,6 +10,7 @@ namespace PerformanceOptimizer
 {
     public class Optimization_DisableSounds_Update : Optimization
     {
+        public override bool EnabledByDefault => false;
         public override OptimizationType OptimizationType => OptimizationType.Misc;
         public override string Name => "PO.DisableSoundsCompletely".Translate();
         public override void DoPatches()
@@ -22,10 +23,6 @@ namespace PerformanceOptimizer
         public static bool Prefix()
         {
             return false;
-        }
-
-        public override void Clear()
-        {
         }
     }
 }

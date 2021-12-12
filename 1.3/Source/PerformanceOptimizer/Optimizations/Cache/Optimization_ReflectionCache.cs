@@ -135,11 +135,6 @@ namespace PerformanceOptimizer
                 }
             }
         }
-
-        public override void Clear()
-        {
-
-        }
     }
 }
 

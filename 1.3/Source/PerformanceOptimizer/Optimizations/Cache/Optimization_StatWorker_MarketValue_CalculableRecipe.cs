@@ -42,10 +42,5 @@ namespace PerformanceOptimizer
                 cachedResults[def] = __result;
             }
         }
-
-        public override void Clear()
-        {
-            cachedResults.Clear();
-        }
     }
 }
