@@ -159,7 +159,7 @@ namespace PerformanceOptimizer
                 }
             }
             cacheSettings.GapLine(8);
-            foreach (var optimization in throttles)
+            foreach (var optimization in throttles.OrderBy(x => x.Name))
             {
                 var sliderName = optimization.OptimizationType == OptimizationType.CacheWithRefreshRate ? "PO.RefreshRate" : "PO.ThrottleRate";
 

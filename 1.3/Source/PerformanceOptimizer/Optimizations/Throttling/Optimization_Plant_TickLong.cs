@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using UnityEngine;
 using Verse;
 using Verse.AI;
 
@@ -28,14 +29,11 @@ namespace PerformanceOptimizer
             {
                 if (x.plant != null)
                 {
-                    if (x.comps.Count > 0)
-                    {
-                        return false;
-                    }
                     if (x.tickerType != TickerType.Long)
                     {
                         return false;
                     }
+
                     if (x.plant.harvestedThingDef is null || x.plant.harvestTag == "Wood")
                     {
                         return true;
@@ -57,7 +55,15 @@ namespace PerformanceOptimizer
                     return true;
                 }
                 else
-                {
+{
+                    if (__instance.comps != null)
+                    {
+                        int i = 0;
+                        for (int count = __instance.comps.Count; i < count; i++)
+                        {
+                            __instance.comps[i].CompTickLong();
+                        }
+                    }
                     return false;
                 }
             }
