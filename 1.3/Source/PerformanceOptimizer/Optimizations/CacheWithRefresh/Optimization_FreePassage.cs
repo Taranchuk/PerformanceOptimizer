@@ -1,33 +1,40 @@
 ﻿using HarmonyLib;
 using RimWorld;
-using System;
+using RimWorld.Planet;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading.Tasks;
+using UnityEngine;
 using Verse;
+using Verse.AI;
+using Verse.Sound;
 
 namespace PerformanceOptimizer
 {
-    public class Optimization_Need_Beauty_CurrentInstantBeauty : Optimization_RefreshRate
+
+    public class Optimization_FreePassage : Optimization_RefreshRate
     {
         public static int refreshRateStatic;
-
-        public static Dictionary<Need_Beauty, CachedValueTick<float>> cachedResults = new Dictionary<Need_Beauty, CachedValueTick<float>>();
-        public override int RefreshRateByDefault => 600;
+        public override int RefreshRateByDefault => 10;
+        public override string Name => "PO.FreePassage".Translate();
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
-
-        public override string Name => "PO.CurrentInstantBeauty".Translate();
-
         public override void DoPatches()
         {
             base.DoPatches();
-            Patch(typeof(Need_Beauty), "CurrentInstantBeauty", GetMethod(nameof(Optimization_Need_Beauty_CurrentInstantBeauty.Prefix)), GetMethod(nameof(Optimization_Need_Beauty_CurrentInstantBeauty.Postfix)));
+            Patch(typeof(Building_Door), "get_FreePassage", GetMethod(nameof(Prefix)), GetMethod(nameof(Postfix)));
         }
 
+        public static Dictionary<Building_Door, CachedValueTick<bool>> cachedResults = new Dictionary<Building_Door, CachedValueTick<bool>>();
+
         [HarmonyPriority(Priority.First)]
-        public static bool Prefix(Need_Beauty __instance, out bool __state, ref float __result)
+        public static bool Prefix(Building_Door __instance, out bool __state, ref bool __result)
         {
             if (!cachedResults.TryGetValue(__instance, out var cache))
             {
-                cachedResults[__instance] = new CachedValueTick<float>(0, refreshRateStatic);
+                cachedResults[__instance] = new CachedValueTick<bool>(false, refreshRateStatic);
                 __state = true;
                 return true;
             }
@@ -43,8 +50,9 @@ namespace PerformanceOptimizer
                 return false;
             }
         }
+
         [HarmonyPriority(Priority.Last)]
-        public static void Postfix(Need_Beauty __instance, bool __state, float __result)
+        public static void Postfix(Building_Door __instance, bool __state, bool __result)
         {
             if (__state)
             {

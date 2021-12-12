@@ -8,6 +8,8 @@ namespace PerformanceOptimizer
 {
     public class Optimization_Pawn_JobTracker_DetermineNextConstantThinkTreeJob : Optimization_RefreshRate
     {
+        public static int refreshRateStatic;
+
         public static Dictionary<Pawn, int> cachedResults = new Dictionary<Pawn, int>();
         public override int RefreshRateByDefault => 30;
         public override OptimizationType OptimizationType => OptimizationType.Throttle;

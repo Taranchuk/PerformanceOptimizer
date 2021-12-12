@@ -8,6 +8,8 @@ namespace PerformanceOptimizer
 {
     public class Optimization_ExpectationsUtility_CurrentExpectationForMap : Optimization_RefreshRate
     {
+        public static int refreshRateStatic;
+
         public static Dictionary<Map, CachedValueTick<ExpectationDef>> cachedResults = new Dictionary<Map, CachedValueTick<ExpectationDef>>();
         public override int RefreshRateByDefault => 1000;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;

@@ -9,11 +9,12 @@ namespace PerformanceOptimizer
 {
     public class Optimization_JobDriver_CheckCurrentToilEndOrFail : Optimization_RefreshRate
     {
+        public static int refreshRateStatic;
+
         public static Dictionary<Pawn, int> cachedResults = new Dictionary<Pawn, int>();
         public override int RefreshRateByDefault => 10;
         public override OptimizationType OptimizationType => OptimizationType.Throttle;
         public override string Name => "PO.CheckCurrentToilEndOrFail".Translate();
-
         public override void DoPatches()
         {
             base.DoPatches();

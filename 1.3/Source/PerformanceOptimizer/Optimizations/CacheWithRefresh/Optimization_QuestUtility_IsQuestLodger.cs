@@ -8,6 +8,8 @@ namespace PerformanceOptimizer
 {
     public class Optimization_QuestUtility_IsQuestLodger : Optimization_RefreshRate
     {
+        public static int refreshRateStatic;
+
         public static Dictionary<Pawn, CachedValueTick<bool>> cachedResults = new Dictionary<Pawn, CachedValueTick<bool>>();
         public override int RefreshRateByDefault => 30;
 

@@ -11,11 +11,10 @@ namespace PerformanceOptimizer
 {
     public class Optimization_InspectGizmoGrid_DrawInspectGizmoGridFor : Optimization_RefreshRate
     {
+        public static int refreshRateStatic;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Name => "PO.InspectGizmoGrid".Translate();
-
         public override int RefreshRateByDefault => 30;
-
         public override void DoPatches()
         {
             base.DoPatches();

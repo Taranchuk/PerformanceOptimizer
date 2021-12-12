@@ -12,6 +12,8 @@ namespace PerformanceOptimizer
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Name => "PO.FindAllowedDesignator".Translate();
         public override int RefreshRateByDefault => 120;
+
+        public static int refreshRateStatic;
         public override void DoPatches()
         {
             base.DoPatches();

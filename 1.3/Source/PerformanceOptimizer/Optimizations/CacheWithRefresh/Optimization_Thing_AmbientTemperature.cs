@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using Verse;
@@ -7,6 +8,7 @@ namespace PerformanceOptimizer
 {
     public class Optimization_Thing_AmbientTemperature : Optimization_RefreshRate
     {
+        public static int refreshRateStatic;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Name => "PO.AmbientTemperature".Translate();
         public override int RefreshRateByDefault => 120;
@@ -21,6 +23,11 @@ namespace PerformanceOptimizer
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(Thing __instance, out bool __state, ref float __result)
         {
+            if (__instance.def.tickerType != TickerType.Normal)
+            {
+                __state = false;
+                return true;
+            }
             if (!cachedResults.TryGetValue(__instance, out var cache))
             {
                 cachedResults[__instance] = new CachedValueTick<float>(0, refreshRateStatic);

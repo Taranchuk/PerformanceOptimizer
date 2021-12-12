@@ -55,4 +55,5 @@
 	<PO.OptimizeThingSpawned>Optimize Thing:Spawned</PO.OptimizeThingSpawned>
 	<PO.Pawn_InteractionsTracker_CurrentSocialMode>Pawn_InteractionsTracker:CurrentSocialMode</PO.Pawn_InteractionsTracker_CurrentSocialMode>
 	<PO.Plant_CheckTemperatureMakeLeafless>Plant:CheckTemperatureMakeLeafless</PO.Plant_CheckTemperatureMakeLeafless>
+	<PO.FreePassage>Building_Door:FreePassage</PO.FreePassage>
 </LanguageData>

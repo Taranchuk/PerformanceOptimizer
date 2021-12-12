@@ -8,9 +8,11 @@ namespace PerformanceOptimizer
 {
     public class Optimization_Plant_CheckTemperatureMakeLeafless : Optimization_RefreshRate
     {
+        public static int refreshRateStatic;
+
         public static Dictionary<Plant, int> cachedResults = new Dictionary<Plant, int>();
-        public override int RefreshRateByDefault => 3000;
-        public override int MaxSliderValue => 6000;
+        public override int RefreshRateByDefault => 6000;
+        public override int MaxSliderValue => 10000;
         public override OptimizationType OptimizationType => OptimizationType.Throttle;
         public override string Name => "PO.Plant_CheckTemperatureMakeLeafless".Translate();
         public override void DoPatches()

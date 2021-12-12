@@ -8,6 +8,8 @@ namespace PerformanceOptimizer
 {
     public class Optimization_PawnUtility_IsTeetotaler : Optimization_RefreshRate
     {
+        public static int refreshRateStatic;
+
         public static Dictionary<Pawn, CachedValueTick<bool>> cachedResults = new Dictionary<Pawn, CachedValueTick<bool>>();
         public override int RefreshRateByDefault => 500;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;

@@ -8,6 +8,8 @@ namespace PerformanceOptimizer
 {
     public class Optimization_Pawn_InteractionsTracker_CurrentSocialMode : Optimization_RefreshRate
     {
+        public static int refreshRateStatic;
+
         public static Dictionary<Pawn, CachedValueTick<RandomSocialMode>> cachedResults = new Dictionary<Pawn, CachedValueTick<RandomSocialMode>>();
         public override int RefreshRateByDefault => 30;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;

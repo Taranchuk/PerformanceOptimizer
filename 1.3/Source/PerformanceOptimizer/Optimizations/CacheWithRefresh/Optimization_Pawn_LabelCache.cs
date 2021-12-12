@@ -7,10 +7,12 @@ namespace PerformanceOptimizer
 {
     public class Optimization_Pawn_LabelCache : Optimization_RefreshRate
     {
+        public static int refreshRateStatic;
+
         public static Dictionary<Pawn, CachedValueTick<string>> cachedResultsLabelNoCountCache = new Dictionary<Pawn, CachedValueTick<string>>();
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Name => "PO.PawnLabel".Translate();
-        public override int RefreshRateByDefault => 30;
+        public override int RefreshRateByDefault => 60;
         public override void DoPatches()
         {
             base.DoPatches();

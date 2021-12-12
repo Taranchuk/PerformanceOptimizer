@@ -9,6 +9,7 @@ namespace PerformanceOptimizer
 {
     public class Optimization_Pawn_DrawPos : Optimization_RefreshRate
     {
+        public static int refreshRateStatic;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Name => "PO.PawnDrawPos".Translate();
         public override int RefreshRateByDefault => 30;
@@ -45,7 +46,7 @@ namespace PerformanceOptimizer
             {
                 if (!cachedResults.TryGetValue(__instance, out var cache))
                 {
-                    cachedResults[__instance] = new CachedValueTick<Vector3>(default, 30);
+                    cachedResults[__instance] = new CachedValueTick<Vector3>(default, refreshRateStatic);
                     __state = true;
                     return true;
                 }
@@ -70,7 +71,7 @@ namespace PerformanceOptimizer
         {
             if (__state)
             {
-                cachedResults[__instance].SetValue(__result, 30);
+                cachedResults[__instance].SetValue(__result, refreshRateStatic);
             }
         }
 

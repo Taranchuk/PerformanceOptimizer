@@ -8,12 +8,10 @@ namespace PerformanceOptimizer
 {
     public class Optimization_IdeoUtility_GetStyleDominance : Optimization_RefreshRate
     {
-        public override int RefreshRateByDefault => 2000;
-
+        public static int refreshRateStatic;
+        public override int RefreshRateByDefault => 4000;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
-
         public override string Name => "PO.GetStyleDominance".Translate();
-
         public override void DoPatches()
         {
             base.DoPatches();

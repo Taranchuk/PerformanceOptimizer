@@ -1,4 +1,5 @@
-﻿using Verse;
+﻿using HarmonyLib;
+using Verse;
 
 namespace PerformanceOptimizer
 {
@@ -8,18 +9,16 @@ namespace PerformanceOptimizer
         public override void Reset()
         {
             base.Reset();
-            refreshRateStatic = refreshRate = RefreshRateByDefault;
+            refreshRate = RefreshRateByDefault;
+            AccessTools.Field(GetType(), "refreshRateStatic").SetValue(null, refreshRate);
         }
         public abstract int RefreshRateByDefault { get; }
 
         public int refreshRate;
-
-        public static int refreshRateStatic;
-
         public override void Apply()
         {
             base.Apply();
-            refreshRateStatic = refreshRate;
+            AccessTools.Field(GetType(), "refreshRateStatic").SetValue(null, refreshRate);
         }
         public override void ExposeData()
         {

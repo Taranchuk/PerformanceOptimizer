@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="CachedValueTick.cs" />
     <Compile Include="CachedValueUpdate.cs" />
+    <Compile Include="Optimizations\CacheWithRefresh\Optimization_FreePassage.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Pawn_InteractionsTracker_CurrentSocialMode.cs" />
     <Compile Include="Optimizations\Cache\Optimization_ReflectionCache.cs" />
     <Compile Include="Optimizations\Cache\Optimization_HediffDef_PossibleToDevelopImmunityNaturally.cs" />

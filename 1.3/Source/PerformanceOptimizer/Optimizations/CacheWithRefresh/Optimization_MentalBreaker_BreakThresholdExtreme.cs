@@ -8,15 +8,12 @@ namespace PerformanceOptimizer
 {
     public class Optimization_MentalBreaker_BreakThresholdExtreme : Optimization_RefreshRate
     {
+        public static int refreshRateStatic;
 
         public static Dictionary<Pawn, CachedValueTick<float>> cachedResults = new Dictionary<Pawn, CachedValueTick<float>>();
-
         public override int RefreshRateByDefault => 300;
-
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
-
         public override string Name => "PO.BreakThresholdExtreme".Translate();
-
         public override void DoPatches()
         {
             base.DoPatches();
