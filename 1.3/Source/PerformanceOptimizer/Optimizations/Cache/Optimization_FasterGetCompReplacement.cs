@@ -287,17 +287,23 @@ namespace PerformanceOptimizer
         private static IEnumerable<CodeInstruction> PerformTranspiler(string methodName, Type baseType, MethodInfo genericMethod, OpCode opcode, int parameterLength, 
             IEnumerable<CodeInstruction> instructions, MethodBase source, ILGenerator il)
         {
+            bool found = false;
             var codes = instructions.ToList();
             for (var i = 0; i < codes.Count; i++)
             {
                 var instr = codes[i];
                 if (CallsComponent(instr, opcode, methodName, baseType, parameterLength, out Type type))
                 {
+                    found = true;
                     var methodToReplace = genericMethod.MakeGenericMethod(new Type[] { type });
                     instr.opcode = OpCodes.Call;
                     instr.operand = methodToReplace;
                 }
                 yield return instr;
+            }
+            if (!found)
+            {
+                Log.Error("Couldn't find GetComp instr in " + methodName + " - " + source);
             }
         }
 
@@ -315,6 +321,13 @@ namespace PerformanceOptimizer
                     return index;
                 }).ToList();
             }
+        }
+
+        public override void Clear()
+        {
+            ComponentCache.cachedWorldComps.Clear();
+            ComponentCache.cachedGameComps.Clear();
+            CompsOfType<Map>.mapCompsByMap.Clear();
         }
 
         public static List<string> mostCalledComps = new List<string>
