@@ -58,4 +58,5 @@
 	<PO.FreePassage>Building_Door:FreePassage</PO.FreePassage>
 	<PO.GenCelestial_CurCelestialSunGlow>GenCelestial:CurCelestialSunGlow</PO.GenCelestial_CurCelestialSunGlow>
 	<PO.PlantFallColors_GetFallColorFactor>PlantFallColors:GetFallColorFactor</PO.PlantFallColors_GetFallColorFactor>
+	<PO.GenTemperature_AverageTemperatureAtTileForTwelfth>GenTemperature:AverageTemperatureAtTileForTwelfth</PO.GenTemperature_AverageTemperatureAtTileForTwelfth>
 </LanguageData>
