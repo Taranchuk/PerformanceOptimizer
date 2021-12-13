@@ -47,8 +47,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CachedValueTick.cs" />
-    <Compile Include="CachedValueUpdate.cs" />
+    <Compile Include="Containers\CachedValueTick.cs" />
+    <Compile Include="Containers\CachedValueUpdate.cs" />
+    <Compile Include="Containers\CacheData.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_GenCelestial_CurCelestialSunGlow.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_FreePassage.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_PlantFallColors_GetFallColorFactor.cs" />
@@ -56,7 +57,7 @@
     <Compile Include="Optimizations\Cache\Optimization_ReflectionCache.cs" />
     <Compile Include="Optimizations\Cache\Optimization_HediffDef_PossibleToDevelopImmunityNaturally.cs" />
     <Compile Include="Optimizations\Misc\Optimization_FixDuplicateXMLNodes.cs" />
-    <Compile Include="ModCompatUtility.cs" />
+    <Compile Include="Utilities\ModCompatUtility.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_BuildCopyCommandUtility_FindAllowedDesignator.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_DoorRotationAt.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_ExpectationsUtility_CurrentExpectationForMap.cs" />
@@ -79,7 +80,7 @@
     <Compile Include="Optimizations\Cache\Optimization_FasterGetCompReplacement.cs" />
     <Compile Include="PerformanceOptimizerSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Logging.cs" />
+    <Compile Include="Utilities\Logging.cs" />
     <Compile Include="Optimizations\Misc\Optimization_DisableSounds_Update.cs" />
     <Compile Include="Optimizations\Bases\Optimization.cs" />
     <Compile Include="Optimizations\Bases\OptimizationType.cs" />
@@ -99,7 +100,7 @@
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Pawn_LabelCache.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Thing_AmbientTemperature.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_ThoughtHandler_TotalMoodOffset.cs" />
-    <Compile Include="SettingsHelper.cs" />
+    <Compile Include="Utilities\SettingsHelper.cs" />
     <Compile Include="Optimizations\UITweaks\Optimization_DoPlaySettings_DoTimespeedControls.cs" />
   </ItemGroup>
   <ItemGroup>

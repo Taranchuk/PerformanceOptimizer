@@ -7,11 +7,6 @@ using Verse;
 
 namespace PerformanceOptimizer
 {
-    public struct CacheData
-    {
-        public int key;
-        public bool state;
-    }
     public abstract class Optimization : IExposable, IComparable<Optimization>
     {
         public Dictionary<MethodInfo, List<MethodInfo>> patchedMethods;
