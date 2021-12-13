@@ -56,4 +56,6 @@
 	<PO.Pawn_InteractionsTracker_CurrentSocialMode>Pawn_InteractionsTracker:CurrentSocialMode</PO.Pawn_InteractionsTracker_CurrentSocialMode>
 	<PO.Plant_TickLong>Plant:TickLong</PO.Plant_TickLong>
 	<PO.FreePassage>Building_Door:FreePassage</PO.FreePassage>
+	<PO.GenCelestial_CurCelestialSunGlow>GenCelestial:CurCelestialSunGlow</PO.GenCelestial_CurCelestialSunGlow>
+	<PO.PlantFallColors_GetFallColorFactor>PlantFallColors:GetFallColorFactor</PO.PlantFallColors_GetFallColorFactor>
 </LanguageData>
