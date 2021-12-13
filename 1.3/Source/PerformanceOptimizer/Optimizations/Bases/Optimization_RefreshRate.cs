@@ -20,6 +20,12 @@ namespace PerformanceOptimizer
             base.Apply();
             AccessTools.Field(GetType(), "refreshRateStatic").SetValue(null, refreshRate);
         }
+
+        public override void DrawSettings(Listing_Standard section)
+        {
+            var sliderName = this.OptimizationType == OptimizationType.CacheWithRefreshRate ? "PO.RefreshRate" : "PO.ThrottleRate";
+            section.CheckboxLabeledWithSlider(this.Label, sliderName, ref this.enabled, ref this.refreshRate, this.MaxSliderValue);
+        }
         public override void ExposeData()
         {
             base.ExposeData();

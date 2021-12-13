@@ -11,7 +11,7 @@ namespace PerformanceOptimizer
     {
         public static int refreshRateStatic;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
-        public override string Name => "PO.PawnDrawPos".Translate();
+        public override string Label => "PO.PawnDrawPos".Translate();
         public override int RefreshRateByDefault => 30;
         public override void DoPatches()
         {

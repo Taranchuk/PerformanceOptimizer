@@ -9,7 +9,7 @@ namespace PerformanceOptimizer
     public class Optimization_HediffDef_PossibleToDevelopImmunityNaturally : Optimization
     {
         public override OptimizationType OptimizationType => OptimizationType.Optimization;
-        public override string Name => "PO.CacheHediffDef_PossibleToDevelopImmunityNaturally".Translate();
+        public override string Label => "PO.CacheHediffDef_PossibleToDevelopImmunityNaturally".Translate();
         public override void DoPatches()
         {
             base.DoPatches();

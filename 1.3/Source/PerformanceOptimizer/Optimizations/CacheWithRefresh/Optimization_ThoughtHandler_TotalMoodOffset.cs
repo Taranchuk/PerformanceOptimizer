@@ -14,7 +14,7 @@ namespace PerformanceOptimizer
         public override int RefreshRateByDefault => 500;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
 
-        public override string Name => "PO.TotalMoodOffset".Translate();
+        public override string Label => "PO.TotalMoodOffset".Translate();
 
         public override void DoPatches()
         {

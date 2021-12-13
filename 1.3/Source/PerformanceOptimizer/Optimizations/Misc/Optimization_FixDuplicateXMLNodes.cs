@@ -13,10 +13,9 @@ using static Verse.XmlInheritance;
 
 namespace PerformanceOptimizer
 {
-    public class Optimization_FixDuplicateXMLNodes : Optimization
+    public class Optimization_FixDuplicateXMLNodes : Optimization_Misc
     {
-        public override OptimizationType OptimizationType => OptimizationType.Misc;
-        public override string Name => "PO.FixCheckForDuplicateNodes".Translate();
+        public override string Label => "PO.FixCheckForDuplicateNodes".Translate();
         public override void DoPatches()
         {
             base.DoPatches();

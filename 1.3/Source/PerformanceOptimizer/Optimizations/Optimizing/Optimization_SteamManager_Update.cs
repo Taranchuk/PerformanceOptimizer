@@ -7,7 +7,7 @@ namespace PerformanceOptimizer
     public class Optimization_SteamManager_Update : Optimization
     {
         public override OptimizationType OptimizationType => OptimizationType.Optimization;
-        public override string Name => "PO.DisableSteamManagerCallbacksChecks".Translate();
+        public override string Label => "PO.DisableSteamManagerCallbacksChecks".Translate();
         public override void DoPatches()
         {
             base.DoPatches();

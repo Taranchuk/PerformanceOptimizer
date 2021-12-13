@@ -13,7 +13,7 @@ namespace PerformanceOptimizer
         public static Dictionary<Pawn, CachedValueTick<bool>> cachedResults = new Dictionary<Pawn, CachedValueTick<bool>>();
         public override int RefreshRateByDefault => 500;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
-        public override string Name => "PO.IsTeetotaler".Translate();
+        public override string Label => "PO.IsTeetotaler".Translate();
         public override void DoPatches()
         {
             base.DoPatches();

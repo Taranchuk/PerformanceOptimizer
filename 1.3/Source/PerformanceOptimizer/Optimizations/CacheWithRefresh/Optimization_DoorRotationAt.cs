@@ -19,7 +19,7 @@ namespace PerformanceOptimizer
     {
         public static int refreshRateStatic;
         public override int RefreshRateByDefault => 90;
-        public override string Name => "PO.DoorRotationAt".Translate();
+        public override string Label => "PO.DoorRotationAt".Translate();
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override void DoPatches()
         {

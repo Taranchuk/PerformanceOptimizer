@@ -64,10 +64,17 @@
     <Compile Include="Optimizations\Cache\Optimization_Faction_FactionOfPlayer.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_IdeoUtility_GetStyleDominance.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_InspectGizmoGrid_DrawInspectGizmoGridFor.cs" />
+    <Compile Include="Optimizations\Bases\Optimization_Misc.cs" />
     <Compile Include="Optimizations\Throttling\Optimization_JobDriver_CheckCurrentToilEndOrFail.cs" />
     <Compile Include="Optimizations\Optimizing\Optimization_SteamManager_Update.cs" />
     <Compile Include="Optimizations\Optimizing\Optimization_WindManager_WindManagerTick.cs" />
     <Compile Include="Optimizations\Throttling\Optimization_Plant_TickLong.cs" />
+    <Compile Include="Optimizations\UITweaks\Optimization_AlertsReadoutOnGUI_Prefix.cs" />
+    <Compile Include="Optimizations\UITweaks\Optimization_DoPlaySettings_DoPlaySettings.cs" />
+    <Compile Include="Optimizations\UITweaks\Optimization_MainButtonsRoot_DoButtons.cs" />
+    <Compile Include="Optimizations\UITweaks\Optimization_ResourceReadoutOnGUI.cs" />
+    <Compile Include="Optimizations\Bases\Optimization_UITweaks.cs" />
+    <Compile Include="Optimizations\UITweaks\Optimization_UIToggle.cs" />
     <Compile Include="PerformanceOptimizerMod.cs" />
     <Compile Include="Optimizations\Cache\Optimization_FasterGetCompReplacement.cs" />
     <Compile Include="PerformanceOptimizerSettings.cs" />
@@ -93,7 +100,7 @@
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Thing_AmbientTemperature.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_ThoughtHandler_TotalMoodOffset.cs" />
     <Compile Include="SettingsHelper.cs" />
-    <Compile Include="UIPatches.cs" />
+    <Compile Include="Optimizations\UITweaks\Optimization_DoPlaySettings_DoTimespeedControls.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Krafs.Publicizer">

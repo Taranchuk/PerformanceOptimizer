@@ -11,7 +11,7 @@ namespace PerformanceOptimizer
         public static int refreshRateStatic;
         public override int RefreshRateByDefault => 4000;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
-        public override string Name => "PO.PlantFallColors_GetFallColorFactor".Translate();
+        public override string Label => "PO.PlantFallColors_GetFallColorFactor".Translate();
         public override void DoPatches()
         {
             base.DoPatches();

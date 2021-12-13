@@ -19,7 +19,7 @@ namespace PerformanceOptimizer
     {
         public static int refreshRateStatic;
         public override int RefreshRateByDefault => 10;
-        public override string Name => "PO.FreePassage".Translate();
+        public override string Label => "PO.FreePassage".Translate();
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override void DoPatches()
         {

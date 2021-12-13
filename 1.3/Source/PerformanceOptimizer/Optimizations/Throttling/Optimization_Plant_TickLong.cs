@@ -18,7 +18,7 @@ namespace PerformanceOptimizer
         public override int RefreshRateByDefault => 6000;
         public override int MaxSliderValue => 10000;
         public override OptimizationType OptimizationType => OptimizationType.Throttle;
-        public override string Name => "PO.Plant_TickLong".Translate();
+        public override string Label => "PO.Plant_TickLong".Translate();
 
         public static HashSet<ThingDef> throttledPlants = new HashSet<ThingDef>();
         public override void DoPatches()

@@ -13,7 +13,7 @@ namespace PerformanceOptimizer
         public static Dictionary<Map, CachedValueTick<ExpectationDef>> cachedResults = new Dictionary<Map, CachedValueTick<ExpectationDef>>();
         public override int RefreshRateByDefault => 1000;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
-        public override string Name => "PO.CurrentExpectationForMap".Translate();
+        public override string Label => "PO.CurrentExpectationForMap".Translate();
         public override void DoPatches()
         {
             base.DoPatches();

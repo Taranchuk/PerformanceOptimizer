@@ -13,7 +13,7 @@ namespace PerformanceOptimizer
 
         public static int refreshRateStatic;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
-        public override string Name => "PO.CurrentExpectationForPawn".Translate();
+        public override string Label => "PO.CurrentExpectationForPawn".Translate();
         public override void DoPatches()
         {
             base.DoPatches();

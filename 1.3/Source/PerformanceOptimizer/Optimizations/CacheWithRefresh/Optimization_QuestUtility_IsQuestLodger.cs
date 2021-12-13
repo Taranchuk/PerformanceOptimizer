@@ -14,7 +14,7 @@ namespace PerformanceOptimizer
         public override int RefreshRateByDefault => 30;
 
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
-        public override string Name => "PO.QuestLodger".Translate();
+        public override string Label => "PO.QuestLodger".Translate();
         public override void DoPatches()
         {
             base.DoPatches();

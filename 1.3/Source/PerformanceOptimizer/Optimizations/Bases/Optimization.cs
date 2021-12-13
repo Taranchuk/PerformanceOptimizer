@@ -12,15 +12,22 @@ namespace PerformanceOptimizer
         public int key;
         public bool state;
     }
-    public abstract class Optimization : IExposable
+    public abstract class Optimization : IExposable, IComparable<Optimization>
     {
         public Dictionary<MethodInfo, List<MethodInfo>> patchedMethods;
         public virtual bool EnabledByDefault => true;
         public abstract OptimizationType OptimizationType { get; }
 
         public bool enabled;
-        public abstract string Name { get; }
-        public virtual string Key => this.GetType().Name;
+        public abstract string Label { get; }
+        public virtual void DrawSettings(Listing_Standard section)
+        {
+            section.CheckboxLabeled(Label, ref enabled);
+        }
+        public virtual int DrawOrder => 0;
+
+        public virtual int DrawHeight => 24;
+        public Comparer<Optimization> Comparer => Comparer<Optimization>.Create((first, second) => 1);// );;
         public virtual void Initialize()
         {
             Reset();
@@ -89,5 +96,9 @@ namespace PerformanceOptimizer
         }
 
         public MethodInfo GetMethod(string name) => AccessTools.Method(this.GetType(), name);
+        public virtual int CompareTo(Optimization other)
+        {
+            return string.Compare(this.Label, other.Label) + DrawOrder;
+        }
     }
 }

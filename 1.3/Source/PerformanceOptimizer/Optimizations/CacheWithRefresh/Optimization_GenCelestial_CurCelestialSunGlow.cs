@@ -13,7 +13,7 @@ namespace PerformanceOptimizer
         public static Dictionary<Map, CachedValueTick<float>> cachedResults = new Dictionary<Map, CachedValueTick<float>>();
         public override int RefreshRateByDefault => 60;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
-        public override string Name => "PO.GenCelestial_CurCelestialSunGlow".Translate();
+        public override string Label => "PO.GenCelestial_CurCelestialSunGlow".Translate();
         public override void DoPatches()
         {
             base.DoPatches();

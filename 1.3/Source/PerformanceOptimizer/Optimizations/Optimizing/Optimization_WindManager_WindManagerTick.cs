@@ -9,7 +9,7 @@ namespace PerformanceOptimizer
     public class Optimization_WindManager_WindManagerTick : Optimization
     {
         public override OptimizationType OptimizationType => OptimizationType.Optimization;
-        public override string Name => "PO.DisablePlantSwayShaderUpdateIfSwayDisabled".Translate();
+        public override string Label => "PO.DisablePlantSwayShaderUpdateIfSwayDisabled".Translate();
 
         public override void DoPatches()
         {

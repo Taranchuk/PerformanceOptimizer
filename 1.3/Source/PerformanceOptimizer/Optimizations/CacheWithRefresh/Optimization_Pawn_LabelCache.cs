@@ -11,7 +11,7 @@ namespace PerformanceOptimizer
 
         public static Dictionary<Pawn, CachedValueTick<string>> cachedResultsLabelNoCountCache = new Dictionary<Pawn, CachedValueTick<string>>();
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
-        public override string Name => "PO.PawnLabel".Translate();
+        public override string Label => "PO.PawnLabel".Translate();
         public override int RefreshRateByDefault => 60;
         public override void DoPatches()
         {

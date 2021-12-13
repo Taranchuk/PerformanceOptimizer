@@ -14,7 +14,7 @@ namespace PerformanceOptimizer
         public override int RefreshRateByDefault => 600;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
 
-        public override string Name => "PO.CurrentInstantBeauty".Translate();
+        public override string Label => "PO.CurrentInstantBeauty".Translate();
 
         public override void DoPatches()
         {

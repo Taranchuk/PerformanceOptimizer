@@ -13,7 +13,7 @@ namespace PerformanceOptimizer
         public static Dictionary<Pawn, int> cachedResults = new Dictionary<Pawn, int>();
         public override int RefreshRateByDefault => 30;
         public override OptimizationType OptimizationType => OptimizationType.Throttle;
-        public override string Name => "PO.DetermineNextConstantThinkTreeJob".Translate();
+        public override string Label => "PO.DetermineNextConstantThinkTreeJob".Translate();
         public override void DoPatches()
         {
             base.DoPatches();

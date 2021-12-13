@@ -13,7 +13,7 @@ namespace PerformanceOptimizer
         public static Dictionary<Pawn, CachedValueTick<RandomSocialMode>> cachedResults = new Dictionary<Pawn, CachedValueTick<RandomSocialMode>>();
         public override int RefreshRateByDefault => 30;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
-        public override string Name => "PO.Pawn_InteractionsTracker_CurrentSocialMode".Translate();
+        public override string Label => "PO.Pawn_InteractionsTracker_CurrentSocialMode".Translate();
         public override void DoPatches()
         {
             base.DoPatches();

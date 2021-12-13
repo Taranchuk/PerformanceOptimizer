@@ -8,11 +8,10 @@ using Verse.Sound;
 
 namespace PerformanceOptimizer
 {
-    public class Optimization_DisableSounds_Update : Optimization
+    public class Optimization_DisableSounds_Update : Optimization_Misc
     {
         public override bool EnabledByDefault => false;
-        public override OptimizationType OptimizationType => OptimizationType.Misc;
-        public override string Name => "PO.DisableSoundsCompletely".Translate();
+        public override string Label => "PO.DisableSoundsCompletely".Translate();
         public override void DoPatches()
         {
             base.DoPatches();

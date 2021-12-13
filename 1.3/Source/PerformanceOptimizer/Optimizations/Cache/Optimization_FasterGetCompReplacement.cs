@@ -17,6 +17,7 @@ namespace PerformanceOptimizer
 {
     public class Optimization_FasterGetCompReplacement : Optimization
     {
+        public override int DrawOrder => -99999;
         public List<MethodInfo> methodsCallingMapGetComp;
         public List<MethodInfo> methodsCallingWorldGetComp;
         public List<MethodInfo> methodsCallingGameGetComp;
@@ -187,7 +188,7 @@ namespace PerformanceOptimizer
 
         public override OptimizationType OptimizationType => OptimizationType.Optimization;
 
-        public override string Name => "PO.FasterGetCompReplacement".Translate();
+        public override string Label => "PO.FasterGetCompReplacement".Translate();
 
         public override void DoPatches()
         {
