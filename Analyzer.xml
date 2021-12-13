@@ -1,5 +1,5 @@
 <Analyzer>
-    <tabName>
+    <Profiling>
         <Types>
 <li>RimWorld.BeautyUtility</li>
 <li>RimWorld.BedUtility</li>
@@ -18,5 +18,5 @@
 <li>Verse.ThingListGroupHelper</li>
 <li>Verse.VerbUtility</li>
         </Types>
-    </tabName>
+    </Profiling>
 </Analyzer>
