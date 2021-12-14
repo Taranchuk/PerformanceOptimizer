@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace PerformanceOptimizer
+﻿namespace PerformanceOptimizer
 {
     public abstract class Optimization_UITweaks : Optimization
     {

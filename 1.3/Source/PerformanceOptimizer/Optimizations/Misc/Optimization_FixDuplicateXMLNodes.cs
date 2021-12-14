@@ -1,14 +1,6 @@
 ﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 using System.Xml;
 using Verse;
-using Verse.Sound;
-using Verse.Steam;
 using static Verse.XmlInheritance;
 
 namespace PerformanceOptimizer

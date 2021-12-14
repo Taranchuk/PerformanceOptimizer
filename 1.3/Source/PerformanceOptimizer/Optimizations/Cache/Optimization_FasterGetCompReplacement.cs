@@ -1,15 +1,11 @@
 ﻿using HarmonyLib;
 using RimWorld.Planet;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Verse;
 
@@ -79,7 +75,7 @@ namespace PerformanceOptimizer
             }
             return methods;
         }
-        public static void ParseMethod(MethodInfo method, List<MethodInfo> methodsCallingMapGetComp, List<MethodInfo> methodsCallingWorldGetComp, List<MethodInfo> methodsCallingGameGetComp, 
+        public static void ParseMethod(MethodInfo method, List<MethodInfo> methodsCallingMapGetComp, List<MethodInfo> methodsCallingWorldGetComp, List<MethodInfo> methodsCallingGameGetComp,
             List<MethodInfo> methodsCallingThingGetComp, List<MethodInfo> methodsCallingThingTryGetComp, List<MethodInfo> methodsCallingHediffTryGetComp
             , List<MethodInfo> methodsCallingWorldObjectGetComp)
         {
@@ -285,7 +281,7 @@ namespace PerformanceOptimizer
             return false;
         }
 
-        private static IEnumerable<CodeInstruction> PerformTranspiler(string methodName, Type baseType, MethodInfo genericMethod, OpCode opcode, int parameterLength, 
+        private static IEnumerable<CodeInstruction> PerformTranspiler(string methodName, Type baseType, MethodInfo genericMethod, OpCode opcode, int parameterLength,
             IEnumerable<CodeInstruction> instructions, MethodBase source, ILGenerator il)
         {
             bool found = false;

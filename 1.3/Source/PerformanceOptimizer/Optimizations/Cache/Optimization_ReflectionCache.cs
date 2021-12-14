@@ -1,14 +1,8 @@
 ﻿using HarmonyLib;
-using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
-using System.Xml;
-using UnityEngine;
-using UnityEngine.Rendering;
 using Verse;
 
 namespace PerformanceOptimizer
@@ -109,7 +103,7 @@ namespace PerformanceOptimizer
         }
 
         private static bool TraverseGetValuePrefix(Traverse __instance, ref object __result, out bool __state)
-        {     
+        {
             if (objectValues.TryGetValue(__instance._root, out var dict) && dict.TryGetValue(__instance._info, out __result))
             {
                 __state = false;

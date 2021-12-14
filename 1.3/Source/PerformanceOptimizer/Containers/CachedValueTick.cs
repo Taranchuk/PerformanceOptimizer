@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Verse;
 
 namespace PerformanceOptimizer
@@ -175,7 +171,7 @@ namespace PerformanceOptimizer
             this.valueInt = value;
             refreshTick = Find.TickManager.TicksGame + resetInTicks;
         }
-    
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetValue(T value, int resetInTicks)
         {

@@ -4,9 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
-using UnityEngine;
 using Verse;
-using Verse.AI;
 
 namespace PerformanceOptimizer
 {
@@ -55,7 +53,7 @@ namespace PerformanceOptimizer
                     return true;
                 }
                 else
-{
+                {
                     if (__instance.comps != null)
                     {
                         int i = 0;

@@ -1,20 +1,9 @@
-﻿using HarmonyLib;
-using RimWorld;
-using RimWorld.Planet;
+﻿using RimWorld;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
-using Verse.Noise;
 
 namespace PerformanceOptimizer
 {

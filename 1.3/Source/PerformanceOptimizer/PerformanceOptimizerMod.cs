@@ -2,19 +2,11 @@
 using RimWorld;
 using RimWorld.Planet;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
-using Verse.Noise;
 
 namespace PerformanceOptimizer
 {
@@ -109,7 +101,7 @@ namespace PerformanceOptimizer
         }
     }
 
-    [HarmonyPatch(typeof(Log), nameof(Log.Error), new Type[] {typeof(string) })]
+    [HarmonyPatch(typeof(Log), nameof(Log.Error), new Type[] { typeof(string) })]
     public static class Log_Error_Patch
     {
         public static bool suppressErrorMessages;

@@ -87,7 +87,7 @@ namespace PerformanceOptimizer
             }
             topLeftSection.EndSection(uiSection);
             topLeftSection.End();
-            
+
             Listing_Standard miscSettingsSection = new Listing_Standard();
             Rect miscSettingsRect = new Rect(uiSettingsRect.xMax + 15, uiSettingsRect.y, sectionWidth, uiSettingsRect.height);
             miscSettingsSection.Begin(miscSettingsRect);

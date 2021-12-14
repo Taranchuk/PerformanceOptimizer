@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using RimWorld;
-using System;
 using Verse;
 
 namespace PerformanceOptimizer
@@ -28,7 +27,7 @@ namespace PerformanceOptimizer
                     return false;
                 }
             }
-            
+
             if (cachedResult is null)
             {
                 cachedResult = Find.FactionManager.OfPlayer;

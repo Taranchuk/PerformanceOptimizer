@@ -1,9 +1,4 @@
-﻿using HarmonyLib;
-using System;
-using System.Diagnostics;
-using System.Reflection;
-using System.Xml;
-using Verse;
+﻿using Verse;
 using Verse.Sound;
 
 namespace PerformanceOptimizer
