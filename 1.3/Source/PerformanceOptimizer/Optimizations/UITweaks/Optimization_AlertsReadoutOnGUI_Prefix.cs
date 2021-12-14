@@ -48,7 +48,7 @@ namespace PerformanceOptimizer
                 num += activeAlerts[i].Height;
             }
             float num2 = Find.LetterStack.LastTopY - num;
-            Rect rect = new Rect((float)UI.screenWidth - 154f, num2, 154f, lastFinalY - num2);
+            Rect rect = new Rect(UI.screenWidth - 154f, num2, 154f, lastFinalY - num2);
             float num3 = GenUI.BackgroundDarkAlphaForText();
             if (num3 > 0.001f)
             {

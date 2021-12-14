@@ -17,7 +17,7 @@ namespace PerformanceOptimizer
         public abstract string Label { get; }
         public virtual void DrawSettings(Listing_Standard section)
         {
-            section.CheckboxLabeled(Label, ref enabled, actionOnClick: this.Apply);
+            section.CheckboxLabeled(Label, ref enabled, actionOnClick: Apply);
         }
 
         public virtual int DrawOrder => 0;
@@ -89,10 +89,14 @@ namespace PerformanceOptimizer
         {
             Scribe_Values.Look(ref enabled, "enabled");
         }
-        public MethodInfo GetMethod(string name) => AccessTools.Method(this.GetType(), name);
+        public MethodInfo GetMethod(string name)
+        {
+            return AccessTools.Method(GetType(), name);
+        }
+
         public int CompareTo(Optimization other)
         {
-            return string.Compare(this.Label, other.Label) + DrawOrder;
+            return string.Compare(Label, other.Label) + DrawOrder;
         }
     }
 }

@@ -17,7 +17,7 @@ namespace PerformanceOptimizer
             stopwatch.Restart();
         }
 
-        private static Dictionary<Stopwatch, StopwatchData> stopwatches = new Dictionary<Stopwatch, StopwatchData>();
+        private static readonly Dictionary<Stopwatch, StopwatchData> stopwatches = new Dictionary<Stopwatch, StopwatchData>();
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LogTime(this Stopwatch stopwatch, string log, int limit = 1)
         {

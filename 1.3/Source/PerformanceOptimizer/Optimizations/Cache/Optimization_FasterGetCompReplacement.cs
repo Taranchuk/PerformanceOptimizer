@@ -37,7 +37,10 @@ namespace PerformanceOptimizer
             "Numbers.MainTabWindow_Numbers", "Numbers.OptionsMaker", "<PawnSelector>g__Action", "<AllBuildingsColonistWithComp>", "<FailOnOwnerStatus>", "Transpiler"
         };
 
-        private static bool TypeValidator(Type type) => !assembliesToSkip.Any(asmName => type.Assembly?.FullName?.Contains(asmName) ?? false) && !typesToSkip.Any(x => type.FullName.Contains(x));
+        private static bool TypeValidator(Type type)
+        {
+            return !assembliesToSkip.Any(asmName => type.Assembly?.FullName?.Contains(asmName) ?? false) && !typesToSkip.Any(x => type.FullName.Contains(x));
+        }
 
         private static List<Type> types;
         public static List<Type> GetTypesToParse()
@@ -67,7 +70,7 @@ namespace PerformanceOptimizer
                             }
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         //Log.Error("Exception: " + ex);
                     }
@@ -512,7 +515,7 @@ namespace PerformanceOptimizer
                 CompsOfType<T>.mapCompsByMap[map] = mapComp = map.GetComponent<T>();
             }
             //Log.Message("Returning map comp: " + mapComp + ", total count of map comps is " + map.components.Count);
-            return mapComp as T;
+            return mapComp;
         }
 
         public static Dictionary<Type, WorldComponent> cachedWorldComps = new Dictionary<Type, WorldComponent>();

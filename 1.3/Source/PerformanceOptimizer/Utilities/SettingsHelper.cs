@@ -120,7 +120,7 @@ namespace PerformanceOptimizer
         // Token: 0x06000027 RID: 39 RVA: 0x00003754 File Offset: 0x00001954
         public static void SliderLabeled(this Listing_Standard ls, string label, ref int val, string format, float min = 0f, float max = 100f, string tooltip = null)
         {
-            float num = (float)val;
+            float num = val;
             ls.SliderLabeled(label, ref num, format, min, max, tooltip);
             val = (int)num;
         }
@@ -230,9 +230,7 @@ namespace PerformanceOptimizer
         // Token: 0x0600002E RID: 46 RVA: 0x00003A24 File Offset: 0x00001C24
         public static void AddLabeledTextField(this Listing_Standard listing_Standard, string label, ref string settingsValue, float leftPartPct = 0.5f)
         {
-            Rect rect;
-            Rect rect2;
-            listing_Standard.LineRectSpilter(out rect, out rect2, leftPartPct, null);
+            listing_Standard.LineRectSpilter(out Rect rect, out Rect rect2, leftPartPct, null);
             Widgets.Label(rect, label);
             string text = settingsValue.ToString();
             settingsValue = Widgets.TextField(rect2, text);
@@ -241,9 +239,7 @@ namespace PerformanceOptimizer
         // Token: 0x0600002F RID: 47 RVA: 0x00003A60 File Offset: 0x00001C60
         public static void AddLabeledNumericalTextField<T>(this Listing_Standard listing_Standard, string label, ref T settingsValue, float leftPartPct = 0.5f, float minValue = 1f, float maxValue = 100000f) where T : struct
         {
-            Rect rect;
-            Rect rect2;
-            listing_Standard.LineRectSpilter(out rect, out rect2, leftPartPct, null);
+            listing_Standard.LineRectSpilter(out Rect rect, out Rect rect2, leftPartPct, null);
             Widgets.Label(rect, label);
             string text = settingsValue.ToString();
             Widgets.TextFieldNumeric<T>(rect2, ref settingsValue, ref text, minValue, maxValue);
@@ -271,8 +267,8 @@ namespace PerformanceOptimizer
             // Token: 0x0600008C RID: 140 RVA: 0x000052A7 File Offset: 0x000034A7
             public LabeledRadioValue(string label, T val)
             {
-                this.Label = label;
-                this.Value = val;
+                Label = label;
+                Value = val;
             }
 
             // Token: 0x17000011 RID: 17

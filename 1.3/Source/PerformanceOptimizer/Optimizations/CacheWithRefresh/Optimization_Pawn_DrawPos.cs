@@ -17,9 +17,11 @@ namespace PerformanceOptimizer
         {
             base.DoPatches();
             bool cache = false;
-            List<MethodInfo> methods = new List<MethodInfo>();
-            methods.Add(AccessTools.Method("DubsMintMinimap.MainTabWindow_MiniMap:DrawAllPawns"));
-            methods.Add(AccessTools.Method(typeof(Designation), "Draw"));
+            List<MethodInfo> methods = new List<MethodInfo>
+            {
+                AccessTools.Method("DubsMintMinimap.MainTabWindow_MiniMap:DrawAllPawns"),
+                AccessTools.Method(typeof(Designation), "Draw")
+            };
             foreach (var method in methods)
             {
                 if (method != null)

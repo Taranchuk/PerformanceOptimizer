@@ -168,14 +168,14 @@ namespace PerformanceOptimizer
         }
         public CachedValueTick(T value, int resetInTicks)
         {
-            this.valueInt = value;
+            valueInt = value;
             refreshTick = Find.TickManager.TicksGame + resetInTicks;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetValue(T value, int resetInTicks)
         {
-            this.valueInt = value;
+            valueInt = value;
             refreshTick = Find.TickManager.TicksGame + resetInTicks;
         }
     }

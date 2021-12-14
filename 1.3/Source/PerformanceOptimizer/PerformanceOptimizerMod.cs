@@ -10,7 +10,7 @@ using Verse;
 
 namespace PerformanceOptimizer
 {
-    class PerformanceOptimizerMod : Mod
+    internal class PerformanceOptimizerMod : Mod
     {
         public static Harmony harmony;
 
@@ -58,7 +58,7 @@ namespace PerformanceOptimizer
 
         public override string SettingsCategory()
         {
-            return this.Content.Name;
+            return Content.Name;
         }
 
         public static void ResetStaticData()
