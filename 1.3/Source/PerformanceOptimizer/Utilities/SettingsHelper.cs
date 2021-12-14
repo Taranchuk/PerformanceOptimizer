@@ -13,7 +13,57 @@ namespace PerformanceOptimizer
 {
 	internal static class SettingsHelper
 	{
-		public static void CheckboxLabeledWithSlider(this Listing_Standard ls, string label, string sliderLabelKey, ref bool checkOn, ref int value, int maxSliderValue = 2500, string tooltip = null)
+		public static void CheckboxLabeled(this Listing_Standard ls, string label, ref bool checkOn, string tooltip = null, Action actionOnClick = null)
+		{
+			float lineHeight = Text.LineHeight;
+			Rect rect = ls.GetRect(lineHeight);
+			if (!ls.BoundingRectCached.HasValue || rect.Overlaps(ls.BoundingRectCached.Value))
+			{
+				if (!tooltip.NullOrEmpty())
+				{
+					if (Mouse.IsOver(rect))
+					{
+						DrawHighlight(rect);
+					}
+					TooltipHandler.TipRegion(rect, tooltip);
+				}
+				CheckboxLabeled(rect, label, ref checkOn, actionOnClick: actionOnClick);
+			}
+			ls.Gap(ls.verticalSpacing);
+		}
+
+		public static void CheckboxLabeled(Rect rect, string label, ref bool checkOn, bool disabled = false, Texture2D texChecked = null, 
+			Texture2D texUnchecked = null, bool placeCheckboxNearText = false, Action actionOnClick = null)
+		{
+			TextAnchor anchor = Text.Anchor;
+			Text.Anchor = TextAnchor.MiddleLeft;
+			if (placeCheckboxNearText)
+			{
+				rect.width = Mathf.Min(rect.width, Text.CalcSize(label).x + 24f + 10f);
+			}
+			Label(rect, label);
+			if (!disabled && ButtonInvisible(rect))
+			{
+				checkOn = !checkOn;
+				if (checkOn)
+				{
+					SoundDefOf.Checkbox_TurnedOn.PlayOneShotOnCamera();
+				}
+				else
+				{
+					SoundDefOf.Checkbox_TurnedOff.PlayOneShotOnCamera();
+				}
+				if (actionOnClick != null)
+                {
+					actionOnClick();
+                }
+			}
+			CheckboxDraw(rect.x + rect.width - 24f, rect.y, checkOn, disabled);
+			Text.Anchor = anchor;
+		}
+
+		public static void CheckboxLabeledWithSlider(this Listing_Standard ls, string label, string sliderLabelKey, ref bool checkOn, ref int value, int maxSliderValue = 2500,
+			string tooltip = null, Action actionOnClick = null)
 		{
 			float lineHeight = Text.LineHeight;
 			Rect rect = ls.GetRect(lineHeight);
@@ -60,6 +110,10 @@ namespace PerformanceOptimizer
 					{
 						SoundDefOf.Checkbox_TurnedOff.PlayOneShotOnCamera();
 					}
+					if (actionOnClick != null)
+                    {
+						actionOnClick();
+                    }
 				}
 				CheckboxDraw(rect.x + rect.width - 24f, rect.y, checkOn, false);
 				Text.Anchor = anchor;

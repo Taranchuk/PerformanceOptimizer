@@ -62,7 +62,6 @@ namespace PerformanceOptimizer
         {
             base.WriteSettings();
             KeyPrefs.Save();
-            PerformanceOptimizerSettings.optimizations.ForEach(x => x.Apply());
         }
 
         public override string SettingsCategory()

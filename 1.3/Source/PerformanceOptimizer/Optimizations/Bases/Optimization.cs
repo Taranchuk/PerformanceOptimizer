@@ -17,12 +17,11 @@ namespace PerformanceOptimizer
         public abstract string Label { get; }
         public virtual void DrawSettings(Listing_Standard section)
         {
-            section.CheckboxLabeled(Label, ref enabled);
+            section.CheckboxLabeled(Label, ref enabled, actionOnClick: this.Apply);
         }
-        public virtual int DrawOrder => 0;
 
+        public virtual int DrawOrder => 0;
         public virtual int DrawHeight => 24;
-        public Comparer<Optimization> Comparer => Comparer<Optimization>.Create((first, second) => 1);// );;
         public virtual void Initialize()
         {
             Reset();
@@ -31,8 +30,8 @@ namespace PerformanceOptimizer
         public virtual void Reset()
         {
             enabled = EnabledByDefault;
+            Apply();
         }
-
         public virtual void Clear()
         {
 
@@ -48,6 +47,7 @@ namespace PerformanceOptimizer
                 patchedMethods ??= new Dictionary<MethodInfo, List<MethodInfo>>();
                 DoPatches();
             }
+            Watcher.Reset();
         }
 
         public virtual void DoPatches() { }
@@ -89,9 +89,8 @@ namespace PerformanceOptimizer
         {
             Scribe_Values.Look(ref enabled, "enabled");
         }
-
         public MethodInfo GetMethod(string name) => AccessTools.Method(this.GetType(), name);
-        public virtual int CompareTo(Optimization other)
+        public int CompareTo(Optimization other)
         {
             return string.Compare(this.Label, other.Label) + DrawOrder;
         }

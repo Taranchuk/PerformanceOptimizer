@@ -6,6 +6,7 @@
         CacheWithRefreshRate,
         Throttle,
         UITweak,
-        Misc
+        Misc,
+        Dev
     }
 }

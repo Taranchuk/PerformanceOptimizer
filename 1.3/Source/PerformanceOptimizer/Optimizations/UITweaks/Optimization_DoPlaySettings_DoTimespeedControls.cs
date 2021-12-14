@@ -41,8 +41,8 @@ namespace PerformanceOptimizer
         }
         public override void DrawSettings(Listing_Standard section)
         {
-            section.CheckboxLabeled(Label, ref hideSpeedButtons);
-            section.CheckboxLabeled(SecondLabel, ref disableSpeedButtons);
+            section.CheckboxLabeled(Label, ref hideSpeedButtons, actionOnClick: this.Apply);
+            section.CheckboxLabeled(SecondLabel, ref disableSpeedButtons, actionOnClick: this.Apply);
         }
 
         public override void ExposeData()
