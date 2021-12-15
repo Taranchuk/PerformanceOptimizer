@@ -56,20 +56,15 @@
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_GenTemperature_AverageTemperatureAtTileForTwelfth.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_PlantFallColors_GetFallColorFactor.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Pawn_InteractionsTracker_CurrentSocialMode.cs" />
-    <Compile Include="Optimizations\Cache\Optimization_ReflectionCache.cs" />
     <Compile Include="Optimizations\Cache\Optimization_HediffDef_PossibleToDevelopImmunityNaturally.cs" />
     <Compile Include="Optimizations\Misc\Optimization_FixDuplicateXMLNodes.cs" />
     <Compile Include="Utilities\ModCompatUtility.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_BuildCopyCommandUtility_FindAllowedDesignator.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_DoorRotationAt.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_ExpectationsUtility_CurrentExpectationForMap.cs" />
-    <Compile Include="Optimizations\CacheWithRefresh\Optimization_ExpectationsUtility_CurrentExpectationForPawn.cs" />
-    <Compile Include="Optimizations\Cache\Optimization_Faction_FactionOfPlayer.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_IdeoUtility_GetStyleDominance.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_InspectGizmoGrid_DrawInspectGizmoGridFor.cs" />
     <Compile Include="Optimizations\Bases\Optimization_Misc.cs" />
-    <Compile Include="Optimizations\Throttling\Optimization_JobDriver_CheckCurrentToilEndOrFail.cs" />
-    <Compile Include="Optimizations\Optimizing\Optimization_SteamManager_Update.cs" />
     <Compile Include="Optimizations\Optimizing\Optimization_WindManager_WindManagerTick.cs" />
     <Compile Include="Optimizations\Throttling\Optimization_Plant_TickLong.cs" />
     <Compile Include="Optimizations\UITweaks\Optimization_AlertsReadoutOnGUI_Prefix.cs" />
@@ -97,8 +92,6 @@
     <Compile Include="Optimizations\Throttling\Optimization_Pawn_JobTracker_DetermineNextConstantThinkTreeJob.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_QuestUtility_IsQuestLodger.cs" />
     <Compile Include="Optimizations\Bases\Optimization_RefreshRate.cs" />
-    <Compile Include="Optimizations\Cache\Optimization_StatWorker_MarketValue_CalculableRecipe.cs" />
-    <Compile Include="Optimizations\Cache\Optimization_Text_CalcSize.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Pawn_LabelCache.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Thing_AmbientTemperature.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_ThoughtHandler_TotalMoodOffset.cs" />
@@ -124,6 +117,7 @@
     <Publicize Include="Assembly-CSharp;AllowTool;0Harmony" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Optimizations\Inefficient\" />
     <Folder Include="Optimizations\WIP\" />
   </ItemGroup>
 </Project>

@@ -10,7 +10,7 @@ namespace PerformanceOptimizer
         public static int refreshRateStatic;
 
         public static Dictionary<Pawn, CachedValueTick<float>> cachedResults = new Dictionary<Pawn, CachedValueTick<float>>();
-        public override int RefreshRateByDefault => 300;
+        public override int RefreshRateByDefault => 600;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Label => "PO.BreakThresholdMinor".Translate();
 

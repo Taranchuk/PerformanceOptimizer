@@ -50,32 +50,21 @@ namespace PerformanceOptimizer
 
         private static bool TraverseCreatePrefix(ref Traverse __result, out bool __state, object root)
         {
-            try
-            {
-                if (root != null && createdTraverses.TryGetValue(root, out __result))
-                {
-                    __state = false;
-                    return false;
-                }
-                __state = true;
-            }
-            catch
+            if (root != null && createdTraverses.TryGetValue(root, out __result))
             {
                 __state = false;
+                return false;
             }
+            __state = true;
             return true;
         }
 
         private static void TraverseCreatePostfix(Traverse __result, bool __state, object root)
         {
-            try
+            if (__state && root != null)
             {
-                if (__state && root != null)
-                {
-                    createdTraverses[root] = __result;
-                }
+                createdTraverses[root] = __result;
             }
-            catch { }
         }
 
         private static bool TraverseFieldPrefix(Traverse __instance, ref Traverse __result, out bool __state, string name)
@@ -89,7 +78,6 @@ namespace PerformanceOptimizer
                 __state = false;
                 return false;
             }
-
             __state = true;
             return true;
         }

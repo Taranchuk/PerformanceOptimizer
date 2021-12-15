@@ -18,27 +18,21 @@ namespace PerformanceOptimizer
         [HarmonyPriority(Priority.First)]
         public static bool Prefix(ref Faction __result)
         {
-            if (Current.programStateInt != ProgramState.Playing)
+            if (cachedResult != null)
             {
-                GameInitData gameInitData = Find.GameInitData;
-                if (gameInitData != null && gameInitData.playerFaction != null)
-                {
-                    __result = gameInitData.playerFaction;
-                    return false;
-                }
+                __result = cachedResult;
+                return false;
             }
-
-            if (cachedResult is null)
-            {
-                cachedResult = Find.FactionManager.OfPlayer;
-            }
-            __result = cachedResult;
-            return false;
+            return true;
         }
 
         public override void Clear()
         {
             cachedResult = null;
+            if (Find.World?.factionManager?.OfPlayer != null)
+            {
+                cachedResult = Find.World.factionManager.OfPlayer;
+            }
         }
     }
 }
