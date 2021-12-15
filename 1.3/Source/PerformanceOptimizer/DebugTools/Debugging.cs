@@ -13,7 +13,6 @@ namespace PerformanceOptimizer
         public int fpsActual = 0;
         public List<int> allTps = new List<int>();
         public List<int> allFps = new List<int>();
-
         public int tpsAverageCached;
         public int fpsAverageCached;
     }
@@ -28,9 +27,8 @@ namespace PerformanceOptimizer
         public static Dictionary<TimeSpeed, TPSCounter> tpsDataByTargets = new Dictionary<TimeSpeed, TPSCounter>();
         public static TimeSpeed curTimeSpeed;
         public static bool renderSettings = false;
-        public static DateTime secondStartCollecting;
-        public override bool EnabledByDefault => false;
-
+        public static DateTime timeStartCollectingData;
+        public override bool EnabledAlways => false;
         public override void DoPatches()
         {
             base.DoPatches();
@@ -48,7 +46,7 @@ namespace PerformanceOptimizer
             if (curTimeSpeed != Find.TickManager.CurTimeSpeed)
             {
                 curTimeSpeed = Find.TickManager.CurTimeSpeed;
-                Reset();
+                ResetData();
                 return;
             }
             TPSCounter stats = RecordData();
@@ -76,11 +74,11 @@ namespace PerformanceOptimizer
                 mod.DoSettingsWindowContents(inRect2);
             }
         }
-        public static void Reset()
+        public static void ResetData()
         {
             prevTicks = -1;
             tpsDataByTargets.Clear();
-            secondStartCollecting = DateTime.Now.AddSeconds(2);
+            timeStartCollectingData = DateTime.Now.AddSeconds(2);
         }
 
         private static TPSCounter RecordData()
@@ -92,7 +90,7 @@ namespace PerformanceOptimizer
             float trm = Find.TickManager.TickRateMultiplier;
             tpsTarget = (int)Math.Round((trm == 0f) ? 0f : (60f * trm));
             var currTime = DateTime.Now;
-            if (currTime > secondStartCollecting)
+            if (currTime > timeStartCollectingData)
             {
                 if (prevTicks == -1)
                 {

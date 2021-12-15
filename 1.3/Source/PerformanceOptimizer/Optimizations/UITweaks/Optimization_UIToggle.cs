@@ -46,7 +46,6 @@ namespace PerformanceOptimizer
             }
         }
         public override string Label => "PO.UIToggle".Translate();
-        public override int DrawHeight => base.DrawHeight + 12;
         public override void DrawSettings(Listing_Standard section)
         {
             var keyPrefsData = KeyPrefs.KeyPrefsData;
@@ -74,9 +73,7 @@ namespace PerformanceOptimizer
 
             var checkboxOneKey = new Rect(keybinding2Rect.xMax + 10, keybinding2Rect.y, 120, 24);
             Widgets.CheckboxLabeled(checkboxOneKey, "PO.OneKeyMode".Translate(), ref oneKeyMode);
-
             section.Label(keyHidingText);
-            section.GapLine();
         }
 
         public override void ExposeData()

@@ -12,9 +12,11 @@ namespace PerformanceOptimizer
     {
         public Dictionary<MethodInfo, List<MethodInfo>> patchedMethods;
         public virtual bool EnabledByDefault => true;
+        public virtual bool EnabledAlways => false;
         public abstract OptimizationType OptimizationType { get; }
 
-        public bool enabled;
+        protected bool enabled;
+        public bool IsEnabled => enabled || EnabledAlways;
         public abstract string Label { get; }
         public virtual void DrawSettings(Listing_Standard section)
         {
@@ -39,16 +41,16 @@ namespace PerformanceOptimizer
         }
         public virtual void Apply()
         {
-            if (!enabled && patchedMethods != null && patchedMethods.Any())
+            if (!IsEnabled && patchedMethods != null && patchedMethods.Any())
             {
                 UnPatchAll();
             }
-            else if (enabled && (patchedMethods is null || !patchedMethods.Any()))
+            else if (IsEnabled && (patchedMethods is null || !patchedMethods.Any()))
             {
                 patchedMethods ??= new Dictionary<MethodInfo, List<MethodInfo>>();
                 DoPatches();
             }
-            Watcher.Reset();
+            Watcher.ResetData();
         }
 
         public virtual void DoPatches() { }
@@ -69,7 +71,7 @@ namespace PerformanceOptimizer
             if (prefix != null)
             {
                 patches.Add(prefix);
-                if (PERFORMANCEPROFILE && prefix != null && prefix.ReturnType == typeof(bool))
+                if (ProfilePerformanceImpact && prefix != null && prefix.ReturnType == typeof(bool))
                 {
                     var type = prefix.DeclaringType;
                     PerformanceOptimizerMod.harmony.Patch(prefix, prefix: new HarmonyMethod(GetMethod(nameof(MeasurePrefix))));
@@ -96,39 +98,15 @@ namespace PerformanceOptimizer
             patchedMethods[methodInfo] = patches;
         }
 
-        public static Dictionary<Type, float> performanceTweaksOn = new Dictionary<Type, float>();
-        public static Dictionary<Type, float> performanceTweaksOff = new Dictionary<Type, float>();
+        public static Dictionary<Type, List<float>> performanceTweaksOn = new Dictionary<Type, List<float>>();
+        public static Dictionary<Type, List<float>> performanceTweaksOff = new Dictionary<Type, List<float>>();
         public static bool profileOn = true;
         public static int lastProfileCheckTick;
         public static Stopwatch stopwatch = new Stopwatch();
-        public const bool PERFORMANCEPROFILE = false;
-        public const int PROFILINGINTERVAL = 10000;
+        public virtual bool ProfilePerformanceImpact => false;
+        public const int PROFILINGINTERVAL = 60;
         public static bool MeasurePrefix(ref bool __result)
         {
-            if (Current.gameInt?.tickManager != null && lastProfileCheckTick != Find.TickManager.ticksGameInt && Find.TickManager.ticksGameInt % PROFILINGINTERVAL == 0)
-            {
-                profileOn = !profileOn;
-                lastProfileCheckTick = Find.TickManager.ticksGameInt;
-                Watcher.Reset();
-                if (profileOn)
-                {
-                    Log.Message("Profiling result: -------------------");
-                    var result = new Dictionary<Type, float>();
-                    foreach (var kvp in performanceTweaksOff.OrderByDescending(x => x.Value))
-                    {
-                        if (performanceTweaksOn.TryGetValue(kvp.Key, out var performanceOn))
-                        {
-                            Log.Message(kvp.Key + " - performance on: " + performanceOn + " - performance off: " + kvp.Value + " === " + kvp.Value / performanceOn);
-                            result[kvp.Key] = kvp.Value / performanceOn;
-                        }
-                    }
-
-                    foreach (var r in result.OrderByDescending(x => x.Value))
-                    {
-                        Log.Message("Result: " + r.Key + " - " + r.Value);
-                    }
-                }
-            }
             stopwatch.Restart();
             if (profileOn)
             {
@@ -149,23 +127,58 @@ namespace PerformanceOptimizer
             {
                 if (performanceTweaksOn.ContainsKey(type))
                 {
-                    performanceTweaksOn[type] += elapsed;
+                    performanceTweaksOn[type].Add(elapsed);
                 }
                 else
                 {
-                    performanceTweaksOn[type] = elapsed;
+                    performanceTweaksOn[type] = new List<float> { elapsed };
                 }
             }
             else
             {
                 if (performanceTweaksOff.ContainsKey(type))
                 {
-                    performanceTweaksOff[type] += elapsed;
+                    performanceTweaksOff[type].Add(elapsed);
                 }
                 else
                 {
-                    performanceTweaksOff[type] = elapsed;
+                    performanceTweaksOff[type] = new List<float> { elapsed };
                 }
+            }
+
+            if (Current.gameInt?.tickManager != null && lastProfileCheckTick != Find.TickManager.ticksGameInt
+                && Find.TickManager.ticksGameInt % PROFILINGINTERVAL == 0)
+            {
+                if (performanceTweaksOn.ContainsKey(type) && performanceTweaksOff.ContainsKey(type))
+                {
+                    if (performanceTweaksOn[type].Count > 1000)
+                    {
+                        performanceTweaksOn[type] = performanceTweaksOn[type].Skip(100).ToList();
+                        performanceTweaksOff[type] = performanceTweaksOff[type].Skip(100).ToList();
+                    }
+                    if (!profileOn && performanceTweaksOff.Count > 1 && performanceTweaksOn.Count > 1)
+                    {
+                        Log.Message("Refreshing: " + profileOn + " - " + performanceTweaksOn[type].Count + " - " + performanceTweaksOff[type].Count);
+                        Log.Message("Profiling result: -------------------");
+                        var result = new Dictionary<Type, float>();
+                        foreach (var kvp in performanceTweaksOff.OrderByDescending(x => x.Value.Sum()))
+                        {
+                            if (performanceTweaksOn.TryGetValue(kvp.Key, out var performanceOn))
+                            {
+                                Log.Message(kvp.Key + " - performance on: " + performanceOn.Sum() + " - performance off: " + kvp.Value.Sum() + " === " + kvp.Value.Average() / performanceOn.Average());
+                                result[kvp.Key] = kvp.Value.Average() / performanceOn.Average();
+                            }
+                        }
+
+                        foreach (var r in result.OrderByDescending(x => x.Value))
+                        {
+                            Log.Message("Result: " + r.Key + " - " + r.Value);
+                        }
+                    }
+                }
+                profileOn = !profileOn;
+                lastProfileCheckTick = Find.TickManager.ticksGameInt;
+                Watcher.ResetData();
             }
         }
 

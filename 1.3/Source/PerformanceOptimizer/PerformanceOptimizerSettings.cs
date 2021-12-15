@@ -25,8 +25,8 @@ namespace PerformanceOptimizer
             Log_Error_Patch.suppressErrorMessages = false;
         }
 
-        public static List<Optimization> uiMiscTweaks;
-        public static List<Optimization> optimizationTweaks;
+        public static List<Optimization> uiTweaks;
+        public static List<Optimization> perfTweaks;
         public static List<Optimization> throttles;
         public static void Initialize()
         {
@@ -44,8 +44,9 @@ namespace PerformanceOptimizer
                 }
             }
 
-            uiMiscTweaks = optimizations.Where(x => x.OptimizationType == OptimizationType.UITweak).Concat(optimizations.Where(x => x.OptimizationType == OptimizationType.Misc)).ToList();
-            optimizationTweaks = optimizations.Where(x => x.OptimizationType == OptimizationType.Optimization).ToList();
+            uiTweaks = optimizations.Where(x => x.OptimizationType == OptimizationType.UITweak).ToList();
+            perfTweaks = optimizations.Where(x => x.OptimizationType == OptimizationType.Optimization)
+                .Concat(optimizations.Where(x => x.OptimizationType == OptimizationType.Misc)).ToList();
             throttles = optimizations.Where(x => x.OptimizationType == OptimizationType.Throttle || x.OptimizationType == OptimizationType.CacheWithRefreshRate).ToList();
 
             foreach (var optimization in optimizations)
@@ -56,8 +57,8 @@ namespace PerformanceOptimizer
 
         public void DoSettingsWindowContents(Rect inRect)
         {
-            var uiSectionHeight = uiMiscTweaks.Sum(x => x.DrawHeight);
-            var optimizationTweaksHeight = optimizationTweaks.Sum(x => x.DrawHeight);
+            var uiSectionHeight = uiTweaks.Sum(x => x.DrawHeight);
+            var optimizationTweaksHeight = perfTweaks.Sum(x => x.DrawHeight);
             var throttlesHeight = throttles.Sum(y => y.DrawHeight);
 
             var sectionHeightSize = (uiSectionHeight > optimizationTweaksHeight ? uiSectionHeight : optimizationTweaksHeight) + 8 + 30;
@@ -75,13 +76,13 @@ namespace PerformanceOptimizer
             var uiSection = topLeftSection.BeginSection(sectionHeightSize, 10, 10);
             if (uiSection.ButtonTextLabeled("PO.UISettings".Translate(), "Reset".Translate()))
             {
-                foreach (var tweak in uiMiscTweaks)
+                foreach (var tweak in uiTweaks)
                 {
                     tweak.Reset();
                 }
             }
             uiSection.GapLine(8);
-            foreach (var tweak in uiMiscTweaks.OrderBy(x => x))
+            foreach (var tweak in uiTweaks.OrderBy(x => x))
             {
                 tweak.DrawSettings(uiSection);
             }
@@ -95,14 +96,14 @@ namespace PerformanceOptimizer
 
             if (miscSettings.ButtonTextLabeled("PO.PerformanceSettings".Translate(), "Reset".Translate()))
             {
-                foreach (var tweak in optimizationTweaks)
+                foreach (var tweak in perfTweaks)
                 {
                     tweak.Reset();
                 }
             }
 
             miscSettings.GapLine(8);
-            foreach (var tweak in optimizationTweaks.OrderBy(x => x))
+            foreach (var tweak in perfTweaks.OrderBy(x => x))
             {
                 tweak.DrawSettings(miscSettings);
             }

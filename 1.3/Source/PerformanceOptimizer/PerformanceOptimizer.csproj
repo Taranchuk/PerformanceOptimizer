@@ -57,6 +57,7 @@
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_PlantFallColors_GetFallColorFactor.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Pawn_InteractionsTracker_CurrentSocialMode.cs" />
     <Compile Include="Optimizations\Cache\Optimization_HediffDef_PossibleToDevelopImmunityNaturally.cs" />
+    <Compile Include="Optimizations\Cache\Optimization_StatWorker_MarketValue_CalculableRecipe.cs" />
     <Compile Include="Optimizations\Misc\Optimization_FixDuplicateXMLNodes.cs" />
     <Compile Include="Utilities\ModCompatUtility.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_BuildCopyCommandUtility_FindAllowedDesignator.cs" />

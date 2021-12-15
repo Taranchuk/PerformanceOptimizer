@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
-	<PO.UISettings>UI and miscellaneous settings</PO.UISettings>
+	<PO.UISettings>UI settings</PO.UISettings>
 	<PO.HideResourceReadout>Hide resource readout</PO.HideResourceReadout>
 	<PO.HideBottomButtonBar>Hide bottom button bar</PO.HideBottomButtonBar>
 	<PO.HideBottomRightOverlayButtons>Hide bottom right overlay buttons</PO.HideBottomRightOverlayButtons>
@@ -9,7 +9,7 @@
 	<PO.HideSpeedButtons>Hide speed buttons</PO.HideSpeedButtons>
 	<PO.DisableSpeedButtons>Disable speed buttons (leave only keybindings)</PO.DisableSpeedButtons>
 	
-	<PO.PerformanceSettings>Performance tweaks</PO.PerformanceSettings>
+	<PO.PerformanceSettings>Performance &amp; misc. tweaks</PO.PerformanceSettings>
 	<PO.FasterGetCompReplacement>Faster GetComp methods replacement</PO.FasterGetCompReplacement>
 	<PO.CacheTextSizeCalc>Cache text size calculations</PO.CacheTextSizeCalc>
 	<PO.CacheGizmos>Cache gizmos retrieval from selected objects</PO.CacheGizmos>
