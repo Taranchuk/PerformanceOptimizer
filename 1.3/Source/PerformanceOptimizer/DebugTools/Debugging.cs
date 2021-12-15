@@ -28,7 +28,7 @@ namespace PerformanceOptimizer
         public static TimeSpeed curTimeSpeed;
         public static bool renderSettings = false;
         public static DateTime timeStartCollectingData;
-        public override bool EnabledAlways => false;
+        public override bool IsEnabled => false;
         public override void DoPatches()
         {
             base.DoPatches();
@@ -87,11 +87,11 @@ namespace PerformanceOptimizer
             {
                 tpsDataByTargets[curTimeSpeed] = stats = new TPSCounter();
             }
-            float trm = Find.TickManager.TickRateMultiplier;
-            tpsTarget = (int)Math.Round((trm == 0f) ? 0f : (60f * trm));
             var currTime = DateTime.Now;
             if (currTime > timeStartCollectingData)
             {
+                float trm = Find.TickManager.TickRateMultiplier;
+                tpsTarget = (int)Math.Round((trm == 0f) ? 0f : (60f * trm));
                 if (prevTicks == -1)
                 {
                     prevTicks = GenTicks.TicksAbs;

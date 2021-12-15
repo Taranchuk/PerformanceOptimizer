@@ -12,11 +12,10 @@ namespace PerformanceOptimizer
     {
         public Dictionary<MethodInfo, List<MethodInfo>> patchedMethods;
         public virtual bool EnabledByDefault => true;
-        public virtual bool EnabledAlways => false;
         public abstract OptimizationType OptimizationType { get; }
 
         protected bool enabled;
-        public bool IsEnabled => enabled || EnabledAlways;
+        public virtual bool IsEnabled => enabled;
         public abstract string Label { get; }
         public virtual void DrawSettings(Listing_Standard section)
         {
