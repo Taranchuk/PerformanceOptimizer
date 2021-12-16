@@ -117,67 +117,75 @@ namespace PerformanceOptimizer
                 return false;
             }
         }
+
+        private static DateTime dateTime = DateTime.MaxValue;
         public static void MeasurePostfix(MethodBase __originalMethod)
         {
             stopwatch.Stop();
-            var elapsed = (float)stopwatch.ElapsedTicks / Stopwatch.Frequency;
-            var type = mappedValues[__originalMethod];
-            if (profileOn)
+            if (dateTime == DateTime.MaxValue)
             {
-                if (performanceTweaksOn.ContainsKey(type))
-                {
-                    performanceTweaksOn[type].Add(elapsed);
-                }
-                else
-                {
-                    performanceTweaksOn[type] = new List<float> { elapsed };
-                }
+                dateTime = DateTime.Now.AddSeconds(5);
+                return;
             }
-            else
+            if (DateTime.Now > dateTime)
             {
-                if (performanceTweaksOff.ContainsKey(type))
+                var elapsed = (float)stopwatch.ElapsedTicks / Stopwatch.Frequency;
+                var type = mappedValues[__originalMethod];
+                if (profileOn)
                 {
-                    performanceTweaksOff[type].Add(elapsed);
-                }
-                else
-                {
-                    performanceTweaksOff[type] = new List<float> { elapsed };
-                }
-            }
-
-            if (Current.gameInt?.tickManager != null && lastProfileCheckTick != Find.TickManager.ticksGameInt
-                && Find.TickManager.ticksGameInt % PROFILINGINTERVAL == 0)
-            {
-                if (performanceTweaksOn.ContainsKey(type) && performanceTweaksOff.ContainsKey(type))
-                {
-                    if (performanceTweaksOn[type].Count > 1000)
+                    if (performanceTweaksOn.ContainsKey(type))
                     {
-                        performanceTweaksOn[type] = performanceTweaksOn[type].Skip(100).ToList();
-                        performanceTweaksOff[type] = performanceTweaksOff[type].Skip(100).ToList();
+                        performanceTweaksOn[type].Add(elapsed);
                     }
-                    if (!profileOn && performanceTweaksOff.Count > 1 && performanceTweaksOn.Count > 1)
+                    else
                     {
-                        Log.Message("Refreshing: " + profileOn + " - " + performanceTweaksOn[type].Count + " - " + performanceTweaksOff[type].Count);
-                        Log.Message("Profiling result: -------------------");
-                        var result = new Dictionary<Type, float>();
-                        foreach (var kvp in performanceTweaksOff.OrderByDescending(x => x.Value.Sum()))
+                        performanceTweaksOn[type] = new List<float> { elapsed };
+                    }
+                }
+                else
+                {
+                    if (performanceTweaksOff.ContainsKey(type))
+                    {
+                        performanceTweaksOff[type].Add(elapsed);
+                    }
+                    else
+                    {
+                        performanceTweaksOff[type] = new List<float> { elapsed };
+                    }
+                }
+
+                if (Current.gameInt?.tickManager != null && Find.TickManager.ticksGameInt > lastProfileCheckTick + PROFILINGINTERVAL)
+                {
+                    //Log.Message("performanceTweaksOn.ContainsKey(type): " + performanceTweaksOn.ContainsKey(type));
+                    //Log.Message("performanceTweaksOff.ContainsKey(type): " + performanceTweaksOff.ContainsKey(type));
+                    if (profileOn && performanceTweaksOn.ContainsKey(type) && performanceTweaksOff.ContainsKey(type))
+                    {
+                        //Log.Message("performanceTweaksOn[type].Count: " + performanceTweaksOn[type].Count);
+                        //Log.Message("performanceTweaksOff[type].Count: " + performanceTweaksOff[type].Count);
+                        if (performanceTweaksOff[type].Count > 1 && performanceTweaksOn[type].Count > 1)
                         {
-                            if (performanceTweaksOn.TryGetValue(kvp.Key, out var performanceOn))
+                            Log.Message("Profile: " + profileOn + " - " + performanceTweaksOn[type].Count + " - " + performanceTweaksOff[type].Count);
+                            Log.Message("Profiling result: -------------------");
+                            var result = new Dictionary<Type, float>();
+                            foreach (var kvp in performanceTweaksOff.OrderByDescending(x => x.Value.Sum()))
                             {
-                                Log.Message(kvp.Key + " - performance on: " + performanceOn.Sum() + " - performance off: " + kvp.Value.Sum() + " === " + kvp.Value.Average() / performanceOn.Average());
-                                result[kvp.Key] = kvp.Value.Average() / performanceOn.Average();
+                                if (performanceTweaksOn.TryGetValue(kvp.Key, out var performanceOn))
+                                {
+                                    Log.Message(kvp.Key + " - performance on: " + performanceOn.Sum() + " - performance off: " + kvp.Value.Sum() + " === " + kvp.Value.Average() / performanceOn.Average());
+                                    result[kvp.Key] = kvp.Value.Average() / performanceOn.Average();
+                                }
+                            }
+
+                            foreach (var r in result.OrderByDescending(x => x.Value))
+                            {
+                                Log.Message("Result: " + r.Key + " - " + r.Value);
                             }
                         }
-
-                        foreach (var r in result.OrderByDescending(x => x.Value))
-                        {
-                            Log.Message("Result: " + r.Key + " - " + r.Value);
-                        }
                     }
+                    profileOn = !profileOn;
+                    lastProfileCheckTick = Find.TickManager.ticksGameInt;
+                    Watcher.ResetData();
                 }
-                profileOn = !profileOn;
-                lastProfileCheckTick = Find.TickManager.ticksGameInt;
-                Watcher.ResetData();
             }
         }
 

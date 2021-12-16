@@ -58,6 +58,10 @@
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Pawn_InteractionsTracker_CurrentSocialMode.cs" />
     <Compile Include="Optimizations\Cache\Optimization_HediffDef_PossibleToDevelopImmunityNaturally.cs" />
     <Compile Include="Optimizations\Cache\Optimization_StatWorker_MarketValue_CalculableRecipe.cs" />
+    <Compile Include="Optimizations\Experimental\Optimization_Precept_RoleSingle_RecacheActivity.cs" />
+    <Compile Include="Optimizations\Experimental\Optimization_Precept_RoleMulti_RecacheActivity.cs" />
+    <Compile Include="Optimizations\Experimental\Optimization_IdeoBuildingPresenceDemand_BuildingPresent.cs" />
+    <Compile Include="Optimizations\Experimental\Optimization_WorldGrid_LongLatOf.cs" />
     <Compile Include="Optimizations\Misc\Optimization_FixDuplicateXMLNodes.cs" />
     <Compile Include="Utilities\ModCompatUtility.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_BuildCopyCommandUtility_FindAllowedDesignator.cs" />
