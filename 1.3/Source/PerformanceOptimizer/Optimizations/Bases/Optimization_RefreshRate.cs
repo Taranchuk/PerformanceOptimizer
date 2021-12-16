@@ -34,7 +34,7 @@ namespace PerformanceOptimizer
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Values.Look(ref refreshRate, "refreshRate");
+            Scribe_Values.Look(ref refreshRate, "refreshRate", RefreshRateByDefault);
         }
     }
 }

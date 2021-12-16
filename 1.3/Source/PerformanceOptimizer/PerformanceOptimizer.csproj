@@ -67,7 +67,6 @@
     <Compile Include="Utilities\ModCompatUtility.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_BuildCopyCommandUtility_FindAllowedDesignator.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_DoorRotationAt.cs" />
-    <Compile Include="Optimizations\CacheWithRefresh\Optimization_ExpectationsUtility_CurrentExpectationForMap.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_IdeoUtility_GetStyleDominance.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_InspectGizmoGrid_DrawInspectGizmoGridFor.cs" />
     <Compile Include="Optimizations\Bases\Optimization_Misc.cs" />

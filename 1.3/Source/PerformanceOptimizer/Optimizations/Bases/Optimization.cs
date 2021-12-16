@@ -104,6 +104,16 @@ namespace PerformanceOptimizer
         public static Stopwatch stopwatch = new Stopwatch();
         public virtual bool ProfilePerformanceImpact => false;
         public const int PROFILINGINTERVAL = 60;
+        struct MeasureData
+        {
+            public float performanceImpactOn;
+            public float performanceImpactOff;
+            public float perfRate;
+            public string Log()
+            {
+                return "performance on: " + performanceImpactOn + " - performance off: " + performanceImpactOff + " - perf rate: " + perfRate;
+            }
+        }
         public static bool MeasurePrefix(ref bool __result)
         {
             stopwatch.Restart();
@@ -117,75 +127,71 @@ namespace PerformanceOptimizer
                 return false;
             }
         }
-
-        private static DateTime dateTime = DateTime.MaxValue;
         public static void MeasurePostfix(MethodBase __originalMethod)
         {
             stopwatch.Stop();
-            if (dateTime == DateTime.MaxValue)
+            var elapsed = (float)stopwatch.ElapsedTicks / Stopwatch.Frequency;
+            var type = mappedValues[__originalMethod];
+            if (profileOn)
             {
-                dateTime = DateTime.Now.AddSeconds(5);
-                return;
-            }
-            if (DateTime.Now > dateTime)
-            {
-                var elapsed = (float)stopwatch.ElapsedTicks / Stopwatch.Frequency;
-                var type = mappedValues[__originalMethod];
-                if (profileOn)
+                if (performanceTweaksOn.ContainsKey(type))
                 {
-                    if (performanceTweaksOn.ContainsKey(type))
-                    {
-                        performanceTweaksOn[type].Add(elapsed);
-                    }
-                    else
-                    {
-                        performanceTweaksOn[type] = new List<float> { elapsed };
-                    }
+                    performanceTweaksOn[type].Add(elapsed);
                 }
                 else
                 {
-                    if (performanceTweaksOff.ContainsKey(type))
-                    {
-                        performanceTweaksOff[type].Add(elapsed);
-                    }
-                    else
-                    {
-                        performanceTweaksOff[type] = new List<float> { elapsed };
-                    }
+                    performanceTweaksOn[type] = new List<float> { elapsed };
                 }
-
-                if (Current.gameInt?.tickManager != null && Find.TickManager.ticksGameInt > lastProfileCheckTick + PROFILINGINTERVAL)
+            }
+            else
+            {
+                if (performanceTweaksOff.ContainsKey(type))
                 {
-                    //Log.Message("performanceTweaksOn.ContainsKey(type): " + performanceTweaksOn.ContainsKey(type));
-                    //Log.Message("performanceTweaksOff.ContainsKey(type): " + performanceTweaksOff.ContainsKey(type));
-                    if (profileOn && performanceTweaksOn.ContainsKey(type) && performanceTweaksOff.ContainsKey(type))
-                    {
-                        //Log.Message("performanceTweaksOn[type].Count: " + performanceTweaksOn[type].Count);
-                        //Log.Message("performanceTweaksOff[type].Count: " + performanceTweaksOff[type].Count);
-                        if (performanceTweaksOff[type].Count > 1 && performanceTweaksOn[type].Count > 1)
-                        {
-                            Log.Message("Profile: " + profileOn + " - " + performanceTweaksOn[type].Count + " - " + performanceTweaksOff[type].Count);
-                            Log.Message("Profiling result: -------------------");
-                            var result = new Dictionary<Type, float>();
-                            foreach (var kvp in performanceTweaksOff.OrderByDescending(x => x.Value.Sum()))
-                            {
-                                if (performanceTweaksOn.TryGetValue(kvp.Key, out var performanceOn))
-                                {
-                                    Log.Message(kvp.Key + " - performance on: " + performanceOn.Sum() + " - performance off: " + kvp.Value.Sum() + " === " + kvp.Value.Average() / performanceOn.Average());
-                                    result[kvp.Key] = kvp.Value.Average() / performanceOn.Average();
-                                }
-                            }
+                    performanceTweaksOff[type].Add(elapsed);
+                }
+                else
+                {
+                    performanceTweaksOff[type] = new List<float> { elapsed };
+                }
+            }
 
-                            foreach (var r in result.OrderByDescending(x => x.Value))
+            if (Current.gameInt?.tickManager != null && Find.TickManager.ticksGameInt > lastProfileCheckTick + PROFILINGINTERVAL)
+            {
+                //Log.Message("performanceTweaksOn.ContainsKey(type): " + performanceTweaksOn.ContainsKey(type));
+                //Log.Message("performanceTweaksOff.ContainsKey(type): " + performanceTweaksOff.ContainsKey(type));
+                if (profileOn && performanceTweaksOn.ContainsKey(type) && performanceTweaksOff.ContainsKey(type))
+                {
+                    //Log.Message("performanceTweaksOn[type].Count: " + performanceTweaksOn[type].Count);
+                    //Log.Message("performanceTweaksOff[type].Count: " + performanceTweaksOff[type].Count);
+                    if (performanceTweaksOff[type].Count > 1 && performanceTweaksOn[type].Count > 1)
+                    {
+                        Log.Message("Profiling result: -------------------");
+                        var result = new Dictionary<Type, MeasureData>();
+                        foreach (var kvp in performanceTweaksOff)
+                        {
+                            if (performanceTweaksOn.TryGetValue(kvp.Key, out var performanceOn))
                             {
-                                Log.Message("Result: " + r.Key + " - " + r.Value);
+                                var smallerListCount = kvp.Value.Count > performanceOn.Count ? performanceOn.Count : kvp.Value.Count;
+                                var performanceOnNew = performanceOn.Take(smallerListCount).ToList();
+                                var performanceOffNew = kvp.Value.Take(smallerListCount).ToList();
+                                result[kvp.Key] = new MeasureData
+                                {
+                                    performanceImpactOn = performanceOnNew.Sum(),
+                                    performanceImpactOff = performanceOffNew.Sum(),
+                                    perfRate = performanceOffNew.Average() / performanceOnNew.Average()
+                                };
                             }
                         }
+
+                        foreach (var r in result.OrderByDescending(x => x.Value.performanceImpactOff))
+                        {
+                            Log.Message("Result: " + r.Key + " - " + r.Value.Log());
+                        }
                     }
-                    profileOn = !profileOn;
-                    lastProfileCheckTick = Find.TickManager.ticksGameInt;
-                    Watcher.ResetData();
                 }
+                profileOn = !profileOn;
+                lastProfileCheckTick = Find.TickManager.ticksGameInt;
+                Watcher.ResetData();
             }
         }
 
@@ -206,7 +212,7 @@ namespace PerformanceOptimizer
         }
         public virtual void ExposeData()
         {
-            Scribe_Values.Look(ref enabled, "enabled");
+            Scribe_Values.Look(ref enabled, "enabled", EnabledByDefault);
         }
         public MethodInfo GetMethod(string name)
         {

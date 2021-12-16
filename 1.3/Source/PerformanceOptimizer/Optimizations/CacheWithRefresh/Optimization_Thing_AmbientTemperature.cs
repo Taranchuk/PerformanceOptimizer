@@ -9,7 +9,7 @@ namespace PerformanceOptimizer
         public static int refreshRateStatic;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Label => "PO.AmbientTemperature".Translate();
-        public override int RefreshRateByDefault => 120;
+        public override int RefreshRateByDefault => 240;
         public override void DoPatches()
         {
             base.DoPatches();
