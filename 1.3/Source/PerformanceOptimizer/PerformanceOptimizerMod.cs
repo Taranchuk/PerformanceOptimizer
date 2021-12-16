@@ -90,9 +90,20 @@ namespace PerformanceOptimizer
         }
     }
 
-    [HarmonyPatch(typeof(StaticConstructorOnStartupUtility), "CallAll")]
-    public static class StaticConstructorOnStartupUtilityCallAll
+    [HarmonyPatch]
+    public static class InitializeMod
     {
+        public static MethodBase targetMethod;
+
+        [HarmonyTargetMethod]
+        public static MethodBase TargetMethod()
+        {
+            if (ModsConfig.ActiveModsInLoadOrder.Any(x => x.Name == "BetterLoading"))
+            {
+                return AccessTools.Method("BetterLoading.BetterLoadingMain:CreateTimingReport");
+            }
+            return AccessTools.Method(typeof(StaticConstructorOnStartupUtility), "CallAll");
+        }
         public static void Postfix()
         {
             PerformanceOptimizerMod.keyPrefsData = KeyPrefs.KeyPrefsData;

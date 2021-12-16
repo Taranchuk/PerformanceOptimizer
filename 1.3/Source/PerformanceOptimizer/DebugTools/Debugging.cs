@@ -56,7 +56,7 @@ namespace PerformanceOptimizer
             {
                 Text.Font = GameFont.Small;
                 var labelRect = new Rect(15, 15, rect.width - 15, 26);
-                Widgets.Label(labelRect, $"TPS: {stats.tpsActual}({tpsTarget}) - average: {stats.tpsAverageCached}");
+                Widgets.Label(labelRect, $"TPS: {stats.tpsActual} - average: {stats.tpsAverageCached}");
                 labelRect.y += 26;
                 Widgets.Label(labelRect, $"FPS: {stats.fpsActual} - average: {stats.fpsAverageCached}");
                 labelRect.y += 26;
