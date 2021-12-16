@@ -10,7 +10,7 @@ namespace PerformanceOptimizer
         {
             base.Reset();
             refreshRate = RefreshRateByDefault;
-            AccessTools.Field(GetType(), "refreshRateStatic").SetValue(null, refreshRate);
+            SetRefreshRate();
         }
         public abstract int RefreshRateByDefault { get; }
 
@@ -18,13 +18,18 @@ namespace PerformanceOptimizer
         public override void Apply()
         {
             base.Apply();
+            SetRefreshRate();
+        }
+
+        private void SetRefreshRate()
+        {
             AccessTools.Field(GetType(), "refreshRateStatic").SetValue(null, refreshRate);
         }
 
         public override void DrawSettings(Listing_Standard section)
         {
             var sliderName = OptimizationType == OptimizationType.CacheWithRefreshRate ? "PO.RefreshRate" : "PO.ThrottleRate";
-            section.CheckboxLabeledWithSlider(Label, sliderName, ref enabled, ref refreshRate, MaxSliderValue, actionOnClick: Apply);
+            section.CheckboxLabeledWithSlider(Label, sliderName, ref enabled, ref refreshRate, MaxSliderValue, actionOnClick: Apply, actionOnSlider: SetRefreshRate);
         }
         public override void ExposeData()
         {

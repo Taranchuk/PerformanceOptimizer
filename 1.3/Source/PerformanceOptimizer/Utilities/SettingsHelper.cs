@@ -60,7 +60,7 @@ namespace PerformanceOptimizer
         }
 
         public static void CheckboxLabeledWithSlider(this Listing_Standard ls, string label, string sliderLabelKey, ref bool checkOn, ref int value, int maxSliderValue = 2500,
-            string tooltip = null, Action actionOnClick = null)
+            string tooltip = null, Action actionOnClick = null, Action actionOnSlider = null)
         {
             float lineHeight = Text.LineHeight;
             Rect rect = ls.GetRect(lineHeight);
@@ -94,7 +94,15 @@ namespace PerformanceOptimizer
                 if (checkOn)
                 {
                     Widgets.Label(sliderLabelRect, sliderLabelKey.Translate(value.TicksToSeconds().ToString("F1") + "s"));
+                    var oldValue = value;
                     value = (int)Widgets.HorizontalSlider(sliderRect, value, 0, maxSliderValue, false);
+                    if (oldValue != value)
+                    {
+                        if (actionOnSlider != null)
+                        {
+                            actionOnSlider();
+                        }
+                    }
                 }
                 if (ButtonInvisible(checkboxRect))
                 {
