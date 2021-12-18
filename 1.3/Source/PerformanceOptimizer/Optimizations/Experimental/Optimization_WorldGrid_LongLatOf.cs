@@ -42,5 +42,11 @@ namespace PerformanceOptimizer
                 cachedResults[tileID] = __result;
             }
         }
+
+        public override void Clear()
+        {
+            base.Clear();
+            cachedResults.Clear();
+        }
     }
 }
