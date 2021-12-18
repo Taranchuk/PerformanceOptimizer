@@ -65,10 +65,6 @@ namespace PerformanceOptimizer
         public static void ResetStaticData()
         {
             tickManager = Current.Game?.tickManager;
-            ComponentCache.cachedWorldComps.Clear();
-            ComponentCache.cachedGameComps.Clear();
-            CompsOfType<Map>.mapCompsByMap.Clear();
-
             foreach (var optimization in PerformanceOptimizerSettings.optimizations)
             {
                 optimization.Clear();
