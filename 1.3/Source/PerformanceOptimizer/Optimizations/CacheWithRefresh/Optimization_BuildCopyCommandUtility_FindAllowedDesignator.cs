@@ -27,7 +27,7 @@ namespace PerformanceOptimizer
                 cachedResults[buildable] = __state = new CachedObjectTick<Designator_Build>();
                 return true;
             }
-            return __state.TryRefresh(ref __result);
+            return __state.SetOrRefresh(ref __result);
         }
 
         [HarmonyPriority(int.MinValue)]

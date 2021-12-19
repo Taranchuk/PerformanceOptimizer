@@ -51,7 +51,7 @@ namespace PerformanceOptimizer
                     cachedResults[__instance] = __state = new CachedValueTick<Vector3>();
                     return true;
                 }
-                return __state.TryRefresh(ref __result);
+                return __state.SetOrRefresh(ref __result);
             }
             __state = null;
             return true;

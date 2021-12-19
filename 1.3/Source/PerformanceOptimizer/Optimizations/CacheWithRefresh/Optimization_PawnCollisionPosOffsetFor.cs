@@ -27,7 +27,7 @@ namespace PerformanceOptimizer
                 cachedResults[pawn] = __state = new CachedValueTick<Vector3>();
                 return true;
             }
-            return __state.TryRefresh(ref __result);
+            return __state.SetOrRefresh(ref __result);
         }
 
         [HarmonyPriority(int.MinValue)]

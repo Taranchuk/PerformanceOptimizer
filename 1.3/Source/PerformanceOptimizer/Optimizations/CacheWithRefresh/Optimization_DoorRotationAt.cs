@@ -43,7 +43,7 @@ namespace PerformanceOptimizer
                 cachedResults[curDoor] = __state = new CachedValueTick<Rot4>();
                 return true;
             }
-            return __state.TryRefresh(ref __result);
+            return __state.SetOrRefresh(ref __result);
 
         }
 

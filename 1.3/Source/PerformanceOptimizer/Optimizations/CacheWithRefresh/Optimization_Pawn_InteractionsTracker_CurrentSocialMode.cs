@@ -27,7 +27,7 @@ namespace PerformanceOptimizer
                 cachedResults[___pawn] = __state = new CachedValueTick<RandomSocialMode>();
                 return true;
             }
-            return __state.TryRefresh(ref __result);
+            return __state.SetOrRefresh(ref __result);
         }
 
         [HarmonyPriority(int.MinValue)]

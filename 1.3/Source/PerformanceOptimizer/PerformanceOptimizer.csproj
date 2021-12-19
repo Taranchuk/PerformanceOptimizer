@@ -52,6 +52,7 @@
     <Compile Include="Containers\CachedValueUpdate.cs" />
     <Compile Include="Containers\Stats.cs" />
     <Compile Include="DebugTools\Debugging.cs" />
+    <Compile Include="Optimizations\CacheWithRefresh\Optimization_TicksToOpenNow.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_GenCelestial_CurCelestialSunGlow.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_FreePassage.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_GenTemperature_AverageTemperatureAtTileForTwelfth.cs" />

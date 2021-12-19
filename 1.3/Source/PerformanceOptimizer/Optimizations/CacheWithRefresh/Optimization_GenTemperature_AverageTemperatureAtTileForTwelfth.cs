@@ -30,7 +30,7 @@ namespace PerformanceOptimizer
                 cachedResults[hashcode] = __state = new CachedValueTick<float>();
                 return true;
             }
-            return __state.TryRefresh(ref __result);
+            return __state.SetOrRefresh(ref __result);
         }
 
         [HarmonyPriority(int.MinValue)]

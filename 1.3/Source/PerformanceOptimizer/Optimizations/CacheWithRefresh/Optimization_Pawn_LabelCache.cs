@@ -27,7 +27,7 @@ namespace PerformanceOptimizer
                 cachedResultsLabelNoCountCache[__instance] = __state = new CachedObjectTick<string>();
                 return true;
             }
-            return __state.TryRefresh(ref __result);
+            return __state.SetOrRefresh(ref __result);
         }
 
         [HarmonyPriority(int.MinValue)]
@@ -46,7 +46,7 @@ namespace PerformanceOptimizer
                 cachedResultsLabelShortCache[__instance] = __state = new CachedObjectTick<string>();
                 return true;
             }
-            return __state.TryRefresh(ref __result);
+            return __state.SetOrRefresh(ref __result);
         }
 
         [HarmonyPriority(int.MinValue)]

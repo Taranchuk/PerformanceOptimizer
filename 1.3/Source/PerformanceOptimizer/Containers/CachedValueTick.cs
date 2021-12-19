@@ -23,7 +23,7 @@ namespace PerformanceOptimizer
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryRefresh(ref T __result)
+        public bool SetOrRefresh(ref T __result)
         {
             if (PerformanceOptimizerMod.tickManager.ticksGameInt > this.refreshTick)
             {
