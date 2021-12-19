@@ -144,6 +144,18 @@ namespace PerformanceOptimizer
             stopwatch.Stop();
             var elapsed = (float)stopwatch.ElapsedTicks / Stopwatch.Frequency;
             var type = mappedValues[__originalMethod];
+            RegisterElapsedTicks(elapsed, type);
+            if (Current.gameInt?.tickManager != null && Find.TickManager.ticksGameInt > lastProfileCheckTick + PROFILINGINTERVAL)
+            {
+                LogStats(type);
+                profileOn = !profileOn;
+                lastProfileCheckTick = Find.TickManager.ticksGameInt;
+                Watcher.ResetData();
+            }
+        }
+
+        private static void RegisterElapsedTicks(float elapsed, Type type)
+        {
             if (profileOn)
             {
                 if (performanceTweaksOn.ContainsKey(type))
@@ -165,13 +177,6 @@ namespace PerformanceOptimizer
                 {
                     performanceTweaksOff[type] = new List<float> { elapsed };
                 }
-            }
-            if (Current.gameInt?.tickManager != null && Find.TickManager.ticksGameInt > lastProfileCheckTick + PROFILINGINTERVAL)
-            {
-                LogStats(type);
-                profileOn = !profileOn;
-                lastProfileCheckTick = Find.TickManager.ticksGameInt;
-                Watcher.ResetData();
             }
         }
 
