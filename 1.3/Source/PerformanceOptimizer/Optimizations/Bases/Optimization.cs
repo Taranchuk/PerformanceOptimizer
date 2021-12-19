@@ -103,7 +103,7 @@ namespace PerformanceOptimizer
         public static int lastProfileCheckTick;
         public static Stopwatch stopwatch = new Stopwatch();
         public virtual bool ProfilePerformanceImpact => false;
-        public const int PROFILINGINTERVAL = 60;
+        public const int PROFILINGINTERVAL = 2500;
         struct MeasureData
         {
             public float performanceImpactOn;
@@ -117,7 +117,6 @@ namespace PerformanceOptimizer
 
         public static bool ControlPostfix()
         {
-            Log.Message("ControlPostfix: " + profileOn);
             if (profileOn)
             {
                 return true;
@@ -129,7 +128,6 @@ namespace PerformanceOptimizer
         }
         public static bool MeasureBefore(ref bool __result)
         {
-            Log.Message("MeasureBefore: " + profileOn);
             stopwatch.Restart();
             if (profileOn)
             {
@@ -143,7 +141,6 @@ namespace PerformanceOptimizer
         }
         public static void MeasureAfter(MethodBase __originalMethod)
         {
-            Log.Message("MeasureAfter: " + profileOn);
             stopwatch.Stop();
             var elapsed = (float)stopwatch.ElapsedTicks / Stopwatch.Frequency;
             var type = mappedValues[__originalMethod];
@@ -169,45 +166,48 @@ namespace PerformanceOptimizer
                     performanceTweaksOff[type] = new List<float> { elapsed };
                 }
             }
-            Log.Message("Find.TickManager.ticksGameInt: " + Find.TickManager.ticksGameInt);
-            Log.Message("lastProfileCheckTick + PROFILINGINTERVAL: " + lastProfileCheckTick + PROFILINGINTERVAL);
             if (Current.gameInt?.tickManager != null && Find.TickManager.ticksGameInt > lastProfileCheckTick + PROFILINGINTERVAL)
             {
-                Log.Message("performanceTweaksOn.ContainsKey(type): " + performanceTweaksOn.ContainsKey(type));
-                Log.Message("performanceTweaksOff.ContainsKey(type): " + performanceTweaksOff.ContainsKey(type));
-                if (performanceTweaksOn.ContainsKey(type) && performanceTweaksOff.ContainsKey(type))
-                {
-                    Log.Message("performanceTweaksOn[type].Count: " + performanceTweaksOn[type].Count);
-                    Log.Message("performanceTweaksOff[type].Count: " + performanceTweaksOff[type].Count);
-                    if (performanceTweaksOff[type].Count > 1 && performanceTweaksOn[type].Count > 1)
-                    {
-                        Log.Message("Profiling result: -------------------");
-                        var result = new Dictionary<Type, MeasureData>();
-                        foreach (var kvp in performanceTweaksOff)
-                        {
-                            if (performanceTweaksOn.TryGetValue(kvp.Key, out var performanceOn))
-                            {
-                                var smallerListCount = kvp.Value.Count > performanceOn.Count ? performanceOn.Count : kvp.Value.Count;
-                                var performanceOnNew = performanceOn.Take(smallerListCount).ToList();
-                                var performanceOffNew = kvp.Value.Take(smallerListCount).ToList();
-                                result[kvp.Key] = new MeasureData
-                                {
-                                    performanceImpactOn = performanceOnNew.Sum(),
-                                    performanceImpactOff = performanceOffNew.Sum(),
-                                    perfRate = performanceOffNew.Average() / performanceOnNew.Average()
-                                };
-                            }
-                        }
-
-                        foreach (var r in result.OrderByDescending(x => x.Value.performanceImpactOff))
-                        {
-                            Log.Message("Result: " + r.Key + " - " + r.Value.Log());
-                        }
-                    }
-                }
+                LogStats(type);
                 profileOn = !profileOn;
                 lastProfileCheckTick = Find.TickManager.ticksGameInt;
                 Watcher.ResetData();
+            }
+        }
+
+        private static void LogStats(Type type)
+        {
+            //Log.Message("performanceTweaksOn.ContainsKey(type): " + performanceTweaksOn.ContainsKey(type));
+            //Log.Message("performanceTweaksOff.ContainsKey(type): " + performanceTweaksOff.ContainsKey(type));
+            if (!profileOn && performanceTweaksOn.ContainsKey(type) && performanceTweaksOff.ContainsKey(type))
+            {
+                //Log.Message("performanceTweaksOn[type].Count: " + performanceTweaksOn[type].Count);
+                //Log.Message("performanceTweaksOff[type].Count: " + performanceTweaksOff[type].Count);
+                if (performanceTweaksOff[type].Count > 1 && performanceTweaksOn[type].Count > 1)
+                {
+                    Log.Message("Profiling result: -------------------");
+                    var result = new Dictionary<Type, MeasureData>();
+                    foreach (var kvp in performanceTweaksOff)
+                    {
+                        if (performanceTweaksOn.TryGetValue(kvp.Key, out var performanceOn))
+                        {
+                            var smallerListCount = kvp.Value.Count > performanceOn.Count ? performanceOn.Count : kvp.Value.Count;
+                            var performanceOnNew = performanceOn.Take(smallerListCount).ToList();
+                            var performanceOffNew = kvp.Value.Take(smallerListCount).ToList();
+                            result[kvp.Key] = new MeasureData
+                            {
+                                performanceImpactOn = performanceOnNew.Sum(),
+                                performanceImpactOff = performanceOffNew.Sum(),
+                                perfRate = performanceOffNew.Average() / performanceOnNew.Average()
+                            };
+                        }
+                    }
+
+                    foreach (var r in result.OrderByDescending(x => x.Value.performanceImpactOff))
+                    {
+                        Log.Message("Result: " + r.Key + " - " + r.Value.Log());
+                    }
+                }
             }
         }
 

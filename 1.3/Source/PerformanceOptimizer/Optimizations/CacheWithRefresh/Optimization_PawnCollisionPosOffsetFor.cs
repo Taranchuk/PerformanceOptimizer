@@ -17,13 +17,11 @@ namespace PerformanceOptimizer
             Patch(typeof(PawnCollisionTweenerUtility), "PawnCollisionPosOffsetFor", GetMethod(nameof(Optimization_PawnCollisionPosOffsetFor.Prefix)), GetMethod(nameof(Optimization_PawnCollisionPosOffsetFor.Postfix)));
         }
 
-        public override bool ProfilePerformanceImpact => true;
         public static Dictionary<Pawn, CachedValueTick<Vector3>> cachedResults = new Dictionary<Pawn, CachedValueTick<Vector3>>();
 
         [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(Pawn pawn, out CachedValueTick<Vector3> __state, ref Vector3 __result)
         {
-            Log.Message("Prefix");
             if (!cachedResults.TryGetValue(pawn, out __state))
             {
                 cachedResults[pawn] = __state = new CachedValueTick<Vector3>();
@@ -35,7 +33,6 @@ namespace PerformanceOptimizer
         [HarmonyPriority(int.MinValue)]
         public static void Postfix(CachedValueTick<Vector3> __state, ref Vector3 __result)
         {
-            Log.Message("Postfix");
             __state.ProcessResult(ref __result, refreshRateStatic);
         }
 
