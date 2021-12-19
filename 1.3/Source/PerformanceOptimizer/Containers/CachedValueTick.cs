@@ -11,7 +11,6 @@ namespace PerformanceOptimizer
         public T valueInt;
         public CachedValueTick()
         {
-            valueInt = default;
             refreshNow = true;
         }
 
