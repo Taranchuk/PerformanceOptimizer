@@ -102,7 +102,7 @@ namespace PerformanceOptimizer
         public static bool profileOn = true;
         public static int lastProfileCheckTick;
         public static Stopwatch stopwatch = new Stopwatch();
-        public virtual bool ProfilePerformanceImpact => false;
+        public virtual bool ProfilePerformanceImpact => false; // if you change it to true, don't forget to disable AggressiveInlining atribute on CachedObjectTick and CachedValueTick class methods... they don't get profiled with it
         public const int PROFILINGINTERVAL = 2500;
         struct MeasureData
         {
