@@ -1,4 +1,7 @@
-﻿using Verse;
+﻿using HarmonyLib;
+using System;
+using UnityEngine;
+using Verse;
 using Verse.Sound;
 
 namespace PerformanceOptimizer
@@ -13,6 +16,9 @@ namespace PerformanceOptimizer
             Patch(typeof(SoundRoot), "Update", GetMethod(nameof(Prefix)));
             Patch(typeof(SoundStarter), "PlayOneShotOnCamera", GetMethod(nameof(Prefix)));
             Patch(typeof(SoundStarter), "PlayOneShot", GetMethod(nameof(Prefix)));
+            Patch(AccessTools.Method(typeof(MouseoverSounds), "DoRegion", new Type[] { typeof(Rect), typeof(SoundDef) }), GetMethod(nameof(Prefix)));
+            Patch(AccessTools.Method(typeof(MouseoverSounds), "DoRegion", new Type[] { typeof(Rect)}), GetMethod(nameof(Prefix)));
+            Patch(typeof(MouseoverSounds), "ResolveFrame", GetMethod(nameof(Prefix)));
         }
         public static bool Prefix()
         {
