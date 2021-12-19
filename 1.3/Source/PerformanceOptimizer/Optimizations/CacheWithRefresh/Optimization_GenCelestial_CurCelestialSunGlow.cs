@@ -21,36 +21,21 @@ namespace PerformanceOptimizer
         }
 
         [HarmonyPriority(Priority.First)]
-        public static bool Prefix(Map map, out bool __state, ref float __result)
+        public static bool Prefix(Map map, out CachedValueTick<float> __state, ref float __result)
         {
-            if (!cachedResults.TryGetValue(map, out var cache))
+            if (!cachedResults.TryGetValue(map, out __state))
             {
-                cachedResults[map] = new CachedValueTick<float>(0, refreshRateStatic);
-                __state = true;
+                cachedResults[map] = __state = new CachedValueTick<float>(0, refreshRateStatic);
                 return true;
             }
-            else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
-            {
-                __state = true;
-                return true;
-            }
-            else
-            {
-                __result = cache.valueInt;
-                __state = false;
-                return false;
-            }
+            return __state.TryRefresh(ref __result);
         }
 
         [HarmonyPriority(Priority.Last)]
-        public static void Postfix(Map map, bool __state, float __result)
+        public static void Postfix(CachedValueTick<float> __state, ref float __result)
         {
-            if (__state)
-            {
-                cachedResults[map].SetValue(__result, refreshRateStatic);
-            }
+            __state.ProcessResult(ref __result, refreshRateStatic);
         }
-
         public override void Clear()
         {
             cachedResults.Clear();
