@@ -20,7 +20,7 @@ namespace PerformanceOptimizer
             Patch(typeof(JobGiver_ConfigurableHostilityResponse), "TryGiveJob", GetMethod(nameof(Optimization_JobGiver_ConfigurableHostilityResponse.Prefix)));
         }
 
-        [HarmonyPriority(Priority.First)]
+        [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(Pawn pawn)
         {
             if (!cachedResults.TryGetValue(pawn, out var cache)

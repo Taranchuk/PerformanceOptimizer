@@ -41,39 +41,28 @@ namespace PerformanceOptimizer
 
         public static bool shouldReturnCachedValue;
 
-        [HarmonyPriority(Priority.First)]
-        public static bool Prefix(Pawn __instance, out bool __state, ref Vector3 __result)
+        [HarmonyPriority(int.MaxValue)]
+        public static bool Prefix(Pawn __instance, out CachedValueTick<Vector3> __state, ref Vector3 __result)
         {
             if (shouldReturnCachedValue)
             {
-                if (!cachedResults.TryGetValue(__instance, out var cache))
+                if (!cachedResults.TryGetValue(__instance, out __state))
                 {
-                    cachedResults[__instance] = new CachedValueTick<Vector3>(default, refreshRateStatic);
-                    __state = true;
+                    cachedResults[__instance] = __state = new CachedValueTick<Vector3>();
                     return true;
                 }
-                else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
-                {
-                    __state = true;
-                    return true;
-                }
-                else
-                {
-                    __result = cache.valueInt;
-                    __state = false;
-                    return false;
-                }
+                return __state.TryRefresh(ref __result);
             }
-            __state = false;
+            __state = null;
             return true;
         }
 
-        [HarmonyPriority(Priority.Last)]
-        public static void Postfix(Pawn __instance, bool __state, ref Vector3 __result)
+        [HarmonyPriority(int.MinValue)]
+        public static void Postfix(Pawn __instance, CachedValueTick<Vector3> __state, ref Vector3 __result)
         {
-            if (__state)
+            if (__state != null)
             {
-                cachedResults[__instance].SetValue(__result, refreshRateStatic);
+                __state.ProcessResult(ref __result, refreshRateStatic);
             }
         }
 

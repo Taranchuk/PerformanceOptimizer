@@ -18,35 +18,21 @@ namespace PerformanceOptimizer
             base.DoPatches();
             Patch(typeof(SkillRecord), "LearnRateFactor", GetMethod(nameof(Prefix)), GetMethod(nameof(Postfix)));
         }
-        [HarmonyPriority(Priority.First)]
-        public static bool Prefix(Pawn ___pawn, out bool __state, ref float __result)
+        [HarmonyPriority(int.MaxValue)]
+        public static bool Prefix(Pawn ___pawn, out CachedValueTick<float> __state, ref float __result)
         {
-            if (!cachedResults.TryGetValue(___pawn, out var cache))
+            if (!cachedResults.TryGetValue(___pawn, out __state))
             {
-                cachedResults[___pawn] = new CachedValueTick<float>(0, refreshRateStatic);
-                __state = true;
+                cachedResults[___pawn] = __state = new CachedValueTick<float>();
                 return true;
             }
-            else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
-            {
-                __state = true;
-                return true;
-            }
-            else
-            {
-                __result = cache.valueInt;
-                __state = false;
-                return false;
-            }
+            return __state.TryRefresh(ref __result);
         }
 
-        [HarmonyPriority(Priority.Last)]
-        public static void Postfix(Pawn ___pawn, bool __state, float __result)
+        [HarmonyPriority(int.MinValue)]
+        public static void Postfix(Pawn ___pawn, CachedValueTick<float> __state, ref float __result)
         {
-            if (__state)
-            {
-                cachedResults[___pawn].SetValue(__result, refreshRateStatic);
-            }
+            __state.ProcessResult(ref __result, refreshRateStatic);
         }
 
         public override void Clear()

@@ -2,6 +2,7 @@
 using RimWorld;
 using System.Collections.Generic;
 using Verse;
+using Verse.AI;
 
 namespace PerformanceOptimizer
 {
@@ -21,34 +22,21 @@ namespace PerformanceOptimizer
             Patch(typeof(Need_Beauty), "CurrentInstantBeauty", GetMethod(nameof(Optimization_Need_Beauty_CurrentInstantBeauty.Prefix)), GetMethod(nameof(Optimization_Need_Beauty_CurrentInstantBeauty.Postfix)));
         }
 
-        [HarmonyPriority(Priority.First)]
-        public static bool Prefix(Need_Beauty __instance, out bool __state, ref float __result)
+        [HarmonyPriority(int.MaxValue)]
+        public static bool Prefix(Need_Beauty __instance, out CachedValueTick<float> __state, ref float __result)
         {
-            if (!cachedResults.TryGetValue(__instance, out var cache))
+            if (!cachedResults.TryGetValue(__instance, out __state))
             {
-                cachedResults[__instance] = new CachedValueTick<float>(0, refreshRateStatic);
-                __state = true;
+                cachedResults[__instance] = __state = new CachedValueTick<float>();
                 return true;
             }
-            else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
-            {
-                __state = true;
-                return true;
-            }
-            else
-            {
-                __result = cache.valueInt;
-                __state = false;
-                return false;
-            }
+            return __state.TryRefresh(ref __result);
         }
-        [HarmonyPriority(Priority.Last)]
-        public static void Postfix(Need_Beauty __instance, bool __state, float __result)
+
+        [HarmonyPriority(int.MinValue)]
+        public static void Postfix(CachedValueTick<float> __state, ref float __result)
         {
-            if (__state)
-            {
-                cachedResults[__instance].SetValue(__result, refreshRateStatic);
-            }
+            __state.ProcessResult(ref __result, refreshRateStatic);
         }
 
         public override void Clear()

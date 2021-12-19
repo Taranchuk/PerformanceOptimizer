@@ -11,7 +11,6 @@ namespace PerformanceOptimizer
 
         public static Dictionary<Pawn, CachedValueTick<bool>> cachedResults = new Dictionary<Pawn, CachedValueTick<bool>>();
         public override int RefreshRateByDefault => 30;
-
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Label => "PO.QuestLodger".Translate();
         public override void DoPatches()
@@ -20,35 +19,21 @@ namespace PerformanceOptimizer
             Patch(typeof(QuestUtility), "IsQuestLodger", GetMethod(nameof(Optimization_QuestUtility_IsQuestLodger.Prefix)), GetMethod(nameof(Optimization_QuestUtility_IsQuestLodger.Postfix)));
         }
 
-        [HarmonyPriority(Priority.First)]
-        public static bool Prefix(Pawn p, out bool __state, ref bool __result)
+        [HarmonyPriority(int.MaxValue)]
+        public static bool Prefix(Pawn p, out CachedValueTick<bool> __state, ref bool __result)
         {
-            if (!cachedResults.TryGetValue(p, out var cache))
+            if (!cachedResults.TryGetValue(p, out __state))
             {
-                cachedResults[p] = new CachedValueTick<bool>(false, refreshRateStatic);
-                __state = true;
+                cachedResults[p] = __state = new CachedValueTick<bool>();
                 return true;
             }
-            else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
-            {
-                __state = true;
-                return true;
-            }
-            else
-            {
-                __result = cache.valueInt;
-                __state = false;
-                return false;
-            }
+            return __state.TryRefresh(ref __result);
         }
 
-        [HarmonyPriority(Priority.Last)]
-        public static void Postfix(Pawn p, bool __state, bool __result)
+        [HarmonyPriority(int.MinValue)]
+        public static void Postfix(CachedValueTick<bool> __state, ref bool __result)
         {
-            if (__state)
-            {
-                cachedResults[p].SetValue(__result, refreshRateStatic);
-            }
+            __state.ProcessResult(ref __result, refreshRateStatic);
         }
 
         public override void Clear()

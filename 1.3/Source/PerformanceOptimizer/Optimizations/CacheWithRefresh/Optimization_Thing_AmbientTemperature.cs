@@ -18,38 +18,28 @@ namespace PerformanceOptimizer
 
         public static Dictionary<Thing, CachedValueTick<float>> cachedResults = new Dictionary<Thing, CachedValueTick<float>>();
 
-        [HarmonyPriority(Priority.First)]
-        public static bool Prefix(Thing __instance, out bool __state, ref float __result)
+        [HarmonyPriority(int.MaxValue)]
+        public static bool Prefix(Thing __instance, out CachedValueTick<float> __state, ref float __result)
         {
             if (__instance.def.tickerType != TickerType.Normal)
             {
-                __state = false;
+                __state = null;
                 return true;
             }
-            if (!cachedResults.TryGetValue(__instance, out var cache))
+            if (!cachedResults.TryGetValue(__instance, out __state))
             {
-                cachedResults[__instance] = new CachedValueTick<float>(0, refreshRateStatic);
-                __state = true;
+                cachedResults[__instance] = __state = new CachedValueTick<float>();
                 return true;
             }
-            else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
-            {
-                __state = true;
-                return true;
-            }
-            else
-            {
-                __result = cache.valueInt;
-                __state = false;
-                return false;
-            }
+            return __state.TryRefresh(ref __result);
         }
-        [HarmonyPriority(Priority.Last)]
-        public static void Postfix(Thing __instance, bool __state, float __result)
+
+        [HarmonyPriority(int.MinValue)]
+        public static void Postfix(CachedValueTick<float> __state, ref float __result)
         {
-            if (__state)
+            if (__state != null)
             {
-                cachedResults[__instance].SetValue(__result, refreshRateStatic);
+                __state.ProcessResult(ref __result, refreshRateStatic);
             }
         }
 

@@ -14,7 +14,7 @@ namespace PerformanceOptimizer
         }
         public override string Label => "PO.HideBottomButtonBar".Translate();
 
-        [HarmonyPriority(Priority.First)]
+        [HarmonyPriority(int.MaxValue)]
         public static bool Prefix()
         {
             if (Optimization_UIToggle.UIToggleOn)

@@ -19,37 +19,24 @@ namespace PerformanceOptimizer
 
         public static Dictionary<int, CachedValueTick<float>> cachedResults = new Dictionary<int, CachedValueTick<float>>();
 
-        [HarmonyPriority(Priority.First)]
-        public static bool Prefix(float latitude, int dayOfYear, out CacheData __state, ref float __result)
+        [HarmonyPriority(int.MaxValue)]
+        public static bool Prefix(float latitude, int dayOfYear, out CachedValueTick<float> __state, ref float __result)
         {
             var hashcode = 23;
             hashcode = (hashcode * 37) + latitude.GetHashCode();
             hashcode = (hashcode * 37) + dayOfYear;
-            if (!cachedResults.TryGetValue(hashcode, out var cache))
+            if (!cachedResults.TryGetValue(hashcode, out __state))
             {
-                cachedResults[hashcode] = new CachedValueTick<float>(0, refreshRateStatic);
-                __state = new CacheData { key = hashcode, state = true };
+                cachedResults[hashcode] = __state = new CachedValueTick<float>();
                 return true;
             }
-            else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
-            {
-                __state = new CacheData { key = hashcode, state = true };
-                return true;
-            }
-            else
-            {
-                __result = cache.valueInt;
-                __state = new CacheData { key = hashcode, state = false };
-                return false;
-            }
+            return __state.TryRefresh(ref __result);
         }
-        [HarmonyPriority(Priority.Last)]
-        public static void Postfix(CacheData __state, float __result)
+
+        [HarmonyPriority(int.MinValue)]
+        public static void Postfix(CachedValueTick<float> __state, ref float __result)
         {
-            if (__state.state)
-            {
-                cachedResults[__state.key].SetValue(__result, refreshRateStatic);
-            }
+            __state.ProcessResult(ref __result, refreshRateStatic);
         }
 
         public override void Clear()

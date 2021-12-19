@@ -19,7 +19,7 @@ namespace PerformanceOptimizer
             Patch(typeof(IdeoBuildingPresenceDemand), "BuildingPresent", GetMethod(nameof(Prefix)));
         }
 
-        [HarmonyPriority(Priority.First)]
+        [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(IdeoBuildingPresenceDemand __instance, Map map, ref bool __result)
         {
             __result = map.listerThings.ThingsOfDef(__instance.parent.ThingDef).Any(t => t.Faction == Faction.OfPlayer && t.StyleSourcePrecept == __instance.parent);

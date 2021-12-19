@@ -16,7 +16,7 @@ namespace PerformanceOptimizer
 
         public static Dictionary<HediffDef, bool> cachedResults = new Dictionary<HediffDef, bool>();
 
-        [HarmonyPriority(Priority.First)]
+        [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(HediffDef __instance, out bool __state, ref bool __result)
         {
             if (!cachedResults.TryGetValue(__instance, out var cache))
@@ -32,7 +32,7 @@ namespace PerformanceOptimizer
             }
         }
 
-        [HarmonyPriority(Priority.Last)]
+        [HarmonyPriority(int.MinValue)]
         public static void Postfix(HediffDef __instance, bool __state, bool __result)
         {
             if (__state)

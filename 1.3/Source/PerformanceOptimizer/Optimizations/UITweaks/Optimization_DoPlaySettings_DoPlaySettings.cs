@@ -23,7 +23,7 @@ namespace PerformanceOptimizer
         }
         public override string Label => "PO.HideBottomRightOverlayButtons".Translate();
 
-        [HarmonyPriority(Priority.First)]
+        [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(WidgetRow rowVisibility, bool worldView)
         {
             if (Optimization_UIToggle.UIToggleOn && rowVisibility.FinalY > 0)

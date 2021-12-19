@@ -7,7 +7,7 @@ namespace PerformanceOptimizer
 {
     public class Optimization_BuildCopyCommandUtility_FindAllowedDesignator : Optimization_RefreshRate
     {
-        public static Dictionary<BuildableDef, CachedValueTick<Designator_Build>> cachedResults = new Dictionary<BuildableDef, CachedValueTick<Designator_Build>>();
+        public static Dictionary<BuildableDef, CachedObjectTick<Designator_Build>> cachedResults = new Dictionary<BuildableDef, CachedObjectTick<Designator_Build>>();
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Label => "PO.FindAllowedDesignator".Translate();
         public override int RefreshRateByDefault => 120;
@@ -19,34 +19,21 @@ namespace PerformanceOptimizer
             Patch(typeof(BuildCopyCommandUtility), "FindAllowedDesignator", GetMethod(nameof(Prefix)), GetMethod(nameof(Postfix)));
         }
 
-        [HarmonyPriority(Priority.First)]
-        public static bool Prefix(BuildableDef buildable, out bool __state, ref Designator_Build __result)
+        [HarmonyPriority(int.MaxValue)]
+        public static bool Prefix(BuildableDef buildable, out CachedObjectTick<Designator_Build> __state, ref Designator_Build __result)
         {
-            if (!cachedResults.TryGetValue(buildable, out var cache))
+            if (!cachedResults.TryGetValue(buildable, out __state))
             {
-                cachedResults[buildable] = new CachedValueTick<Designator_Build>(default, refreshRateStatic);
-                __state = true;
+                cachedResults[buildable] = __state = new CachedObjectTick<Designator_Build>();
                 return true;
             }
-            else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
-            {
-                __state = true;
-                return true;
-            }
-            else
-            {
-                __result = cache.valueInt;
-                __state = false;
-                return false;
-            }
+            return __state.TryRefresh(ref __result);
         }
-        [HarmonyPriority(Priority.Last)]
-        public static void Postfix(BuildableDef buildable, bool __state, Designator_Build __result)
+
+        [HarmonyPriority(int.MinValue)]
+        public static void Postfix(CachedObjectTick<Designator_Build> __state, ref Designator_Build __result)
         {
-            if (__state)
-            {
-                cachedResults[buildable].SetValue(__result, refreshRateStatic);
-            }
+            __state.ProcessResult(ref __result, refreshRateStatic);
         }
 
         public override void Clear()

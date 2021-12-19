@@ -19,35 +19,21 @@ namespace PerformanceOptimizer
             Patch(typeof(PawnUtility), "IsTeetotaler", GetMethod(nameof(Prefix)), GetMethod(nameof(Postfix)));
         }
 
-        [HarmonyPriority(Priority.First)]
-        public static bool Prefix(Pawn pawn, out bool __state, ref bool __result)
+        [HarmonyPriority(int.MaxValue)]
+        public static bool Prefix(Pawn pawn, out CachedValueTick<bool> __state, ref bool __result)
         {
-            if (!cachedResults.TryGetValue(pawn, out var cache))
+            if (!cachedResults.TryGetValue(pawn, out __state))
             {
-                cachedResults[pawn] = new CachedValueTick<bool>(false, refreshRateStatic);
-                __state = true;
+                cachedResults[pawn] = __state = new CachedValueTick<bool>();
                 return true;
             }
-            else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
-            {
-                __state = true;
-                return true;
-            }
-            else
-            {
-                __result = cache.valueInt;
-                __state = false;
-                return false;
-            }
+            return __state.TryRefresh(ref __result);
         }
 
-        [HarmonyPriority(Priority.Last)]
-        public static void Postfix(Pawn pawn, bool __state, bool __result)
+        [HarmonyPriority(int.MinValue)]
+        public static void Postfix(CachedValueTick<bool> __state, ref bool __result)
         {
-            if (__state)
-            {
-                cachedResults[pawn].SetValue(__result, refreshRateStatic);
-            }
+            __state.ProcessResult(ref __result, refreshRateStatic);
         }
 
         public override void Clear()

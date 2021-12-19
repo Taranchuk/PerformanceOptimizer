@@ -16,7 +16,7 @@ namespace PerformanceOptimizer
             base.DoPatches();
             Patch(typeof(WindManager), "WindManagerTick", transpiler: GetMethod(nameof(Transpiler)));
         }
-        [HarmonyPriority(Priority.First)]
+        [HarmonyPriority(int.MaxValue)]
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
             var codes = instructions.ToList();

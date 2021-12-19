@@ -17,7 +17,7 @@ namespace PerformanceOptimizer
 
         public static Dictionary<BuildableDef, RecipeDef> cachedResults = new Dictionary<BuildableDef, RecipeDef>();
 
-        [HarmonyPriority(Priority.First)]
+        [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(BuildableDef def, out bool __state, ref RecipeDef __result)
         {
             if (!cachedResults.TryGetValue(def, out var cache))
@@ -33,7 +33,7 @@ namespace PerformanceOptimizer
             }
         }
 
-        [HarmonyPriority(Priority.Last)]
+        [HarmonyPriority(int.MinValue)]
         public static void Postfix(BuildableDef def, bool __state, RecipeDef __result)
         {
             if (__state)

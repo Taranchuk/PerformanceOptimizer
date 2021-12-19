@@ -22,7 +22,7 @@ namespace PerformanceOptimizer
 
         public static bool skipThrottling;
 
-        [HarmonyPriority(Priority.First)]
+        [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(Precept_RoleMulti __instance)
         {
             if (!skipThrottling)

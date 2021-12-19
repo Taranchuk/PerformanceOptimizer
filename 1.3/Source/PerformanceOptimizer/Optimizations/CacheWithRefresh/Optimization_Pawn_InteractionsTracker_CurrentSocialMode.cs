@@ -19,37 +19,22 @@ namespace PerformanceOptimizer
             Patch(typeof(Pawn_InteractionsTracker), "get_CurrentSocialMode", GetMethod(nameof(Prefix)), GetMethod(nameof(Postfix)));
         }
 
-        [HarmonyPriority(Priority.First)]
-        public static bool Prefix(Pawn ___pawn, out bool __state, ref RandomSocialMode __result)
+        [HarmonyPriority(int.MaxValue)]
+        public static bool Prefix(Pawn ___pawn, out CachedValueTick<RandomSocialMode> __state, ref RandomSocialMode __result)
         {
-            if (!cachedResults.TryGetValue(___pawn, out var cache))
+            if (!cachedResults.TryGetValue(___pawn, out __state))
             {
-                cachedResults[___pawn] = new CachedValueTick<RandomSocialMode>(RandomSocialMode.Normal, refreshRateStatic);
-                __state = true;
+                cachedResults[___pawn] = __state = new CachedValueTick<RandomSocialMode>();
                 return true;
             }
-            else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
-            {
-                __state = true;
-                return true;
-            }
-            else
-            {
-                __result = cache.valueInt;
-                __state = false;
-                return false;
-            }
+            return __state.TryRefresh(ref __result);
         }
 
-        [HarmonyPriority(Priority.Last)]
-        public static void Postfix(Pawn ___pawn, bool __state, RandomSocialMode __result)
+        [HarmonyPriority(int.MinValue)]
+        public static void Postfix(CachedValueTick<RandomSocialMode> __state, ref RandomSocialMode __result)
         {
-            if (__state)
-            {
-                cachedResults[___pawn].SetValue(__result, refreshRateStatic);
-            }
+            __state.ProcessResult(ref __result, refreshRateStatic);
         }
-
         public override void Clear()
         {
             cachedResults.Clear();

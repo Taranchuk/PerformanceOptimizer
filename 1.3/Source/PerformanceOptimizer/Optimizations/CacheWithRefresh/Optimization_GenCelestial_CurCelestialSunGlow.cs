@@ -20,18 +20,18 @@ namespace PerformanceOptimizer
             Patch(AccessTools.Method(typeof(GenCelestial), "CurCelestialSunGlow", new Type[] { typeof(Map) }), GetMethod(nameof(Prefix)), GetMethod(nameof(Postfix)));
         }
 
-        [HarmonyPriority(Priority.First)]
+        [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(Map map, out CachedValueTick<float> __state, ref float __result)
         {
             if (!cachedResults.TryGetValue(map, out __state))
             {
-                cachedResults[map] = __state = new CachedValueTick<float>(0, refreshRateStatic);
+                cachedResults[map] = __state = new CachedValueTick<float>();
                 return true;
             }
             return __state.TryRefresh(ref __result);
         }
 
-        [HarmonyPriority(Priority.Last)]
+        [HarmonyPriority(int.MinValue)]
         public static void Postfix(CachedValueTick<float> __state, ref float __result)
         {
             __state.ProcessResult(ref __result, refreshRateStatic);

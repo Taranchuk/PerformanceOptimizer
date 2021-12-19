@@ -14,7 +14,7 @@ namespace PerformanceOptimizer
             Patch(typeof(ResourceReadout), "ResourceReadoutOnGUI", GetMethod(nameof(Prefix)));
         }
 
-        [HarmonyPriority(Priority.First)]
+        [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(ResourceReadout __instance)
         {
             if (Optimization_UIToggle.UIToggleOn)

@@ -18,7 +18,7 @@ namespace PerformanceOptimizer
         }
 
         public static Dictionary<int, Vector2> cachedResults = new Dictionary<int, Vector2>();
-        [HarmonyPriority(Priority.First)]
+        [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(int tileID, out bool __state, ref Vector2 __result)
         {
             if (!cachedResults.TryGetValue(tileID, out var cache))
@@ -34,7 +34,7 @@ namespace PerformanceOptimizer
             }
         }
 
-        [HarmonyPriority(Priority.Last)]
+        [HarmonyPriority(int.MinValue)]
         public static void Postfix(int tileID, bool __state, Vector2 __result)
         {
             if (__state)

@@ -42,7 +42,7 @@ namespace PerformanceOptimizer
             throttledPlants.AddRange(DefDatabase<ThingDef>.AllDefs.Where(x => predicator(x)));
         }
 
-        [HarmonyPriority(Priority.First)]
+        [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(Plant __instance)
         {
             if (ShouldBeThrottled(__instance))

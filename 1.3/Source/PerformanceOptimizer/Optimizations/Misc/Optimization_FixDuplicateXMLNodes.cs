@@ -14,7 +14,7 @@ namespace PerformanceOptimizer
             Patch(typeof(XmlInheritance), "CheckForDuplicateNodes", GetMethod(nameof(Prefix)));
         }
 
-        [HarmonyPriority(Priority.First)]
+        [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(XmlNode node, XmlNode root)
         {
             CheckForDuplicateNodes(node, root);

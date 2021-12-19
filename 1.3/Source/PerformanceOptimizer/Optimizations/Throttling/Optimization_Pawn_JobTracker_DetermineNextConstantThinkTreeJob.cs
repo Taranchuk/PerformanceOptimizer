@@ -20,7 +20,7 @@ namespace PerformanceOptimizer
             Patch(typeof(Pawn_JobTracker), "DetermineNextConstantThinkTreeJob", GetMethod(nameof(Prefix)));
         }
 
-        [HarmonyPriority(Priority.First)]
+        [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(Pawn_JobTracker __instance)
         {
             if (__instance.pawn.factionInt != Faction.OfPlayer)

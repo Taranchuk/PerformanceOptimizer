@@ -54,7 +54,7 @@ namespace PerformanceOptimizer
         }
 
         [TweakValue("0", 0, 2000)] public static float xTest = 154;
-        [HarmonyPriority(Priority.Last)]
+        [HarmonyPriority(int.MinValue)]
         public static bool Prefix()
         {
             if (Optimization_UIToggle.UIToggleOn)

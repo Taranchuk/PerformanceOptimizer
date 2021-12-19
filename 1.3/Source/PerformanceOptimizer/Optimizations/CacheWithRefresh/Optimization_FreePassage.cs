@@ -20,35 +20,21 @@ namespace PerformanceOptimizer
 
         public static Dictionary<Building_Door, CachedValueTick<bool>> cachedResults = new Dictionary<Building_Door, CachedValueTick<bool>>();
 
-        [HarmonyPriority(Priority.First)]
-        public static bool Prefix(Building_Door __instance, out bool __state, ref bool __result)
+        [HarmonyPriority(int.MaxValue)]
+        public static bool Prefix(Building_Door __instance, out CachedValueTick<bool> __state, ref bool __result)
         {
-            if (!cachedResults.TryGetValue(__instance, out var cache))
+            if (!cachedResults.TryGetValue(__instance, out __state))
             {
-                cachedResults[__instance] = new CachedValueTick<bool>(false, refreshRateStatic);
-                __state = true;
+                cachedResults[__instance] = __state = new CachedValueTick<bool>();
                 return true;
             }
-            else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
-            {
-                __state = true;
-                return true;
-            }
-            else
-            {
-                __result = cache.valueInt;
-                __state = false;
-                return false;
-            }
+            return __state.TryRefresh(ref __result);
         }
 
-        [HarmonyPriority(Priority.Last)]
-        public static void Postfix(Building_Door __instance, bool __state, bool __result)
+        [HarmonyPriority(int.MinValue)]
+        public static void Postfix(CachedValueTick<bool> __state, ref bool __result)
         {
-            if (__state)
-            {
-                cachedResults[__instance].SetValue(__result, refreshRateStatic);
-            }
+            __state.ProcessResult(ref __result, refreshRateStatic);
         }
 
         public override void Clear()

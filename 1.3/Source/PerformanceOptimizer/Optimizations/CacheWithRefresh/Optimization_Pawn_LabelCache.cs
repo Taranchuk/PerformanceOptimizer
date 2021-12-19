@@ -8,7 +8,7 @@ namespace PerformanceOptimizer
     {
         public static int refreshRateStatic;
 
-        public static Dictionary<Pawn, CachedValueTick<string>> cachedResultsLabelNoCountCache = new Dictionary<Pawn, CachedValueTick<string>>();
+        public static Dictionary<Pawn, CachedObjectTick<string>> cachedResultsLabelNoCountCache = new Dictionary<Pawn, CachedObjectTick<string>>();
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Label => "PO.PawnLabel".Translate();
         public override int RefreshRateByDefault => 60;
@@ -19,68 +19,40 @@ namespace PerformanceOptimizer
             Patch(typeof(Pawn), "get_LabelShort", GetMethod(nameof(LabelShortCachePrefix)), GetMethod(nameof(LabelShortCachePostfix)));
         }
 
-        [HarmonyPriority(Priority.First)]
-        public static bool LabelNoCountCachePrefix(Pawn __instance, out bool __state, ref string __result)
+        [HarmonyPriority(int.MaxValue)]
+        public static bool LabelNoCountCachePrefix(Pawn __instance, out CachedObjectTick<string> __state, ref string __result)
         {
-            if (!cachedResultsLabelNoCountCache.TryGetValue(__instance, out var cache))
+            if (!cachedResultsLabelNoCountCache.TryGetValue(__instance, out __state))
             {
-                cachedResultsLabelNoCountCache[__instance] = new CachedValueTick<string>(default, refreshRateStatic);
-                __state = true;
+                cachedResultsLabelNoCountCache[__instance] = __state = new CachedObjectTick<string>();
                 return true;
             }
-            else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
-            {
-                __state = true;
-                return true;
-            }
-            else
-            {
-                __result = cache.valueInt;
-                __state = false;
-                return false;
-            }
+            return __state.TryRefresh(ref __result);
         }
 
-        [HarmonyPriority(Priority.Last)]
-        public static void LabelNoCountCachePostfix(Pawn __instance, bool __state, ref string __result)
+        [HarmonyPriority(int.MinValue)]
+        public static void LabelNoCountCachePostfix(CachedObjectTick<string> __state, ref string __result)
         {
-            if (__state)
-            {
-                cachedResultsLabelNoCountCache[__instance].SetValue(__result, refreshRateStatic);
-            }
+            __state.ProcessResult(ref __result, refreshRateStatic);
         }
 
-        public static Dictionary<Pawn, CachedValueTick<string>> cachedResultsLabelShortCache = new Dictionary<Pawn, CachedValueTick<string>>();
+        public static Dictionary<Pawn, CachedObjectTick<string>> cachedResultsLabelShortCache = new Dictionary<Pawn, CachedObjectTick<string>>();
 
-        [HarmonyPriority(Priority.First)]
-        public static bool LabelShortCachePrefix(Pawn __instance, out bool __state, ref string __result)
+        [HarmonyPriority(int.MaxValue)]
+        public static bool LabelShortCachePrefix(Pawn __instance, out CachedObjectTick<string> __state, ref string __result)
         {
-            if (!cachedResultsLabelShortCache.TryGetValue(__instance, out var cache))
+            if (!cachedResultsLabelShortCache.TryGetValue(__instance, out __state))
             {
-                cachedResultsLabelShortCache[__instance] = new CachedValueTick<string>(default, refreshRateStatic);
-                __state = true;
+                cachedResultsLabelShortCache[__instance] = __state = new CachedObjectTick<string>();
                 return true;
             }
-            else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
-            {
-                __state = true;
-                return true;
-            }
-            else
-            {
-                __result = cache.valueInt;
-                __state = false;
-                return false;
-            }
+            return __state.TryRefresh(ref __result);
         }
 
-        [HarmonyPriority(Priority.Last)]
-        public static void LabelShortCachePostfix(Pawn __instance, bool __state, ref string __result)
+        [HarmonyPriority(int.MinValue)]
+        public static void LabelShortCachePostfix(Pawn __instance, CachedObjectTick<string> __state, ref string __result)
         {
-            if (__state)
-            {
-                cachedResultsLabelShortCache[__instance].SetValue(__result, refreshRateStatic);
-            }
+            __state.ProcessResult(ref __result, refreshRateStatic);
         }
 
         public override void Clear()

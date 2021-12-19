@@ -29,42 +29,30 @@ namespace PerformanceOptimizer
         {
             curDoor = null;
         }
-
         public static Dictionary<Building_Door, CachedValueTick<Rot4>> cachedResults = new Dictionary<Building_Door, CachedValueTick<Rot4>>();
-
-        [HarmonyPriority(Priority.First)]
-        public static bool DoorRotationAtPrefix(out bool __state, ref Rot4 __result)
+        [HarmonyPriority(int.MaxValue)]
+        public static bool DoorRotationAtPrefix(out CachedValueTick<Rot4> __state, ref Rot4 __result)
         {
             if (curDoor == null)
             {
-                __state = false;
+                __state = null;
                 return true;
             }
-            if (!cachedResults.TryGetValue(curDoor, out var cache))
+            if (!cachedResults.TryGetValue(curDoor, out __state))
             {
-                cachedResults[curDoor] = new CachedValueTick<Rot4>(Rot4.Invalid, refreshRateStatic);
-                __state = true;
+                cachedResults[curDoor] = __state = new CachedValueTick<Rot4>();
                 return true;
             }
-            else if (PerformanceOptimizerMod.tickManager.ticksGameInt > cache.refreshTick)
-            {
-                __state = true;
-                return true;
-            }
-            else
-            {
-                __result = cache.valueInt;
-                __state = false;
-                return false;
-            }
+            return __state.TryRefresh(ref __result);
+
         }
 
-        [HarmonyPriority(Priority.Last)]
-        public static void DoorRotationAtPostfix(bool __state, Rot4 __result)
+        [HarmonyPriority(int.MinValue)]
+        public static void DoorRotationAtPostfix(CachedValueTick<Rot4> __state, ref Rot4 __result)
         {
-            if (__state)
+            if (__state != null)
             {
-                cachedResults[curDoor].SetValue(__result, refreshRateStatic);
+                __state.ProcessResult(ref __result, refreshRateStatic);
             }
         }
 
