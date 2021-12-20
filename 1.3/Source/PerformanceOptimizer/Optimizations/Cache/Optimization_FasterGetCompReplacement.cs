@@ -2,12 +2,16 @@
 using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Verse;
+using Verse.Sound;
+using static PerformanceOptimizer.ComponentCache;
 
 namespace PerformanceOptimizer
 {
@@ -325,6 +329,10 @@ namespace PerformanceOptimizer
             ComponentCache.cachedWorldComps.Clear();
             ComponentCache.cachedGameComps.Clear();
             CompsOfType<Map>.mapCompsByMap.Clear();
+            foreach (var type in typeof(ThingComp).AllSubclasses())
+            {
+                GenGeneric.InvokeStaticMethodOnGenericType(typeof(ICache_ThingComp<>), type, "Clear");
+            }
         }
 
         public static List<string> mostCalledComps = new List<string>
@@ -379,51 +387,48 @@ namespace PerformanceOptimizer
     [StaticConstructorOnStartup]
     public static class ComponentCache
     {
-        //private static Stopwatch dictStopwatch = new Stopwatch();
-
-        //public static Dictionary<Type, int> calledStats = new Dictionary<Type, int>();
-        //private static void RegisterComp(Type type)
-        //{
-        //	if (calledStats.ContainsKey(type))
-        //    {
-        //		calledStats[type]++;
-        //	}
-        //	else
-        //    {
-        //		calledStats[type] = 1;
-        //	}
-        //}
+        private static Stopwatch dictStopwatch = new Stopwatch();
+        public static class ICache_ThingComp<T> where T : ThingComp
+        {
+            public static Dictionary<int, T> compsById = new Dictionary<int, T>();
+            public static void Clear()
+            {
+                compsById.Clear();
+            }
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T GetThingCompFast<T>(this ThingWithComps thingWithComps) where T : ThingComp
         {
-            //dictStopwatch.Restart();
+            if (ICache_ThingComp<T>.compsById.TryGetValue(thingWithComps.thingIDNumber, out T val))
+            {
+                return val;
+            }
             if (thingWithComps.comps == null)
             {
-                //dictStopwatch.LogTime("Dict approach: ");
+                ICache_ThingComp<T>.compsById[thingWithComps.thingIDNumber] = null;
                 return null;
             }
             for (int i = 0; i < thingWithComps.comps.Count; i++)
             {
                 if (thingWithComps.comps[i].GetType() == typeof(T))
                 {
-                    //RegisterComp(thingWithComps.comps[i].GetType());
-                    //dictStopwatch.LogTime("Dict approach: ");
-                    return thingWithComps.comps[i] as T;
+                    var val2 = thingWithComps.comps[i] as T;
+                    ICache_ThingComp<T>.compsById[thingWithComps.thingIDNumber] = val2;
+                    return val2;
                 }
             }
 
             for (int i = 0; i < thingWithComps.comps.Count; i++)
             {
-                T val = thingWithComps.comps[i] as T;
-                if (val != null)
+                T val3 = thingWithComps.comps[i] as T;
+                if (val3 != null)
                 {
-                    //dictStopwatch.LogTime("Dict approach: ");
-                    return val;
+                    ICache_ThingComp<T>.compsById[thingWithComps.thingIDNumber] = val3;
+                    return val3;
                 }
             }
-
-            //dictStopwatch.LogTime("Dict approach: ");
+            ICache_ThingComp<T>.compsById[thingWithComps.thingIDNumber] = null;
             return null;
         }
 
