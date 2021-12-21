@@ -313,7 +313,7 @@ namespace PerformanceOptimizer
         {
             if (clearMethods is null)
             {
-                clearMethods = GetClearMethods();
+                clearMethods = GetClearMethods().ToList();
             }
             foreach (var method in clearMethods)
             {
@@ -325,73 +325,37 @@ namespace PerformanceOptimizer
             }
         }
 
-        private static List<MethodInfo> GetClearMethods()
+        private static IEnumerable<MethodInfo> GetClearMethods()
         {
-            clearMethods = new List<MethodInfo>();
             foreach (var type in typeof(ThingComp).AllSubclasses())
             {
-                try
-                {
-                    clearMethods.Add(typeof(ICache_ThingComp<>).MakeGenericType(type).GetMethod("Clear", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
-                }
-                catch (Exception ex)
-                {
-                }
+                yield return ClearMethod(typeof(ICache_ThingComp<>), type);
             }
             foreach (var type in typeof(HediffComp).AllSubclasses())
             {
-                try
-                {
-                    clearMethods.Add(typeof(ICache_HediffComp<>).MakeGenericType(type).GetMethod("Clear", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
-                }
-                catch (Exception ex)
-                {
-                }
+                yield return ClearMethod(typeof(ICache_HediffComp<>), type);
             }
-
             foreach (var type in typeof(WorldObjectComp).AllSubclasses())
             {
-                try
-                {
-                    clearMethods.Add(typeof(ICache_WorldObjectComp<>).MakeGenericType(type).GetMethod("Clear", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
-                }
-                catch (Exception ex)
-                {
-                }
+                yield return ClearMethod(typeof(ICache_WorldObjectComp<>), type);
             }
-
             foreach (var type in typeof(GameComponent).AllSubclasses())
             {
-                try
-                {
-                    clearMethods.Add(typeof(ICache_GameComponent<>).MakeGenericType(type).GetMethod("Clear", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
-                }
-                catch (Exception ex)
-                {
-                }
+                yield return ClearMethod(typeof(ICache_GameComponent<>), type);
             }
-
             foreach (var type in typeof(WorldComponent).AllSubclasses())
             {
-                try
-                {
-                    clearMethods.Add(typeof(ICache_WorldComponent<>).MakeGenericType(type).GetMethod("Clear", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
-                }
-                catch (Exception ex)
-                {
-                }
+                yield return ClearMethod(typeof(ICache_WorldComponent<>), type);
             }
             foreach (var type in typeof(MapComponent).AllSubclasses())
             {
-                try
-                {
-                    clearMethods.Add(typeof(ICache_MapComponent<>).MakeGenericType(type).GetMethod("Clear", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
-                }
-                catch (Exception ex)
-                {
-                }
+                yield return ClearMethod(typeof(ICache_MapComponent<>), type);
             }
-            return clearMethods;
+
+            MethodInfo ClearMethod(Type genericType, Type genericParam)
+            {
+                return genericType.MakeGenericType(genericParam).GetMethod("Clear", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            }
         }
     }
 
@@ -516,7 +480,6 @@ namespace PerformanceOptimizer
                 compsById.Clear();
             }
         }
-
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T GetWorldObjectCompFast<T>(this WorldObject worldObject) where T : WorldObjectComp
