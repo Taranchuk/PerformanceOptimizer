@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Verse;
@@ -307,13 +308,27 @@ namespace PerformanceOptimizer
             }
         }
 
+        private static List<MethodInfo> clearMethods;
         public override void Clear()
         {
+            if (clearMethods is null)
+            {
+                clearMethods = GetClearMethods();
+            }
+            foreach (var method in clearMethods)
+            {
+                method.Invoke(null, null);
+            }
+        }
+
+        private static List<MethodInfo> GetClearMethods()
+        {
+            clearMethods = new List<MethodInfo>();
             foreach (var type in typeof(ThingComp).AllSubclasses())
             {
                 try
                 {
-                    GenGeneric.InvokeStaticMethodOnGenericType(typeof(ICache_ThingComp<>), type, "Clear");
+                    clearMethods.Add(typeof(ICache_ThingComp<>).MakeGenericType(type).GetMethod("Clear", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
                 }
                 catch (Exception ex)
                 {
@@ -323,7 +338,7 @@ namespace PerformanceOptimizer
             {
                 try
                 {
-                    GenGeneric.InvokeStaticMethodOnGenericType(typeof(ICache_HediffComp<>), type, "Clear");
+                    clearMethods.Add(typeof(ICache_HediffComp<>).MakeGenericType(type).GetMethod("Clear", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
                 }
                 catch (Exception ex)
                 {
@@ -334,7 +349,7 @@ namespace PerformanceOptimizer
             {
                 try
                 {
-                    GenGeneric.InvokeStaticMethodOnGenericType(typeof(ICache_WorldObjectComp<>), type, "Clear");
+                    clearMethods.Add(typeof(ICache_WorldObjectComp<>).MakeGenericType(type).GetMethod("Clear", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
                 }
                 catch (Exception ex)
                 {
@@ -345,7 +360,7 @@ namespace PerformanceOptimizer
             {
                 try
                 {
-                    GenGeneric.InvokeStaticMethodOnGenericType(typeof(ICache_GameComponent<>), type, "Clear");
+                    clearMethods.Add(typeof(ICache_GameComponent<>).MakeGenericType(type).GetMethod("Clear", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
                 }
                 catch (Exception ex)
                 {
@@ -356,7 +371,7 @@ namespace PerformanceOptimizer
             {
                 try
                 {
-                    GenGeneric.InvokeStaticMethodOnGenericType(typeof(ICache_WorldComponent<>), type, "Clear");
+                    clearMethods.Add(typeof(ICache_WorldComponent<>).MakeGenericType(type).GetMethod("Clear", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
                 }
                 catch (Exception ex)
                 {
@@ -366,12 +381,13 @@ namespace PerformanceOptimizer
             {
                 try
                 {
-                    GenGeneric.InvokeStaticMethodOnGenericType(typeof(ICache_MapComponent<>), type, "Clear");
+                    clearMethods.Add(typeof(ICache_MapComponent<>).MakeGenericType(type).GetMethod("Clear", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic));
                 }
                 catch (Exception ex)
                 {
                 }
             }
+            return clearMethods;
         }
     }
 
@@ -541,7 +557,6 @@ namespace PerformanceOptimizer
             public static Dictionary<Map, T> compsByMap = new Dictionary<Map, T>();
             public static void Clear()
             {
-                Log.Message("Clearing: " + compsByMap?.Count);
                 compsByMap.Clear();
             }
         }

@@ -22,28 +22,30 @@ namespace PerformanceOptimizer
             {
                 var things = map.listerThings.AllThings.OfType<ThingWithComps>().ToList();
                 var oldStopwatch = new Stopwatch();
-                oldStopwatch.Start();
-                for (var i = 0; i < 10000; i++)
+
+                var dictWithThing = new Dictionary<ThingWithComps, ThingWithComps>();
+                var dictWithInt = new Dictionary<int, ThingWithComps>();
+                foreach (var thing in things)
                 {
-                    foreach (var thing in things)
-                    {
-                        ComponentCache.GetCompOld<CompForbiddable>(thing);
-                    }
+                    dictWithThing[thing] = thing;
+                    dictWithInt[thing.thingIDNumber] = thing;
+                }
+                oldStopwatch.Start();
+                foreach (var thing in things)
+                {
+                    dictWithThing.TryGetValue(thing, out var val);
                 }
                 oldStopwatch.Stop();
-                Log.Message("Profiled old comp on CompForbiddable: " + (float)oldStopwatch.ElapsedTicks / Stopwatch.Frequency);
+                Log.Message("Profiled dict with thing: " + (float)oldStopwatch.ElapsedTicks / Stopwatch.Frequency);
 
                 var newStopwatch = new Stopwatch();
                 newStopwatch.Start();
-                for (var i = 0; i < 10000; i++)
+                foreach (var thing in things)
                 {
-                    foreach (var thing in things)
-                    {
-                        ComponentCache.ICache_ThingComp<CompForbiddable>.GetCompNew(thing);
-                    }
+                    dictWithInt.TryGetValue(thing.thingIDNumber, out var val);
                 }
                 newStopwatch.Stop();
-                Log.Message("Profiled new comp on CompForbiddable: " + (float)newStopwatch.ElapsedTicks / Stopwatch.Frequency);
+                Log.Message("Profiled dict with int: " + (float)newStopwatch.ElapsedTicks / Stopwatch.Frequency);
             }
         }
     }
