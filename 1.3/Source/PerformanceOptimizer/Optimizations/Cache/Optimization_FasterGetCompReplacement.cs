@@ -317,7 +317,11 @@ namespace PerformanceOptimizer
             }
             foreach (var method in clearMethods)
             {
-                method.Invoke(null, null);
+                try
+                {
+                    method.Invoke(null, null);
+                }
+                catch { }
             }
         }
 
