@@ -533,7 +533,11 @@ namespace PerformanceOptimizer
         {
             if (!ICache_MapComponent<T>.compsByMap.TryGetValue(map, out T mapComp))
             {
-                ICache_MapComponent<T>.compsByMap[map] = mapComp = map.GetComponent<T>();
+                var comp = map.GetComponent<T>();
+                if (comp != null)
+                {
+                    ICache_MapComponent<T>.compsByMap[map] = mapComp = comp;
+                }
             }
             //Log.Message("Returning map comp: " + mapComp + ", total count of map comps is " + map.components.Count);
             return mapComp;
@@ -548,8 +552,12 @@ namespace PerformanceOptimizer
             {
                 if (world != curWorld)
                 {
-                    world = curWorld;
-                    component = curWorld.GetComponent<T>();
+                    var comp = curWorld.GetComponent<T>();
+                    if (comp != null)
+                    {
+                        component = comp;
+                        world = curWorld;
+                    }
                 }
                 return component;
             }
@@ -577,8 +585,12 @@ namespace PerformanceOptimizer
             {
                 if (game != curGame)
                 {
-                    game = curGame;
-                    component = curGame.GetComponent<T>();
+                    var comp = curGame.GetComponent<T>();
+                    if (comp != null)
+                    {
+                        component = comp;
+                        game = curGame;
+                    }
                 }
                 return component;
             }

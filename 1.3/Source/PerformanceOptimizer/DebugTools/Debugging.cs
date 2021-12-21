@@ -18,6 +18,7 @@ namespace PerformanceOptimizer
     }
     public class Watcher : Optimization
     {
+        public override bool IsEnabled => false;
         public override OptimizationType OptimizationType => OptimizationType.Dev;
         public override string Label => "";
         private static int tpsTarget = 0;
@@ -28,7 +29,6 @@ namespace PerformanceOptimizer
         public static TimeSpeed curTimeSpeed;
         public static bool renderSettings = false;
         public static DateTime timeStartCollectingData;
-        public override bool IsEnabled => false;
         public override void DoPatches()
         {
             base.DoPatches();
