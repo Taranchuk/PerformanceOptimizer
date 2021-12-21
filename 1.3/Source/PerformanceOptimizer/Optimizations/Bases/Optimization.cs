@@ -60,13 +60,13 @@ namespace PerformanceOptimizer
             Patch(originalMethod, prefix, postfix, transpiler);
         }
 
-        public static Dictionary<MethodBase, Type> mappedValues = new Dictionary<MethodBase, Type>();
+        public static Dictionary<MethodBase, Type> mappedValues = new();
         public void Patch(MethodInfo methodInfo, MethodInfo prefix = null, MethodInfo postfix = null, MethodInfo transpiler = null)
         {
             PerformanceOptimizerMod.harmony.Patch(methodInfo, prefix != null ? new HarmonyMethod(prefix) : null, postfix != null ? new HarmonyMethod(postfix) : null, transpiler != null ? new HarmonyMethod(transpiler) : null);
             //Log.Message(this.GetType() +  " - Patching " + methodInfo.FullDescription());
             //Log.ResetMessageCount();
-            List<MethodInfo> patches = new List<MethodInfo>();
+            List<MethodInfo> patches = new();
             if (prefix != null)
             {
                 patches.Add(prefix);
@@ -97,11 +97,11 @@ namespace PerformanceOptimizer
             patchedMethods[methodInfo] = patches;
         }
 
-        public static Dictionary<Type, List<float>> performanceTweaksOn = new Dictionary<Type, List<float>>();
-        public static Dictionary<Type, List<float>> performanceTweaksOff = new Dictionary<Type, List<float>>();
+        public static Dictionary<Type, List<float>> performanceTweaksOn = new();
+        public static Dictionary<Type, List<float>> performanceTweaksOff = new();
         public static bool profileOn = true;
         public static int lastProfileCheckTick;
-        public static Stopwatch stopwatch = new Stopwatch();
+        public static Stopwatch stopwatch = new();
         public virtual bool ProfilePerformanceImpact => false; // if you change it to true, don't forget to disable AggressiveInlining atribute on CachedObjectTick and CachedValueTick class methods...
                                                                // they don't get profiled with it
         public const int PROFILINGINTERVAL = 2500;

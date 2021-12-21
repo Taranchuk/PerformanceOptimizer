@@ -9,7 +9,7 @@ namespace PerformanceOptimizer
     {
         public static int refreshRateStatic;
 
-        public static Dictionary<Frame, CachedValueTick<float>> cachedResults = new Dictionary<Frame, CachedValueTick<float>>();
+        public static Dictionary<Frame, CachedValueTick<float>> cachedResults = new();
         public override int RefreshRateByDefault => 60;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Label => "PO.Frame_WorkToBuild".Translate();
@@ -19,7 +19,6 @@ namespace PerformanceOptimizer
             Patch(typeof(Frame), "get_WorkToBuild", GetMethod(nameof(Prefix)), GetMethod(nameof(Postfix)));
         }
 
-        public override bool ProfilePerformanceImpact => true;
         [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(Frame __instance, out CachedValueTick<float> __state, ref float __result)
         {

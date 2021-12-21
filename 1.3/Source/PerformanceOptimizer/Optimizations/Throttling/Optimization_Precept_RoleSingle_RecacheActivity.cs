@@ -9,7 +9,7 @@ namespace PerformanceOptimizer
     {
         public static int refreshRateStatic;
 
-        public static Dictionary<Precept_RoleSingle, int> cachedResults = new Dictionary<Precept_RoleSingle, int>();
+        public static Dictionary<Precept_RoleSingle, int> cachedResults = new();
         public override int RefreshRateByDefault => 30;
         public override OptimizationType OptimizationType => OptimizationType.Throttle;
         public override string Label => "PO.Precept_RoleSingle_RecacheActivity".Translate();
