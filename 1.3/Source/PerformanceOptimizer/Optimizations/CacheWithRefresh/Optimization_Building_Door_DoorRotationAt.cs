@@ -6,7 +6,7 @@ using Verse;
 namespace PerformanceOptimizer
 {
 
-    public class Optimization_DoorRotationAt : Optimization_RefreshRate
+    public class Optimization_Building_Door_DoorRotationAt : Optimization_RefreshRate
     {
         public static int refreshRateStatic;
         public override int RefreshRateByDefault => 90;
@@ -29,7 +29,7 @@ namespace PerformanceOptimizer
         {
             curDoor = null;
         }
-        public static Dictionary<Building_Door, CachedValueTick<Rot4>> cachedResults = new Dictionary<Building_Door, CachedValueTick<Rot4>>();
+        public static Dictionary<int, CachedValueTick<Rot4>> cachedResults = new Dictionary<int, CachedValueTick<Rot4>>();
         [HarmonyPriority(int.MaxValue)]
         public static bool DoorRotationAtPrefix(out CachedValueTick<Rot4> __state, ref Rot4 __result)
         {
@@ -38,9 +38,9 @@ namespace PerformanceOptimizer
                 __state = null;
                 return true;
             }
-            if (!cachedResults.TryGetValue(curDoor, out __state))
+            if (!cachedResults.TryGetValue(curDoor.thingIDNumber, out __state))
             {
-                cachedResults[curDoor] = __state = new CachedValueTick<Rot4>();
+                cachedResults[curDoor.thingIDNumber] = __state = new CachedValueTick<Rot4>();
                 return true;
             }
             return __state.SetOrRefresh(ref __result);

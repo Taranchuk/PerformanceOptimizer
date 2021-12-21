@@ -14,12 +14,12 @@ namespace PerformanceOptimizer
             Patch(typeof(HediffDef), "PossibleToDevelopImmunityNaturally", GetMethod(nameof(Prefix)), GetMethod(nameof(Postfix)));
         }
 
-        public static Dictionary<HediffDef, bool> cachedResults = new Dictionary<HediffDef, bool>();
+        public static Dictionary<ushort, bool> cachedResults = new Dictionary<ushort, bool>();
 
         [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(HediffDef __instance, out bool __state, ref bool __result)
         {
-            if (!cachedResults.TryGetValue(__instance, out var cache))
+            if (!cachedResults.TryGetValue(__instance.shortHash, out var cache))
             {
                 __state = true;
                 return true;
@@ -37,7 +37,7 @@ namespace PerformanceOptimizer
         {
             if (__state)
             {
-                cachedResults[__instance] = __result;
+                cachedResults[__instance.shortHash] = __result;
             }
         }
 

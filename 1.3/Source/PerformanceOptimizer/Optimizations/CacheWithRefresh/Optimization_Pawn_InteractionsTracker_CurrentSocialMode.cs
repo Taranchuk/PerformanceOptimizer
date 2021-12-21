@@ -9,7 +9,7 @@ namespace PerformanceOptimizer
     {
         public static int refreshRateStatic;
 
-        public static Dictionary<Pawn, CachedValueTick<RandomSocialMode>> cachedResults = new Dictionary<Pawn, CachedValueTick<RandomSocialMode>>();
+        public static Dictionary<int, CachedValueTick<RandomSocialMode>> cachedResults = new();
         public override int RefreshRateByDefault => 30;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Label => "PO.Pawn_InteractionsTracker_CurrentSocialMode".Translate();
@@ -22,9 +22,9 @@ namespace PerformanceOptimizer
         [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(Pawn ___pawn, out CachedValueTick<RandomSocialMode> __state, ref RandomSocialMode __result)
         {
-            if (!cachedResults.TryGetValue(___pawn, out __state))
+            if (!cachedResults.TryGetValue(___pawn.thingIDNumber, out __state))
             {
-                cachedResults[___pawn] = __state = new CachedValueTick<RandomSocialMode>();
+                cachedResults[___pawn.thingIDNumber] = __state = new CachedValueTick<RandomSocialMode>();
                 return true;
             }
             return __state.SetOrRefresh(ref __result);

@@ -17,7 +17,7 @@ namespace PerformanceOptimizer
         {
             base.DoPatches();
             bool cache = false;
-            List<MethodInfo> methods = new List<MethodInfo>
+            List<MethodInfo> methods = new()
             {
                 AccessTools.Method("DubsMintMinimap.MainTabWindow_MiniMap:DrawAllPawns"),
                 AccessTools.Method(typeof(Designation), "Draw")
@@ -37,7 +37,7 @@ namespace PerformanceOptimizer
             }
         }
 
-        public static Dictionary<Pawn, CachedValueTick<Vector3>> cachedResults = new Dictionary<Pawn, CachedValueTick<Vector3>>();
+        public static Dictionary<int, CachedValueTick<Vector3>> cachedResults = new Dictionary<int, CachedValueTick<Vector3>>();
 
         public static bool shouldReturnCachedValue;
 
@@ -46,9 +46,9 @@ namespace PerformanceOptimizer
         {
             if (shouldReturnCachedValue)
             {
-                if (!cachedResults.TryGetValue(__instance, out __state))
+                if (!cachedResults.TryGetValue(__instance.thingIDNumber, out __state))
                 {
-                    cachedResults[__instance] = __state = new CachedValueTick<Vector3>();
+                    cachedResults[__instance.thingIDNumber] = __state = new CachedValueTick<Vector3>();
                     return true;
                 }
                 return __state.SetOrRefresh(ref __result);
@@ -58,7 +58,7 @@ namespace PerformanceOptimizer
         }
 
         [HarmonyPriority(int.MinValue)]
-        public static void Postfix(Pawn __instance, CachedValueTick<Vector3> __state, ref Vector3 __result)
+        public static void Postfix(CachedValueTick<Vector3> __state, ref Vector3 __result)
         {
             if (__state != null)
             {

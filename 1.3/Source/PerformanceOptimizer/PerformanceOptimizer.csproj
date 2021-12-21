@@ -52,9 +52,10 @@
     <Compile Include="Containers\CachedValueUpdate.cs" />
     <Compile Include="Containers\Stats.cs" />
     <Compile Include="DebugTools\Debugging.cs" />
-    <Compile Include="Optimizations\CacheWithRefresh\Optimization_TicksToOpenNow.cs" />
+    <Compile Include="Optimizations\CacheWithRefresh\Optimization_Frame_WorkToBuild.cs" />
+    <Compile Include="Optimizations\CacheWithRefresh\Optimization_Building_Door_TicksToOpenNow.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_GenCelestial_CurCelestialSunGlow.cs" />
-    <Compile Include="Optimizations\CacheWithRefresh\Optimization_FreePassage.cs" />
+    <Compile Include="Optimizations\CacheWithRefresh\Optimization_Building_Door_FreePassage.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_GenTemperature_AverageTemperatureAtTileForTwelfth.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_PlantFallColors_GetFallColorFactor.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Pawn_InteractionsTracker_CurrentSocialMode.cs" />
@@ -68,7 +69,7 @@
     <Compile Include="Optimizations\Misc\Optimization_FixDuplicateXMLNodes.cs" />
     <Compile Include="Utilities\ModCompatUtility.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_BuildCopyCommandUtility_FindAllowedDesignator.cs" />
-    <Compile Include="Optimizations\CacheWithRefresh\Optimization_DoorRotationAt.cs" />
+    <Compile Include="Optimizations\CacheWithRefresh\Optimization_Building_Door_DoorRotationAt.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_IdeoUtility_GetStyleDominance.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_InspectGizmoGrid_DrawInspectGizmoGridFor.cs" />
     <Compile Include="Optimizations\Bases\Optimization_Misc.cs" />

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using UnityEngine;
 using Verse;
 
 namespace PerformanceOptimizer
@@ -12,7 +13,7 @@ namespace PerformanceOptimizer
     {
         public static int refreshRateStatic;
 
-        public static Dictionary<Plant, int> cachedResults = new Dictionary<Plant, int>();
+        public static Dictionary<int, int> cachedResults = new Dictionary<int, int>();
         public override int RefreshRateByDefault => 6000;
         public override int MaxSliderValue => 10000;
         public override OptimizationType OptimizationType => OptimizationType.Throttle;
@@ -44,12 +45,12 @@ namespace PerformanceOptimizer
 
         [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(Plant __instance)
-        {
-            if (ShouldBeThrottled(__instance))
+{
+            if (throttledPlants.Contains(__instance.def))
             {
-                if (!cachedResults.TryGetValue(__instance, out var cache) || PerformanceOptimizerMod.tickManager.ticksGameInt >= (cache + refreshRateStatic))
+                if (!cachedResults.TryGetValue(__instance.thingIDNumber, out var cache) || PerformanceOptimizerMod.tickManager.ticksGameInt >= (cache + refreshRateStatic))
                 {
-                    cachedResults[__instance] = PerformanceOptimizerMod.tickManager.ticksGameInt;
+                    cachedResults[__instance.thingIDNumber] = PerformanceOptimizerMod.tickManager.ticksGameInt;
                     return true;
                 }
                 else
