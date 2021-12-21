@@ -386,7 +386,8 @@ namespace PerformanceOptimizer
             }
             for (int i = 0; i < thingWithComps.comps.Count; i++)
             {
-                if (thingWithComps.comps[i].GetType() == typeof(T))
+                var props = thingWithComps.comps[i].props;
+                if (props != null && props.compClass == typeof(T))
                 {
                     var val2 = thingWithComps.comps[i] as T;
                     ICache_ThingComp<T>.compsById[thingWithComps.thingIDNumber] = val2;
@@ -450,7 +451,8 @@ namespace PerformanceOptimizer
 
             for (int i = 0; i < hediffWithComps.comps.Count; i++)
             {
-                if (hediffWithComps.comps[i].GetType() == typeof(T))
+                var props = hediffWithComps.comps[i].props;
+                if (props != null && props.compClass == typeof(T))
                 {
                     //RegisterComp(thingWithComps.comps[i].GetType());
                     //dictStopwatch.LogTime("Dict approach: ");
