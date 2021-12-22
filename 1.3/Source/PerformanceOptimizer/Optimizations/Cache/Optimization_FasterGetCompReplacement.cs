@@ -18,7 +18,10 @@ namespace PerformanceOptimizer
 {
     public class Optimization_FasterGetCompReplacement : Optimization
     {
+        public override OptimizationType OptimizationType => OptimizationType.Optimization;
+        public override string Label => "PO.FasterGetCompReplacement".Translate();
         public override int DrawOrder => -99999;
+
         public List<MethodInfo> methodsCallingMapGetComp;
         public List<MethodInfo> methodsCallingWorldGetComp;
         public List<MethodInfo> methodsCallingGameGetComp;
@@ -193,10 +196,6 @@ namespace PerformanceOptimizer
         {
             return PerformTranspiler("GetComponent", typeof(WorldObjectComp), genericWorldObjectGetComp, OpCodes.Callvirt, 0, instructions);
         }
-        public override OptimizationType OptimizationType => OptimizationType.Optimization;
-
-        public override string Label => "PO.FasterGetCompReplacement".Translate();
-
         public override void DoPatches()
         {
             base.DoPatches();
@@ -532,7 +531,6 @@ namespace PerformanceOptimizer
                     ICache_MapComponent<T>.compsByMap[map] = mapComp = comp;
                 }
             }
-            //Log.Message("Returning map comp: " + mapComp + ", total count of map comps is " + map.components.Count);
             return mapComp;
         }
         public static class ICache_WorldComponent<T> where T : WorldComponent

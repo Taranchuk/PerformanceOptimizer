@@ -64,5 +64,6 @@
 	<PO.Precept_RoleMulti_RecacheActivity>Precept_RoleMulti:RecacheActivity</PO.Precept_RoleMulti_RecacheActivity>
 	<PO.Precept_RoleSingle_RecacheActivity>Precept_RoleSingle:RecacheActivity</PO.Precept_RoleSingle_RecacheActivity>
 	<PO.SkillRecord_LearnRateFactor>SkillRecord:LearnRateFactor</PO.SkillRecord_LearnRateFactor>
-	
+	<PO.Frame_WorkToBuild>Frame:WorkToBuild</PO.Frame_WorkToBuild>
+	<PO.TicksToOpenNow>Building_Door:TicksToOpenNow</PO.TicksToOpenNow>
 </LanguageData>
