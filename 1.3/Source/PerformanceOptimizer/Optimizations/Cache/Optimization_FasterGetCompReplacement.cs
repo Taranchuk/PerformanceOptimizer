@@ -377,11 +377,12 @@ namespace PerformanceOptimizer
             {
                 return val;
             }
+
             if (thingWithComps.comps == null)
             {
-                ICache_ThingComp<T>.compsById[thingWithComps.thingIDNumber] = null;
                 return null;
             }
+
             for (int i = 0; i < thingWithComps.comps.Count; i++)
             {
                 var props = thingWithComps.comps[i].props;
@@ -402,7 +403,6 @@ namespace PerformanceOptimizer
                     return val3;
                 }
             }
-            ICache_ThingComp<T>.compsById[thingWithComps.thingIDNumber] = null;
             return null;
         }
 
@@ -436,12 +436,10 @@ namespace PerformanceOptimizer
             HediffWithComps hediffWithComps = hd as HediffWithComps;
             if (hediffWithComps == null)
             {
-                ICache_HediffComp<T>.compsById[hd.loadID] = null;
                 return null;
             }
             if (hediffWithComps.comps == null)
             {
-                ICache_HediffComp<T>.compsById[hd.loadID] = null;
                 return null;
             }
 
@@ -465,7 +463,6 @@ namespace PerformanceOptimizer
                     return val3;
                 }
             }
-            ICache_HediffComp<T>.compsById[hd.loadID] = null;
             return null;
         }
         public static class ICache_WorldObjectComp<T> where T : WorldObjectComp
@@ -486,7 +483,6 @@ namespace PerformanceOptimizer
             }
             if (worldObject.comps == null)
             {
-                ICache_WorldObjectComp<T>.compsById[worldObject.ID] = null;
                 return null;
             }
             for (int i = 0; i < worldObject.comps.Count; i++)
@@ -508,7 +504,6 @@ namespace PerformanceOptimizer
                     return val3;
                 }
             }
-            ICache_WorldObjectComp<T>.compsById[worldObject.ID] = null;
             return null;
         }
         public static class ICache_MapComponent<T>
