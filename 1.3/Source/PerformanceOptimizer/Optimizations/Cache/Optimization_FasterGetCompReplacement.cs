@@ -362,7 +362,6 @@ namespace PerformanceOptimizer
     [StaticConstructorOnStartup]
     public static class ComponentCache
     {
-        private static Stopwatch dictStopwatch = new Stopwatch();
         public static class ICache_ThingComp<T> where T : ThingComp
         {
             public static Dictionary<int, T> compsById = new Dictionary<int, T>();
@@ -374,7 +373,7 @@ namespace PerformanceOptimizer
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T GetThingCompFast<T>(this ThingWithComps thingWithComps) where T : ThingComp
-        {
+        {   
             if (ICache_ThingComp<T>.compsById.TryGetValue(thingWithComps.thingIDNumber, out T val))
             {
                 return val;
@@ -441,11 +440,9 @@ namespace PerformanceOptimizer
                 ICache_HediffComp<T>.compsById[hd.loadID] = null;
                 return null;
             }
-            //dictStopwatch.Restart();
             if (hediffWithComps.comps == null)
             {
                 ICache_HediffComp<T>.compsById[hd.loadID] = null;
-                //dictStopwatch.LogTime("Dict approach: ");
                 return null;
             }
 
@@ -454,8 +451,6 @@ namespace PerformanceOptimizer
                 var props = hediffWithComps.comps[i].props;
                 if (props != null && props.compClass == typeof(T))
                 {
-                    //RegisterComp(thingWithComps.comps[i].GetType());
-                    //dictStopwatch.LogTime("Dict approach: ");
                     var val2 = hediffWithComps.comps[i] as T;
                     ICache_HediffComp<T>.compsById[hd.loadID] = val2;
                     return val2;
@@ -490,19 +485,15 @@ namespace PerformanceOptimizer
             {
                 return val;
             }
-            //dictStopwatch.Restart();
             if (worldObject.comps == null)
             {
                 ICache_WorldObjectComp<T>.compsById[worldObject.ID] = null;
-                //dictStopwatch.LogTime("Dict approach: ");
                 return null;
             }
             for (int i = 0; i < worldObject.comps.Count; i++)
             {
                 if (worldObject.comps[i].GetType() == typeof(T))
                 {
-                    //RegisterComp(thingWithComps.comps[i].GetType());
-                    //dictStopwatch.LogTime("Dict approach: ");
                     var val2 = worldObject.comps[i] as T;
                     ICache_WorldObjectComp<T>.compsById[worldObject.ID] = val2;
                     return val2;
