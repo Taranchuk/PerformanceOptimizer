@@ -96,7 +96,7 @@ namespace PerformanceOptimizer
         public void SetValue(T value, int resetInTicks)
         {
             valueInt = value;
-            refreshTick = Find.TickManager.TicksGame + resetInTicks;
+            refreshTick = Find.TickManager.TicksGame + (resetInTicks - 1);
             refreshNow = false;
         }
 

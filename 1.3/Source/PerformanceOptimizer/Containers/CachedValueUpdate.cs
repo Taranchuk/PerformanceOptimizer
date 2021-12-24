@@ -10,7 +10,7 @@ namespace PerformanceOptimizer
         public CachedValueUpdate(T value, int resetInFrames)
         {
             valueInt = value;
-            refreshUpdate = Time.frameCount + resetInFrames;
+            refreshUpdate = Time.frameCount + (resetInFrames - 1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
