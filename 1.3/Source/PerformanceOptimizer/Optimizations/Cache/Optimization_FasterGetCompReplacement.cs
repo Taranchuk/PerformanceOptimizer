@@ -222,10 +222,9 @@ namespace PerformanceOptimizer
         {
             if (parse)
             {
-                var methodsToParse = new HashSet<MethodInfo>();
                 await Task.Run(() =>
                 {
-                    ParseMethods(methodsToParse);
+                    ParseEverything();
                 });
             }
 
@@ -237,10 +236,11 @@ namespace PerformanceOptimizer
             //Log.Message("Transpiled " + patchedMethods.Count + " methods");
         }
 
-        private void ParseMethods(HashSet<MethodInfo> methodsToParse)
+        private void ParseEverything()
         {
             try
             {
+                var methodsToParse = new HashSet<MethodInfo>();
                 var types = GetTypesToParse();
                 foreach (var type in types)
                 {
