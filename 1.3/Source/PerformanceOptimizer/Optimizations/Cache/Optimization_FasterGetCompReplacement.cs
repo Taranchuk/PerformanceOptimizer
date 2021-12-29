@@ -22,13 +22,13 @@ namespace PerformanceOptimizer
         public override string Label => "PO.FasterGetCompReplacement".Translate();
         public override int DrawOrder => -99999;
 
-        public List<MethodInfo> methodsCallingMapGetComp;
-        public List<MethodInfo> methodsCallingWorldGetComp;
-        public List<MethodInfo> methodsCallingGameGetComp;
-        public List<MethodInfo> methodsCallingThingGetComp;
-        public List<MethodInfo> methodsCallingThingTryGetComp;
-        public List<MethodInfo> methodsCallingHediffTryGetComp;
-        public List<MethodInfo> methodsCallingWorldObjectGetComp;
+        public static MethodInfo genericMapGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetMapComponentFast));
+        public static MethodInfo genericWorldGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetWorldComponentFast));
+        public static MethodInfo genericGameGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetGameComponentFast));
+        public static MethodInfo genericThingGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetThingCompFast));
+        public static MethodInfo genericThingTryGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.TryGetThingCompFast));
+        public static MethodInfo genericHediffTryGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.TryGetHediffCompFast));
+        public static MethodInfo genericWorldObjectGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetWorldObjectCompFast));
 
         public static HashSet<string> assembliesToSkip = new HashSet<string>
         {
@@ -86,9 +86,18 @@ namespace PerformanceOptimizer
             }
             return methods;
         }
-        public static void ParseMethod(MethodInfo method, List<MethodInfo> methodsCallingMapGetComp, List<MethodInfo> methodsCallingWorldGetComp, List<MethodInfo> methodsCallingGameGetComp,
-            List<MethodInfo> methodsCallingThingGetComp, List<MethodInfo> methodsCallingThingTryGetComp, List<MethodInfo> methodsCallingHediffTryGetComp
-            , List<MethodInfo> methodsCallingWorldObjectGetComp)
+
+        public struct PatchInfo
+        {
+            public CodeInstruction targetInstruction;
+            public Type genericType;
+            public MethodInfo genericMethod;
+        }
+
+        private static Dictionary<MethodInfo, List<PatchInfo>> patchInfos;
+        private static List<PatchInfo> curPatchInfos;
+
+        public static void ParseMethod(MethodInfo method)
         {
             try
             {
@@ -104,29 +113,29 @@ namespace PerformanceOptimizer
                                 if (mi.Name == "GetComponent")
                                 {
                                     var underlyingType = mi.GetUnderlyingType();
-                                    if (!methodsCallingMapGetComp.Contains(method) && typeof(MapComponent).IsAssignableFrom(underlyingType))
+                                    if (typeof(MapComponent).IsAssignableFrom(underlyingType))
                                     {
-                                        methodsCallingMapGetComp.Add(method);
+                                        AddPatchInfo(instr, typeof(MapComponent), genericMapGetComp);
                                     }
-                                    else if (!methodsCallingGameGetComp.Contains(method) && typeof(GameComponent).IsAssignableFrom(underlyingType))
+                                    else if (typeof(GameComponent).IsAssignableFrom(underlyingType))
                                     {
-                                        methodsCallingGameGetComp.Add(method);
+                                        AddPatchInfo(instr, typeof(GameComponent), genericGameGetComp);
                                     }
-                                    else if (!methodsCallingWorldGetComp.Contains(method) && typeof(WorldComponent).IsAssignableFrom(underlyingType))
+                                    else if (typeof(WorldComponent).IsAssignableFrom(underlyingType))
                                     {
-                                        methodsCallingWorldGetComp.Add(method);
+                                        AddPatchInfo(instr, typeof(WorldComponent), genericWorldGetComp);
                                     }
-                                    else if (!methodsCallingWorldObjectGetComp.Contains(method) && typeof(WorldObjectComp).IsAssignableFrom(underlyingType))
+                                    else if (typeof(WorldObjectComp).IsAssignableFrom(underlyingType))
                                     {
-                                        methodsCallingWorldObjectGetComp.Add(method);
+                                        AddPatchInfo(instr, typeof(WorldObjectComp), genericWorldObjectGetComp);
                                     }
                                 }
                                 else if (mi.Name == "GetComp")
                                 {
                                     var underlyingType = mi.GetUnderlyingType();
-                                    if (!methodsCallingThingGetComp.Contains(method) && typeof(ThingComp).IsAssignableFrom(underlyingType))
+                                    if (typeof(ThingComp).IsAssignableFrom(underlyingType))
                                     {
-                                        methodsCallingThingGetComp.Add(method);
+                                        AddPatchInfo(instr, typeof(ThingComp), genericThingGetComp);
                                     }
                                 }
                             }
@@ -138,13 +147,13 @@ namespace PerformanceOptimizer
                                 if (mi.Name == "TryGetComp")
                                 {
                                     var underlyingType = mi.GetUnderlyingType();
-                                    if (!methodsCallingThingTryGetComp.Contains(method) && typeof(ThingComp).IsAssignableFrom(underlyingType))
+                                    if (typeof(ThingComp).IsAssignableFrom(underlyingType))
                                     {
-                                        methodsCallingThingTryGetComp.Add(method);
+                                        AddPatchInfo(instr, typeof(ThingComp), genericThingTryGetComp);
                                     }
-                                    else if (!methodsCallingHediffTryGetComp.Contains(method) && typeof(HediffComp).IsAssignableFrom(underlyingType))
+                                    else if (typeof(HediffComp).IsAssignableFrom(underlyingType))
                                     {
-                                        methodsCallingHediffTryGetComp.Add(method);
+                                        AddPatchInfo(instr, typeof(HediffComp), genericHediffTryGetComp);
                                     }
                                 }
                             }
@@ -153,62 +162,39 @@ namespace PerformanceOptimizer
                 }
             }
             catch { }
-        }
 
-        public static MethodInfo genericMapGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetMapComponentFast));
-        private static IEnumerable<CodeInstruction> GetMapCompTranspiler(IEnumerable<CodeInstruction> instructions)
-        {
-            return PerformTranspiler("GetComponent", typeof(MapComponent), genericMapGetComp, OpCodes.Callvirt, 0, instructions);
-        }
-
-        public static MethodInfo genericWorldGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetWorldComponentFast));
-        private static IEnumerable<CodeInstruction> GetWorldCompTranspiler(IEnumerable<CodeInstruction> instructions)
-        {
-            return PerformTranspiler("GetComponent", typeof(WorldComponent), genericWorldGetComp, OpCodes.Callvirt, 0, instructions);
-        }
-
-        public static MethodInfo genericGameGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetGameComponentFast));
-        private static IEnumerable<CodeInstruction> GetGameCompTranspiler(IEnumerable<CodeInstruction> instructions)
-        {
-            return PerformTranspiler("GetComponent", typeof(GameComponent), genericGameGetComp, OpCodes.Callvirt, 0, instructions);
-        }
-
-        public static MethodInfo genericThingGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetThingCompFast));
-        private static IEnumerable<CodeInstruction> GetThingCompTranspiler(IEnumerable<CodeInstruction> instructions)
-        {
-            return PerformTranspiler("GetComp", typeof(ThingComp), genericThingGetComp, OpCodes.Callvirt, 0, instructions);
-        }
-
-        public static MethodInfo genericThingTryGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.TryGetThingCompFast));
-        private static IEnumerable<CodeInstruction> TryGetThingCompTranspiler(IEnumerable<CodeInstruction> instructions)
-        {
-            return PerformTranspiler("TryGetComp", typeof(ThingComp), genericThingTryGetComp, OpCodes.Call, 1, instructions);
-        }
-
-        public static MethodInfo genericHediffTryGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.TryGetHediffCompFast));
-        private static IEnumerable<CodeInstruction> TryGetHediffCompTranspiler(IEnumerable<CodeInstruction> instructions)
-        {
-            return PerformTranspiler("TryGetComp", typeof(HediffComp), genericHediffTryGetComp, OpCodes.Call, 1, instructions);
-        }
-
-        public static MethodInfo genericWorldObjectGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetWorldObjectCompFast));
-        private static IEnumerable<CodeInstruction> GetWorldObjectCompTranspiler(IEnumerable<CodeInstruction> instructions)
-        {
-            return PerformTranspiler("GetComponent", typeof(WorldObjectComp), genericWorldObjectGetComp, OpCodes.Callvirt, 0, instructions);
+            void AddPatchInfo(CodeInstruction instr, Type genericType, MethodInfo genericMethod)
+            {
+                if (patchInfos.ContainsKey(method))
+                {
+                    patchInfos[method].Add(new PatchInfo
+                    {
+                        targetInstruction = instr,
+                        genericType = genericType,
+                        genericMethod = genericMethod
+                    });
+                }
+                else
+                {
+                    patchInfos[method] = new List<PatchInfo>
+                    {
+                        new PatchInfo
+                        {
+                            targetInstruction = instr,
+                            genericType = genericType,
+                            genericMethod = genericMethod
+                        }
+                    };
+                }
+            }
         }
         public override void DoPatches()
         {
             base.DoPatches();
             bool parse = false;
-            if (methodsCallingMapGetComp is null)
+            if (patchInfos is null)
             {
-                methodsCallingMapGetComp = new List<MethodInfo>();
-                methodsCallingWorldGetComp = new List<MethodInfo>();
-                methodsCallingGameGetComp = new List<MethodInfo>();
-                methodsCallingThingGetComp = new List<MethodInfo>();
-                methodsCallingThingTryGetComp = new List<MethodInfo>();
-                methodsCallingHediffTryGetComp = new List<MethodInfo>();
-                methodsCallingWorldObjectGetComp = new List<MethodInfo>();
+                patchInfos = new Dictionary<MethodInfo, List<PatchInfo>>();
                 parse = true;
             }
             DoPatchesAsync(parse);
@@ -220,37 +206,16 @@ namespace PerformanceOptimizer
                 var methodsToParse = new HashSet<MethodInfo>();
                 await Task.Run(() =>
                 {
-                    ParseMethods(methodsToParse);
                 });
+                ParseMethods(methodsToParse);
             }
 
-            foreach (var method in methodsCallingGameGetComp)
+            var transpilerMethod = GetMethod(nameof(Optimization_FasterGetCompReplacement.Transpiler));
+            foreach (var kvp in patchInfos)
             {
-                Patch(method, transpiler: GetMethod(nameof(Optimization_FasterGetCompReplacement.GetGameCompTranspiler)));
-            }
-            foreach (var method in methodsCallingWorldGetComp)
-            {
-                Patch(method, transpiler: GetMethod(nameof(Optimization_FasterGetCompReplacement.GetWorldCompTranspiler)));
-            }
-            foreach (var method in methodsCallingWorldObjectGetComp)
-            {
-                Patch(method, transpiler: GetMethod(nameof(Optimization_FasterGetCompReplacement.GetWorldObjectCompTranspiler)));
-            }
-            foreach (var method in methodsCallingMapGetComp)
-            {
-                Patch(method, transpiler: GetMethod(nameof(Optimization_FasterGetCompReplacement.GetMapCompTranspiler)));
-            }
-            foreach (var method in methodsCallingThingGetComp)
-            {
-                Patch(method, transpiler: GetMethod(nameof(Optimization_FasterGetCompReplacement.GetThingCompTranspiler)));
-            }
-            foreach (var method in methodsCallingThingTryGetComp)
-            {
-                Patch(method, transpiler: GetMethod(nameof(Optimization_FasterGetCompReplacement.TryGetThingCompTranspiler)));
-            }
-            foreach (var method in methodsCallingHediffTryGetComp)
-            {
-                Patch(method, transpiler: GetMethod(nameof(Optimization_FasterGetCompReplacement.TryGetHediffCompTranspiler)));
+                curPatchInfos = kvp.Value;
+                Log.Message("Patching " + kvp.Key.FullDescription());
+                Patch(kvp.Key, transpiler: transpilerMethod);
             }
         }
 
@@ -268,8 +233,7 @@ namespace PerformanceOptimizer
                 }
                 foreach (var method in methodsToParse)
                 {
-                    ParseMethod(method, methodsCallingMapGetComp, methodsCallingWorldGetComp, methodsCallingGameGetComp, methodsCallingThingGetComp,
-                        methodsCallingThingTryGetComp, methodsCallingHediffTryGetComp, methodsCallingWorldObjectGetComp);
+                    ParseMethod(method);
                 }
             }
             catch (Exception ex)
@@ -277,38 +241,30 @@ namespace PerformanceOptimizer
                 Log.Error("Exception in Performance Optimizer: " + ex);
             }
         }
-
-        public static bool CallsComponent(CodeInstruction codeInstruction, OpCode opcode, string methodName, Type baseCompType, int parameterLength, out Type curType)
+        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            if (codeInstruction.opcode == opcode && codeInstruction.operand is MethodInfo mi && mi.Name == methodName)
-            {
-                if (mi.IsGenericMethod && mi.GetParameters().Length == parameterLength)
-                {
-                    curType = mi.GetUnderlyingType();
-                    if (baseCompType.IsAssignableFrom(curType))
-                    {
-                        return true;
-                    }
-                }
-            }
-            curType = null;
-            return false;
-        }
-
-        private static IEnumerable<CodeInstruction> PerformTranspiler(string methodName, Type baseType, MethodInfo genericMethod, OpCode opcode, int parameterLength,
-            IEnumerable<CodeInstruction> instructions)
-        {
+            bool patchedSomething = false;
             var codes = instructions.ToList();
             for (var i = 0; i < codes.Count; i++)
             {
                 var instr = codes[i];
-                if (CallsComponent(instr, opcode, methodName, baseType, parameterLength, out Type type))
+                for (var j = 0; j < curPatchInfos.Count; j++)
                 {
-                    var methodToReplace = genericMethod.MakeGenericMethod(new Type[] { type });
-                    instr.opcode = OpCodes.Call;
-                    instr.operand = methodToReplace;
+                    var patchInfo = curPatchInfos[j];
+                    if (patchInfo.targetInstruction.opcode == instr.opcode && patchInfo.targetInstruction.operand == instr.operand)
+                    {
+                        var methodToReplace = patchInfo.genericMethod.MakeGenericMethod(new Type[] { patchInfo.genericType });
+                        instr.opcode = OpCodes.Call;
+                        instr.operand = methodToReplace;
+                        Log.Message("Replaced " + instr);
+                        patchedSomething = true;
+                    }
                 }
                 yield return instr;
+            }
+            if (!patchedSomething)
+            {
+                Log.Error("Performance Optimizer failed to transpile");
             }
         }
 
