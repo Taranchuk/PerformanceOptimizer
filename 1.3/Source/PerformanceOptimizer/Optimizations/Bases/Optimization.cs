@@ -10,7 +10,7 @@ namespace PerformanceOptimizer
 {
     public abstract class Optimization : IExposable, IComparable<Optimization>
     {
-        public Dictionary<MethodInfo, List<MethodInfo>> patchedMethods;
+        public Dictionary<MethodBase, List<MethodInfo>> patchedMethods;
         public virtual bool EnabledByDefault => true;
         public abstract OptimizationType OptimizationType { get; }
 
@@ -46,7 +46,7 @@ namespace PerformanceOptimizer
             }
             else if (IsEnabled && (patchedMethods is null || !patchedMethods.Any()))
             {
-                patchedMethods ??= new Dictionary<MethodInfo, List<MethodInfo>>();
+                patchedMethods ??= new Dictionary<MethodBase, List<MethodInfo>>();
                 DoPatches();
             }
             Watcher.ResetData();
@@ -61,7 +61,7 @@ namespace PerformanceOptimizer
         }
 
         public static Dictionary<MethodBase, Type> mappedValues = new();
-        public void Patch(MethodInfo methodInfo, MethodInfo prefix = null, MethodInfo postfix = null, MethodInfo transpiler = null)
+        public void Patch(MethodBase methodInfo, MethodInfo prefix = null, MethodInfo postfix = null, MethodInfo transpiler = null)
         {
             PerformanceOptimizerMod.harmony.Patch(methodInfo, prefix != null ? new HarmonyMethod(prefix) : null, postfix != null ? new HarmonyMethod(postfix) : null, transpiler != null ? new HarmonyMethod(transpiler) : null);
             //Log.Message(this.GetType() +  " - Patching " + methodInfo.FullDescription());
@@ -223,7 +223,7 @@ namespace PerformanceOptimizer
             {
                 foreach (var kvp in patchedMethods)
                 {
-                    MethodInfo method = kvp.Key;
+                    MethodBase method = kvp.Key;
                     foreach (var patch in kvp.Value)
                     {
                         PerformanceOptimizerMod.harmony.Unpatch(method, patch);

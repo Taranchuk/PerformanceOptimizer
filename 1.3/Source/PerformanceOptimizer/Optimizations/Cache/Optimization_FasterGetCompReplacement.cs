@@ -89,13 +89,13 @@ namespace PerformanceOptimizer
 
         public struct PatchInfo
         {
+            public MethodInfo targetMethod;
             public CodeInstruction targetInstruction;
             public Type genericType;
             public MethodInfo genericMethod;
         }
 
-        private static Dictionary<MethodInfo, List<PatchInfo>> patchInfos;
-        private static List<PatchInfo> curPatchInfos;
+        private static Dictionary<MethodBase, List<PatchInfo>> patchInfos;
 
         public static void ParseMethod(MethodInfo method)
         {
@@ -108,26 +108,26 @@ namespace PerformanceOptimizer
                     {
                         if (mi.IsGenericMethod && mi.GetParameters().Length <= 0)
                         {
-                            if (instr.opcode == OpCodes.Callvirt)
+                            if (instr.opcode == OpCodes.Callvirt || instr.opcode == OpCodes.Call)
                             {
                                 if (mi.Name == "GetComponent")
                                 {
                                     var underlyingType = mi.GetUnderlyingType();
                                     if (typeof(MapComponent).IsAssignableFrom(underlyingType))
                                     {
-                                        AddPatchInfo(instr, typeof(MapComponent), genericMapGetComp);
+                                        AddPatchInfo(method, instr, underlyingType, genericMapGetComp);
                                     }
                                     else if (typeof(GameComponent).IsAssignableFrom(underlyingType))
                                     {
-                                        AddPatchInfo(instr, typeof(GameComponent), genericGameGetComp);
+                                        AddPatchInfo(method, instr, underlyingType, genericGameGetComp);
                                     }
                                     else if (typeof(WorldComponent).IsAssignableFrom(underlyingType))
                                     {
-                                        AddPatchInfo(instr, typeof(WorldComponent), genericWorldGetComp);
+                                        AddPatchInfo(method, instr, underlyingType, genericWorldGetComp);
                                     }
                                     else if (typeof(WorldObjectComp).IsAssignableFrom(underlyingType))
                                     {
-                                        AddPatchInfo(instr, typeof(WorldObjectComp), genericWorldObjectGetComp);
+                                        AddPatchInfo(method, instr, underlyingType, genericWorldObjectGetComp);
                                     }
                                 }
                                 else if (mi.Name == "GetComp")
@@ -135,7 +135,7 @@ namespace PerformanceOptimizer
                                     var underlyingType = mi.GetUnderlyingType();
                                     if (typeof(ThingComp).IsAssignableFrom(underlyingType))
                                     {
-                                        AddPatchInfo(instr, typeof(ThingComp), genericThingGetComp);
+                                        AddPatchInfo(method, instr, underlyingType, genericThingGetComp);
                                     }
                                 }
                             }
@@ -149,11 +149,11 @@ namespace PerformanceOptimizer
                                     var underlyingType = mi.GetUnderlyingType();
                                     if (typeof(ThingComp).IsAssignableFrom(underlyingType))
                                     {
-                                        AddPatchInfo(instr, typeof(ThingComp), genericThingTryGetComp);
+                                        AddPatchInfo(method, instr, underlyingType, genericThingTryGetComp);
                                     }
                                     else if (typeof(HediffComp).IsAssignableFrom(underlyingType))
                                     {
-                                        AddPatchInfo(instr, typeof(HediffComp), genericHediffTryGetComp);
+                                        AddPatchInfo(method, instr, underlyingType, genericHediffTryGetComp);
                                     }
                                 }
                             }
@@ -163,12 +163,13 @@ namespace PerformanceOptimizer
             }
             catch { }
 
-            void AddPatchInfo(CodeInstruction instr, Type genericType, MethodInfo genericMethod)
+            void AddPatchInfo(MethodInfo targetMethod, CodeInstruction instr, Type genericType, MethodInfo genericMethod)
             {
                 if (patchInfos.ContainsKey(method))
                 {
                     patchInfos[method].Add(new PatchInfo
                     {
+                        targetMethod = targetMethod,
                         targetInstruction = instr,
                         genericType = genericType,
                         genericMethod = genericMethod
@@ -180,6 +181,7 @@ namespace PerformanceOptimizer
                     {
                         new PatchInfo
                         {
+                            targetMethod = targetMethod,
                             targetInstruction = instr,
                             genericType = genericType,
                             genericMethod = genericMethod
@@ -194,7 +196,7 @@ namespace PerformanceOptimizer
             bool parse = false;
             if (patchInfos is null)
             {
-                patchInfos = new Dictionary<MethodInfo, List<PatchInfo>>();
+                patchInfos = new Dictionary<MethodBase, List<PatchInfo>>();
                 parse = true;
             }
             DoPatchesAsync(parse);
@@ -206,17 +208,16 @@ namespace PerformanceOptimizer
                 var methodsToParse = new HashSet<MethodInfo>();
                 await Task.Run(() =>
                 {
+                    ParseMethods(methodsToParse);
                 });
-                ParseMethods(methodsToParse);
             }
 
             var transpilerMethod = GetMethod(nameof(Optimization_FasterGetCompReplacement.Transpiler));
             foreach (var kvp in patchInfos)
             {
-                curPatchInfos = kvp.Value;
-                Log.Message("Patching " + kvp.Key.FullDescription());
                 Patch(kvp.Key, transpiler: transpilerMethod);
             }
+            Log.Message("Transpiled " + patchedMethods.Count + " methods");
         }
 
         private void ParseMethods(HashSet<MethodInfo> methodsToParse)
@@ -241,8 +242,10 @@ namespace PerformanceOptimizer
                 Log.Error("Exception in Performance Optimizer: " + ex);
             }
         }
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+
+        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, MethodBase method)
         {
+            var curPatchInfos = patchInfos[method];
             bool patchedSomething = false;
             var codes = instructions.ToList();
             for (var i = 0; i < codes.Count; i++)
@@ -256,7 +259,7 @@ namespace PerformanceOptimizer
                         var methodToReplace = patchInfo.genericMethod.MakeGenericMethod(new Type[] { patchInfo.genericType });
                         instr.opcode = OpCodes.Call;
                         instr.operand = methodToReplace;
-                        Log.Message("Replaced " + instr);
+                        //Log.Message("Patched: " + patchInfo.targetMethod.FullDescription() + " - Replaced " + instr);
                         patchedSomething = true;
                     }
                 }
@@ -264,7 +267,11 @@ namespace PerformanceOptimizer
             }
             if (!patchedSomething)
             {
-                Log.Error("Performance Optimizer failed to transpile");
+                Log.Error("Performance Optimizer failed to transpile:");
+                foreach (var patchInfo in curPatchInfos)
+                {
+                    Log.Error(" - " + patchInfo.targetMethod.FullDescription());
+                }
             }
         }
 
@@ -333,7 +340,7 @@ namespace PerformanceOptimizer
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T GetThingCompFast<T>(this ThingWithComps thingWithComps) where T : ThingComp
-        {   
+        {
             if (ICache_ThingComp<T>.compsById.TryGetValue(thingWithComps.thingIDNumber, out T val))
             {
                 return val;
