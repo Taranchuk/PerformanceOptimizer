@@ -29,6 +29,8 @@ namespace PerformanceOptimizer
         public static MethodInfo genericThingTryGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.TryGetThingCompFast));
         public static MethodInfo genericHediffTryGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.TryGetHediffCompFast));
         public static MethodInfo genericWorldObjectGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetWorldObjectCompFast));
+        public static MethodInfo genericThingDefCompProps = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetThingDefPropsFast));
+        public static MethodInfo genericHediffDefCompProps = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetHediffDefPropsFast));
 
         public static HashSet<string> assembliesToSkip = new HashSet<string>
         {
@@ -96,7 +98,6 @@ namespace PerformanceOptimizer
         }
 
         private static Dictionary<MethodBase, List<PatchInfo>> patchInfos;
-
         public static void ParseMethod(MethodInfo method)
         {
             try
@@ -136,6 +137,22 @@ namespace PerformanceOptimizer
                                     if (typeof(ThingComp).IsAssignableFrom(underlyingType))
                                     {
                                         AddPatchInfo(method, instr, underlyingType, genericThingGetComp);
+                                    }
+                                }
+                                else if (mi.Name == "GetCompProperties")
+                                {
+                                    var underlyingType = mi.GetUnderlyingType();
+                                    if (typeof(CompProperties).IsAssignableFrom(underlyingType))
+                                    {
+                                        AddPatchInfo(method, instr, underlyingType, genericThingDefCompProps);
+                                    }
+                                }
+                                else if (mi.Name == "CompProps")
+                                {
+                                    var underlyingType = mi.GetUnderlyingType();
+                                    if (typeof(HediffCompProperties).IsAssignableFrom(underlyingType))
+                                    {
+                                        AddPatchInfo(method, instr, underlyingType, genericHediffDefCompProps);
                                     }
                                 }
                             }
@@ -217,7 +234,7 @@ namespace PerformanceOptimizer
             {
                 Patch(kvp.Key, transpiler: transpilerMethod);
             }
-            Log.Message("Transpiled " + patchedMethods.Count + " methods");
+            //Log.Message("Transpiled " + patchedMethods.Count + " methods");
         }
 
         private void ParseMethods(HashSet<MethodInfo> methodsToParse)
@@ -474,6 +491,73 @@ namespace PerformanceOptimizer
             }
             return null;
         }
+        public static class ICache_ThingDefProps<T> where T : CompProperties
+        {
+            public static Dictionary<ushort, T> compPropsById = new Dictionary<ushort, T>();
+            public static void Clear()
+            {
+                compPropsById.Clear();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T GetThingDefPropsFast<T>(this ThingDef thingDef) where T : CompProperties
+        {
+            if (ICache_ThingDefProps<T>.compPropsById.TryGetValue(thingDef.shortHash, out T val))
+            {
+                return val;
+            }
+
+            if (thingDef.comps == null)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < thingDef.comps.Count; i++)
+            {
+                T val3 = thingDef.comps[i] as T;
+                if (val3 != null)
+                {
+                    ICache_ThingDefProps<T>.compPropsById[thingDef.shortHash] = val3;
+                    return val3;
+                }
+            }
+            return null;
+        }
+        public static class ICache_HediffDefProps<T> where T : HediffCompProperties
+        {
+            public static Dictionary<ushort, T> compPropsById = new Dictionary<ushort, T>();
+            public static void Clear()
+            {
+                compPropsById.Clear();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T GetHediffDefPropsFast<T>(this HediffDef hediffDef) where T : HediffCompProperties
+        {
+            if (ICache_HediffDefProps<T>.compPropsById.TryGetValue(hediffDef.shortHash, out T val))
+            {
+                return val;
+            }
+
+            if (hediffDef.comps == null)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < hediffDef.comps.Count; i++)
+            {
+                T val3 = hediffDef.comps[i] as T;
+                if (val3 != null)
+                {
+                    ICache_HediffDefProps<T>.compPropsById[hediffDef.shortHash] = val3;
+                    return val3;
+                }
+            }
+            return null;
+        }
+
         public static class ICache_MapComponent<T>
         {
             public static Dictionary<Map, T> compsByMap = new Dictionary<Map, T>();
