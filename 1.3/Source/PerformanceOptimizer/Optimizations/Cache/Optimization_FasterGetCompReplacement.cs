@@ -220,26 +220,7 @@ namespace PerformanceOptimizer
                 var methodsToParse = new HashSet<MethodInfo>();
                 await Task.Run(() =>
                 {
-                    try
-                    {
-                        var types = GetTypesToParse();
-                        foreach (var type in types)
-                        {
-                            foreach (var method in GetMethodsToParse(type))
-                            {
-                                methodsToParse.Add(method);
-                            }
-                        }
-                        foreach (var method in methodsToParse)
-                        {
-                            ParseMethod(method, methodsCallingMapGetComp, methodsCallingWorldGetComp, methodsCallingGameGetComp, methodsCallingThingGetComp,
-                                methodsCallingThingTryGetComp, methodsCallingHediffTryGetComp, methodsCallingWorldObjectGetComp);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error("Exception in Performance Optimizer: " + ex);
-                    }
+                    ParseMethods(methodsToParse);
                 });
             }
 
@@ -270,6 +251,30 @@ namespace PerformanceOptimizer
             foreach (var method in methodsCallingHediffTryGetComp)
             {
                 Patch(method, transpiler: GetMethod(nameof(Optimization_FasterGetCompReplacement.TryGetHediffCompTranspiler)));
+            }
+        }
+
+        private void ParseMethods(HashSet<MethodInfo> methodsToParse)
+        {
+            try
+            {
+                var types = GetTypesToParse();
+                foreach (var type in types)
+                {
+                    foreach (var method in GetMethodsToParse(type))
+                    {
+                        methodsToParse.Add(method);
+                    }
+                }
+                foreach (var method in methodsToParse)
+                {
+                    ParseMethod(method, methodsCallingMapGetComp, methodsCallingWorldGetComp, methodsCallingGameGetComp, methodsCallingThingGetComp,
+                        methodsCallingThingTryGetComp, methodsCallingHediffTryGetComp, methodsCallingWorldObjectGetComp);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Exception in Performance Optimizer: " + ex);
             }
         }
 
