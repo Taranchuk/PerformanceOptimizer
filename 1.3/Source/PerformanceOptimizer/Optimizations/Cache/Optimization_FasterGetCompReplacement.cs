@@ -104,9 +104,10 @@ namespace PerformanceOptimizer
                 var instructions = PatchProcessor.GetCurrentInstructions(method);
                 foreach (var instr in instructions)
                 {
-                    if (instr.operand is MethodInfo mi)
+                    if (instr.operand is MethodInfo mi && mi.IsGenericMethod)
                     {
-                        if (mi.IsGenericMethod && mi.GetParameters().Length <= 0)
+                        var parameterLength = mi.GetParameters().Length;
+                        if (parameterLength <= 0)
                         {
                             if (instr.opcode == OpCodes.Callvirt || instr.opcode == OpCodes.Call)
                             {
@@ -156,7 +157,7 @@ namespace PerformanceOptimizer
                                 }
                             }
                         }
-                        else if (mi.IsGenericMethod && mi.GetParameters().Length == 1)
+                        else if (parameterLength == 1)
                         {
                             if (instr.opcode == OpCodes.Call)
                             {
@@ -177,7 +178,10 @@ namespace PerformanceOptimizer
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                //Log.Error("Error when parsing " + method.FullDescription() + " - exception: " + ex);
+            }
 
             void AddPatchInfo(MethodInfo targetMethod, CodeInstruction instr, Type genericType, MethodInfo genericMethod)
             {
