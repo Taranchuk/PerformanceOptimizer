@@ -264,10 +264,8 @@ namespace PerformanceOptimizer
         {
             var curPatchInfos = patchInfos[method];
             bool patchedSomething = false;
-            var codes = instructions.ToList();
-            for (var i = 0; i < codes.Count; i++)
+            foreach (var instr in instructions)
             {
-                var instr = codes[i];
                 for (var j = 0; j < curPatchInfos.Count; j++)
                 {
                     var patchInfo = curPatchInfos[j];
