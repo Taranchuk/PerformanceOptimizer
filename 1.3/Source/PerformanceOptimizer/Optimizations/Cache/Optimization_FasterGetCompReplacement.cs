@@ -181,25 +181,22 @@ namespace PerformanceOptimizer
 
             void AddPatchInfo(MethodInfo targetMethod, CodeInstruction instr, Type genericType, MethodInfo genericMethod)
             {
+                var patchInfo = new PatchInfo
+                {
+                    targetMethod = targetMethod,
+                    targetInstruction = instr,
+                    methodToReplace = genericMethod.MakeGenericMethod(new Type[] { genericType })
+                };
+
                 if (patchInfos.ContainsKey(method))
                 {
-                    patchInfos[method].Add(new PatchInfo
-                    {
-                        targetMethod = targetMethod,
-                        targetInstruction = instr,
-                        methodToReplace = genericMethod.MakeGenericMethod(new Type[] { genericType })
-                    });
+                    patchInfos[method].Add(patchInfo);
                 }
                 else
                 {
                     patchInfos[method] = new List<PatchInfo>
                     {
-                        new PatchInfo
-                        {
-                            targetMethod = targetMethod,
-                            targetInstruction = instr,
-                            methodToReplace = genericMethod.MakeGenericMethod(new Type[] { genericType })
-                        }
+                        patchInfo
                     };
                 }
             }
