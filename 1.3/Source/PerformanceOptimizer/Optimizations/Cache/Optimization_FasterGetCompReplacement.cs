@@ -93,8 +93,7 @@ namespace PerformanceOptimizer
         {
             public MethodInfo targetMethod;
             public CodeInstruction targetInstruction;
-            public Type genericType;
-            public MethodInfo genericMethod;
+            public MethodInfo methodToReplace;
         }
 
         private static Dictionary<MethodBase, List<PatchInfo>> patchInfos;
@@ -188,8 +187,7 @@ namespace PerformanceOptimizer
                     {
                         targetMethod = targetMethod,
                         targetInstruction = instr,
-                        genericType = genericType,
-                        genericMethod = genericMethod
+                        methodToReplace = genericMethod.MakeGenericMethod(new Type[] { genericType })
                     });
                 }
                 else
@@ -200,8 +198,7 @@ namespace PerformanceOptimizer
                         {
                             targetMethod = targetMethod,
                             targetInstruction = instr,
-                            genericType = genericType,
-                            genericMethod = genericMethod
+                            methodToReplace = genericMethod.MakeGenericMethod(new Type[] { genericType })
                         }
                     };
                 }
@@ -220,20 +217,22 @@ namespace PerformanceOptimizer
         }
         public async void DoPatchesAsync(bool parse)
         {
-            if (parse)
+            await Task.Run(() =>
             {
-                await Task.Run(() =>
+                if (parse)
                 {
                     ParseEverything();
-                });
-            }
-
-            var transpilerMethod = GetMethod(nameof(Optimization_FasterGetCompReplacement.Transpiler));
+                }
+            });
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            var transpiler = GetMethod(nameof(Optimization_FasterGetCompReplacement.Transpiler));
             foreach (var kvp in patchInfos)
             {
-                Patch(kvp.Key, transpiler: transpilerMethod);
+                Patch(kvp.Key, transpiler: transpiler);
             }
-            //Log.Message("Transpiled " + patchedMethods.Count + " methods");
+            stopwatch.Stop();
+            //stopwatch.LogTime("Transpiled " + patchedMethods.Count + " methods");
         }
 
         private void ParseEverything()
@@ -273,11 +272,11 @@ namespace PerformanceOptimizer
                     var patchInfo = curPatchInfos[j];
                     if (patchInfo.targetInstruction.opcode == instr.opcode && patchInfo.targetInstruction.operand == instr.operand)
                     {
-                        var methodToReplace = patchInfo.genericMethod.MakeGenericMethod(new Type[] { patchInfo.genericType });
                         instr.opcode = OpCodes.Call;
-                        instr.operand = methodToReplace;
+                        instr.operand = patchInfo.methodToReplace;
                         //Log.Message("Patched: " + patchInfo.targetMethod.FullDescription() + " - Replaced " + instr);
                         patchedSomething = true;
+                        break;
                     }
                 }
                 yield return instr;

@@ -31,7 +31,7 @@ namespace PerformanceOptimizer
             stats.total += elapsed;
             if (stats.count >= limit)
             {
-                Log.Message(log + "it took: " + stats.total);
+                Log.Message(log + ", it took: " + stats.total);
                 stats.total = 0;
                 stats.count = 0;
             }
