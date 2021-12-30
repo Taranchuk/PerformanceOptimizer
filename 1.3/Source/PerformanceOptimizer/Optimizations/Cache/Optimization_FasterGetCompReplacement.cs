@@ -107,7 +107,7 @@ namespace PerformanceOptimizer
                     if (instr.operand is MethodInfo mi && mi.IsGenericMethod)
                     {
                         var parameterLength = mi.GetParameters().Length;
-                        if (parameterLength <= 0)
+                        if (parameterLength == 0)
                         {
                             if (instr.opcode == OpCodes.Callvirt || instr.opcode == OpCodes.Call)
                             {
