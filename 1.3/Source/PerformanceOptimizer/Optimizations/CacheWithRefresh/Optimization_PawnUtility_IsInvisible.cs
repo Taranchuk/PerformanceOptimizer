@@ -13,6 +13,8 @@ namespace PerformanceOptimizer
         public override int RefreshRateByDefault => 10;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Label => "PO.IsInvisible".Translate();
+
+        public override int MaxSliderValue => 600;
         public override void DoPatches()
         {
             base.DoPatches();
