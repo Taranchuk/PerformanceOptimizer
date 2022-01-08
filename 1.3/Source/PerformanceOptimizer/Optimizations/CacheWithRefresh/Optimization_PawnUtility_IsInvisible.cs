@@ -10,15 +10,14 @@ namespace PerformanceOptimizer
         public static int refreshRateStatic;
 
         public static Dictionary<Pawn, CachedValueTick<bool>> cachedResults = new Dictionary<Pawn, CachedValueTick<bool>>();
-        public override int RefreshRateByDefault => 10;
+        public override int RefreshRateByDefault => 60;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Label => "PO.IsInvisible".Translate();
-
-        public override int MaxSliderValue => 600;
         public override void DoPatches()
         {
             base.DoPatches();
             Patch(typeof(PawnUtility), "IsInvisible", GetMethod(nameof(Prefix)), GetMethod(nameof(Postfix)));
+            Patch(typeof(HediffComp_Invisibility), "UpdateTarget", GetMethod(nameof(ClearCache)));
         }
 
         [HarmonyPriority(int.MaxValue)]
@@ -38,6 +37,13 @@ namespace PerformanceOptimizer
             __state.ProcessResult(ref __result, refreshRateStatic);
         }
 
+        public static void ClearCache(HediffComp_Invisibility __instance)
+        {
+            if (__instance.Pawn != null)
+            {
+                cachedResults.Remove(__instance.Pawn);
+            }
+        }
         public override void Clear()
         {
             cachedResults.Clear();
