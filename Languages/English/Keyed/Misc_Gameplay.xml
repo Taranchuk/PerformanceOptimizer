@@ -66,4 +66,5 @@
 	<PO.SkillRecord_LearnRateFactor>SkillRecord:LearnRateFactor</PO.SkillRecord_LearnRateFactor>
 	<PO.Frame_WorkToBuild>Frame:WorkToBuild</PO.Frame_WorkToBuild>
 	<PO.TicksToOpenNow>Building_Door:TicksToOpenNow</PO.TicksToOpenNow>
+	<PO.IsInvisible>PawnUtility:IsInvisible</PO.IsInvisible>
 </LanguageData>

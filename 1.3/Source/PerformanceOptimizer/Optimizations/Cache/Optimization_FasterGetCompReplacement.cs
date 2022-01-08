@@ -185,6 +185,8 @@ namespace PerformanceOptimizer
 
             void AddPatchInfo(MethodInfo targetMethod, CodeInstruction instr, Type genericType, MethodInfo genericMethod)
             {
+                //Log.Message("Patched " + method.FullDescription() + " - instr: " + instr);
+                //Log.ResetMessageCount();
                 var patchInfo = new PatchInfo
                 {
                     targetMethod = targetMethod,
@@ -280,14 +282,14 @@ namespace PerformanceOptimizer
                 }
                 yield return instr;
             }
-            if (!patchedSomething)
-            {
-                Log.Error("Performance Optimizer failed to transpile:");
-                foreach (var patchInfo in curPatchInfos)
-                {
-                    Log.Error(" - " + patchInfo.targetMethod.FullDescription());
-                }
-            }
+            //if (!patchedSomething)
+            //{
+            //    Log.Error("Performance Optimizer failed to transpile:");
+            //    foreach (var patchInfo in curPatchInfos)
+            //    {
+            //        Log.Error(" - " + patchInfo.targetMethod.FullDescription());
+            //    }
+            //}
         }
 
         private static List<MethodInfo> clearMethods;
