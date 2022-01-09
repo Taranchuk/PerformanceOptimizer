@@ -10,7 +10,7 @@ namespace PerformanceOptimizer
     {
         public static int refreshRateStatic;
 
-        public static Dictionary<Pawn, Dictionary<Thing, CachedValueTick<bool>>> cachedResults = new Dictionary<Pawn, Dictionary<Thing, CachedValueTick<bool>>>();
+        public static Dictionary<int, Dictionary<Thing, CachedValueTick<bool>>> cachedResults = new Dictionary<int, Dictionary<Thing, CachedValueTick<bool>>>();
         public override int RefreshRateByDefault => 30;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Label => "PO.IsForbidden".Translate();
@@ -24,9 +24,9 @@ namespace PerformanceOptimizer
         [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(Thing t, Pawn pawn, out CachedValueTick<bool> __state, ref bool __result)
         {
-            if (!cachedResults.TryGetValue(pawn, out var cachedResult))
+            if (!cachedResults.TryGetValue(pawn.thingIDNumber, out var cachedResult))
             {
-                cachedResults[pawn] = cachedResult = new Dictionary<Thing, CachedValueTick<bool>>();
+                cachedResults[pawn.thingIDNumber] = cachedResult = new Dictionary<Thing, CachedValueTick<bool>>();
             }
             if (!cachedResult.TryGetValue(t, out __state))
             {

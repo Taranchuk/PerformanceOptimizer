@@ -9,7 +9,7 @@ namespace PerformanceOptimizer
     {
         public static int refreshRateStatic;
 
-        public static Dictionary<Pawn, CachedValueTick<bool>> cachedResults = new Dictionary<Pawn, CachedValueTick<bool>>();
+        public static Dictionary<int, CachedValueTick<bool>> cachedResults = new Dictionary<int, CachedValueTick<bool>>();
         public override int RefreshRateByDefault => 60;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Label => "PO.IsInvisible".Translate();
@@ -23,9 +23,9 @@ namespace PerformanceOptimizer
         [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(Pawn pawn, out CachedValueTick<bool> __state, ref bool __result)
         {
-            if (!cachedResults.TryGetValue(pawn, out __state))
+            if (!cachedResults.TryGetValue(pawn.thingIDNumber, out __state))
             {
-                cachedResults[pawn] = __state = new CachedValueTick<bool>();
+                cachedResults[pawn.thingIDNumber] = __state = new CachedValueTick<bool>();
                 return true;
             }
             return __state.SetOrRefresh(ref __result);
@@ -41,7 +41,7 @@ namespace PerformanceOptimizer
         {
             if (__instance.Pawn != null)
             {
-                cachedResults.Remove(__instance.Pawn);
+                cachedResults.Remove(__instance.Pawn.thingIDNumber);
             }
         }
         public override void Clear()
