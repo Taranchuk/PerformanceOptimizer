@@ -67,4 +67,5 @@
 	<PO.Frame_WorkToBuild>Frame:WorkToBuild</PO.Frame_WorkToBuild>
 	<PO.TicksToOpenNow>Building_Door:TicksToOpenNow</PO.TicksToOpenNow>
 	<PO.IsInvisible>PawnUtility:IsInvisible</PO.IsInvisible>
+	<PO.IsForbidden>ForbidUtility:IsForbidden</PO.IsForbidden>
 </LanguageData>

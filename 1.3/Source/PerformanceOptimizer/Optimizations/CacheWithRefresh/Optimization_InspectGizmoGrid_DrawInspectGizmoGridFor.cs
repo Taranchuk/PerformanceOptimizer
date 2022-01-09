@@ -3,6 +3,7 @@ using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 using Verse;
 using OpCodes = System.Reflection.Emit.OpCodes;
 
@@ -58,6 +59,7 @@ namespace PerformanceOptimizer
             {
                 gizmos = cache.valueInt;
             }
+
             if (ModCompatUtility.AllowToolActive)
             {
                 ModCompatUtility.ProcessAllowToolToggle(gizmos);
@@ -76,12 +78,17 @@ namespace PerformanceOptimizer
                 if (!found && codes[i].opcode == OpCodes.Stfld)
                 {
                     found = true;
+                    yield return new CodeInstruction(OpCodes.Ldarg_0);
                     yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Optimization_InspectGizmoGrid_DrawInspectGizmoGridFor), nameof(ResetSelectable)));
                 }
             }
         }
-        public static void ResetSelectable()
-        {
+        public static void ResetSelectable(Gizmo giz)
+{
+            if (giz is Command_Toggle toggle && toggle.defaultLabel == "CommandAllow".TranslateWithBackup("DesignatorUnforbid") && toggle.icon == TexCommand.ForbidOff)
+            {
+                Optimization_ForbidUtility_IsForbidden.cachedResults.Clear();
+            }
             cachedResults.Clear();
         }
 

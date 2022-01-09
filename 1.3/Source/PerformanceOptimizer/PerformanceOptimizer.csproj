@@ -58,6 +58,7 @@
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Building_Door_FreePassage.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_GenTemperature_AverageTemperatureAtTileForTwelfth.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_PawnUtility_IsInvisible.cs" />
+    <Compile Include="Optimizations\CacheWithRefresh\Optimization_ForbidUtility_IsForbidden.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_PlantFallColors_GetFallColorFactor.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Pawn_InteractionsTracker_CurrentSocialMode.cs" />
     <Compile Include="Optimizations\Cache\Optimization_HediffDef_PossibleToDevelopImmunityNaturally.cs" />

@@ -5,7 +5,7 @@ namespace PerformanceOptimizer
 {
     public abstract class Optimization_RefreshRate : Optimization
     {
-        public virtual int MaxSliderValue => 2500;
+        public virtual int MaxSliderValue => -1;
         public override void Reset()
         {
             base.Reset();
@@ -29,7 +29,7 @@ namespace PerformanceOptimizer
         public override void DrawSettings(Listing_Standard section)
         {
             var sliderName = OptimizationType == OptimizationType.CacheWithRefreshRate ? "PO.RefreshRate" : "PO.ThrottleRate";
-            section.CheckboxLabeledWithSlider(Label, sliderName, ref enabled, ref refreshRate, MaxSliderValue, actionOnClick: Apply, actionOnSlider: SetRefreshRate);
+            section.CheckboxLabeledWithSlider(Label, sliderName, ref enabled, ref refreshRate, MaxSliderValue == -1 ? RefreshRateByDefault * 10 : MaxSliderValue, actionOnClick: Apply, actionOnSlider: SetRefreshRate);
         }
         public override void ExposeData()
         {
