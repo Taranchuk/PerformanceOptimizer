@@ -3,6 +3,7 @@ using RimWorld;
 using System;
 using System.Collections.Generic;
 using Verse;
+using Verse.AI;
 
 namespace PerformanceOptimizer
 {
@@ -17,28 +18,48 @@ namespace PerformanceOptimizer
         public override void DoPatches()
         {
             base.DoPatches();
+            Patch(typeof(JobDriver), "CheckCurrentToilEndOrFail", GetMethod(nameof(CheckCurrentToilEndOrFailPrefix)), GetMethod(nameof(CheckCurrentToilEndOrFailPostfix)));
             var forbiddedMethod = AccessTools.Method(typeof(ForbidUtility), "IsForbidden", new Type[] { typeof(Thing), typeof(Pawn) });
             Patch(forbiddedMethod, GetMethod(nameof(Prefix)), GetMethod(nameof(Postfix)));
+        }
+
+        public static bool checkCurrentToilEndOrFailIsRunning;
+        public static void CheckCurrentToilEndOrFailPrefix()
+        {
+            checkCurrentToilEndOrFailIsRunning = true;
+        }
+
+        public static void CheckCurrentToilEndOrFailPostfix()
+        {
+            checkCurrentToilEndOrFailIsRunning = false;
         }
 
         [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(Thing t, Pawn pawn, out CachedValueTick<bool> __state, ref bool __result)
         {
-            if (!cachedResults.TryGetValue(pawn.thingIDNumber, out var cachedResult))
+            if (checkCurrentToilEndOrFailIsRunning)
             {
-                cachedResults[pawn.thingIDNumber] = cachedResult = new Dictionary<Thing, CachedValueTick<bool>>();
+                if (!cachedResults.TryGetValue(pawn.thingIDNumber, out var cachedResult))
+                {
+                    cachedResults[pawn.thingIDNumber] = cachedResult = new Dictionary<Thing, CachedValueTick<bool>>();
+                }
+                if (!cachedResult.TryGetValue(t, out __state))
+                {
+                    cachedResult[t] = __state = new CachedValueTick<bool>();
+                }
+                return __state.SetOrRefresh(ref __result);
             }
-            if (!cachedResult.TryGetValue(t, out __state))
+            else
             {
-                cachedResult[t] = __state = new CachedValueTick<bool>();
+                __state = null;
+                return true;
             }
-            return __state.SetOrRefresh(ref __result);
         }
 
         [HarmonyPriority(int.MinValue)]
         public static void Postfix(CachedValueTick<bool> __state, ref bool __result)
         {
-            __state.ProcessResult(ref __result, refreshRateStatic);
+            __state?.ProcessResult(ref __result, refreshRateStatic);
         }
 
         public override void Clear()
