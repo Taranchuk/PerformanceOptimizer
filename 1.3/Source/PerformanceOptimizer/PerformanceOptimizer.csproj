@@ -69,6 +69,7 @@
     <Compile Include="Optimizations\Cache\Optimization_IdeoBuildingPresenceDemand_BuildingPresent.cs" />
     <Compile Include="Optimizations\Cache\Optimization_WorldGrid_LongLatOf.cs" />
     <Compile Include="Optimizations\Misc\Optimization_FixDuplicateXMLNodes.cs" />
+    <Compile Include="Startup.cs" />
     <Compile Include="Utilities\ModCompatUtility.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_BuildCopyCommandUtility_FindAllowedDesignator.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Building_Door_DoorRotationAt.cs" />

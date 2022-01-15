@@ -31,6 +31,8 @@ namespace PerformanceOptimizer
         public static MethodInfo genericWorldObjectGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetWorldObjectCompFast));
         public static MethodInfo genericThingDefCompProps = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetThingDefPropsFast));
         public static MethodInfo genericHediffDefCompProps = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetHediffDefPropsFast));
+        public static MethodInfo genericGetModExtension = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetModExtensionFast));
+        public static MethodInfo genericHasModExtension = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.HasModExtensionFast));
 
         public static HashSet<string> assembliesToSkip = new HashSet<string>
         {
@@ -111,7 +113,8 @@ namespace PerformanceOptimizer
                         {
                             if (instr.opcode == OpCodes.Callvirt || instr.opcode == OpCodes.Call)
                             {
-                                if (mi.Name == "GetComponent")
+                                var miName = mi.Name;
+                                if (miName == "GetComponent")
                                 {
                                     var underlyingType = mi.GetUnderlyingType();
                                     if (typeof(MapComponent).IsAssignableFrom(underlyingType))
@@ -131,7 +134,7 @@ namespace PerformanceOptimizer
                                         AddPatchInfo(method, instr, underlyingType, genericWorldObjectGetComp);
                                     }
                                 }
-                                else if (mi.Name == "GetComp")
+                                else if (miName == "GetComp")
                                 {
                                     var underlyingType = mi.GetUnderlyingType();
                                     if (typeof(ThingComp).IsAssignableFrom(underlyingType))
@@ -139,7 +142,7 @@ namespace PerformanceOptimizer
                                         AddPatchInfo(method, instr, underlyingType, genericThingGetComp);
                                     }
                                 }
-                                else if (mi.Name == "GetCompProperties")
+                                else if (miName == "GetCompProperties")
                                 {
                                     var underlyingType = mi.GetUnderlyingType();
                                     if (typeof(CompProperties).IsAssignableFrom(underlyingType))
@@ -147,12 +150,36 @@ namespace PerformanceOptimizer
                                         AddPatchInfo(method, instr, underlyingType, genericThingDefCompProps);
                                     }
                                 }
-                                else if (mi.Name == "CompProps")
+                                else if (miName == "CompProps")
                                 {
                                     var underlyingType = mi.GetUnderlyingType();
                                     if (typeof(HediffCompProperties).IsAssignableFrom(underlyingType))
                                     {
                                         AddPatchInfo(method, instr, underlyingType, genericHediffDefCompProps);
+                                    }
+                                }
+                                else if (miName == "GetModExtension")
+                                {
+                                    var underlyingType = mi.GetUnderlyingType();
+                                    if (typeof(DefModExtension).IsAssignableFrom(underlyingType))
+                                    {
+                                        AddPatchInfo(method, instr, underlyingType, genericGetModExtension);
+                                    }
+                                }
+                                else if (miName == "HasModExtension")
+                                {
+                                    var genericArgs = mi.GetGenericArguments();
+                                    if (genericArgs.Length > 0)
+                                    {
+                                        var type = genericArgs[0];
+                                        if (typeof(DefModExtension).IsAssignableFrom(type))
+                                        {
+                                            AddPatchInfo(method, instr, type, genericHasModExtension);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Log.Message("FAIL: " + mi.FullDescription());
                                     }
                                 }
                             }
@@ -558,6 +585,45 @@ namespace PerformanceOptimizer
             return null;
         }
 
+
+        public static class ICache_DefModExtension<T> where T : DefModExtension
+        {
+            public static Dictionary<ushort, T> modExtensionsById = new Dictionary<ushort, T>();
+            public static void Clear()
+            {
+                modExtensionsById.Clear();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T GetModExtensionFast<T>(this Def def) where T : DefModExtension
+        {
+            if (ICache_DefModExtension<T>.modExtensionsById.TryGetValue(def.shortHash, out T val))
+            {
+                return val;
+            }
+
+            if (def.modExtensions == null)
+            {
+                return null;
+            }
+            for (int i = 0; i < def.modExtensions.Count; i++)
+            {
+                var val2 = def.modExtensions[i] as T;
+                if (val2 != null)
+                {
+                    ICache_DefModExtension<T>.modExtensionsById[def.shortHash] = val2;
+                    return val2;
+                }
+            }
+            return null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool HasModExtensionFast<T>(this Def def) where T : DefModExtension
+        {
+            return GetModExtensionFast<T>(def) != null;
+        }
         public static class ICache_MapComponent<T>
         {
             public static Dictionary<Map, T> compsByMap = new Dictionary<Map, T>();
