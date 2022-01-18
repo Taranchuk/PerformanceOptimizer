@@ -219,6 +219,8 @@ namespace PerformanceOptimizer
             }
             DoPatchesAsync(parse);
         }
+
+        private static readonly MethodInfo transpiler = AccessTools.Method(typeof(Optimization_FasterGetCompReplacement), nameof(Optimization_FasterGetCompReplacement.Transpiler));
         public async void DoPatchesAsync(bool parse)
         {
             await Task.Run(() =>
@@ -230,13 +232,15 @@ namespace PerformanceOptimizer
             });
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            var transpiler = GetMethod(nameof(Optimization_FasterGetCompReplacement.Transpiler));
             foreach (var kvp in patchInfos)
             {
-                Patch(kvp.Key, transpiler: transpiler);
+                if (Harmony.GetPatchInfo(kvp.Key)?.Transpilers?.FirstOrDefault(x => x.patchMethod == transpiler) is null) // to prevent duplicate transpilers which occurs perhaps via a mod conflict
+                {
+                    Patch(kvp.Key, transpiler: transpiler);
+                }
             }
             stopwatch.Stop();
-            //stopwatch.LogTime("Transpiled " + patchedMethods.Count + " methods");
+            stopwatch.LogTime("Transpiled " + patchedMethods.Count + " methods");
         }
 
         private void ParseEverything()
