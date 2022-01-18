@@ -234,7 +234,7 @@ namespace PerformanceOptimizer
             stopwatch.Start();
             foreach (var kvp in patchInfos)
             {
-                if (Harmony.GetPatchInfo(kvp.Key)?.Transpilers?.FirstOrDefault(x => x.patchMethod == transpiler) is null) // to prevent duplicate transpilers which occurs perhaps via a mod conflict
+                if (Harmony.GetPatchInfo(kvp.Key)?.Transpilers?.FirstOrDefault(x => x.PatchMethod == transpiler) is null) // to prevent duplicate transpilers which occurs perhaps via a mod conflict
                 {
                     Patch(kvp.Key, transpiler: transpiler);
                 }

@@ -124,7 +124,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Publicize Include="Assembly-CSharp;AllowTool;0Harmony" />
+    <Publicize Include="Assembly-CSharp;AllowTool" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Optimizations\Experimental\" />
