@@ -45,7 +45,6 @@ namespace PerformanceOptimizer
 
         public override void Clear()
         {
-            base.Clear();
             cachedResults.Clear();
         }
     }

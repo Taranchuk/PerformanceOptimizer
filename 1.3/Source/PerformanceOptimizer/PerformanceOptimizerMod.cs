@@ -29,12 +29,14 @@ namespace PerformanceOptimizer
                 AccessTools.Method(typeof(Game), "AddMap"),
                 AccessTools.Method(typeof(World), "FillComponents"),
                 AccessTools.Method(typeof(Game), "FillComponents"),
+                AccessTools.Method(typeof(Map), "FillComponents"),
                 AccessTools.Method(typeof(MapComponentUtility), "FinalizeInit"),
                 AccessTools.Method(typeof(WorldComponentUtility), "FinalizeInit"),
                 AccessTools.Method(typeof(GameComponentUtility), "FinalizeInit"),
                 AccessTools.Method(typeof(Game), "InitNewGame"),
                 AccessTools.Method(typeof(Game), "LoadGame"),
-                AccessTools.Method(typeof(GameInitData), "ResetWorldRelatedMapInitData")
+                AccessTools.Method(typeof(GameInitData), "ResetWorldRelatedMapInitData"),
+                AccessTools.Method(typeof(SavedGameLoaderNow), "LoadGameFromSaveFileNow")
             };
 
             foreach (var hook in hooks)

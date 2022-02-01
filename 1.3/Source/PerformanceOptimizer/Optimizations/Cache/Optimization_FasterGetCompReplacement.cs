@@ -593,6 +593,8 @@ namespace PerformanceOptimizer
                     ICache_MapComponent<T>.compsByMap[map] = mapComp = comp;
                 }
             }
+            //Log.Message("Fresh Getting: " + map.GetComponent<T>() + " - " + map.GetComponent<T>()?.GetHashCode());
+            //Log.Message("Saved Getting: " + mapComp + " - " + mapComp?.GetHashCode());
             return mapComp;
         }
         public static class ICache_WorldComponent<T> where T : WorldComponent
