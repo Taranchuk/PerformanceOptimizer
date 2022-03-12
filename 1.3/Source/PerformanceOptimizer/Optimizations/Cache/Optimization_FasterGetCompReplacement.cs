@@ -39,7 +39,7 @@ namespace PerformanceOptimizer
 
         public static HashSet<string> typesToSkip = new HashSet<string>
         {
-            "AnimalGenetics.ColonyManager+JobsWrapper", "AutoMachineTool", "NightVision.CombatHelpers", "RJWSexperience.UI.SexStatusWindow", "AntimatterAnnihilation.Buildings.Building_MultiRefuelable", "AntimatterAnnihilation.Buildings.Building_AlloyFusionMachine"
+            "AnimalGenetics.ColonyManager+JobsWrapper", "AutoMachineTool", "NightVision.CombatHelpers", "RJWSexperience.UI.SexStatusWindow", "AntimatterAnnihilation.Buildings.Building_MultiRefuelable", "AntimatterAnnihilation.Buildings.Building_AlloyFusionMachine", "AntimatterAnnihilation.Buildings.Building_CompositeRefiner"
         };
 
         public static HashSet<string> methodsToSkip = new HashSet<string>
