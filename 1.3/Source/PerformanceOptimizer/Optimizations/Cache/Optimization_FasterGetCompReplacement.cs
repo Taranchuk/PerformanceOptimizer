@@ -7,8 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using System.Security.AccessControl;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Verse;
 using Verse.Sound;
@@ -34,12 +32,16 @@ namespace PerformanceOptimizer
 
         public static HashSet<string> assembliesToSkip = new HashSet<string>
         {
-            "System", "Cecil", "Multiplayer", "Prepatcher", "HeavyMelee", "0Harmony", "UnityEngine", "mscorlib", "ICSharpCode", "Newtonsoft", "TranspilerExplorer"
+            "System", "Cecil", "Multiplayer", "Prepatcher", "HeavyMelee", "0Harmony", "UnityEngine", "mscorlib", 
+            "ICSharpCode", "Newtonsoft"
         };
 
         public static HashSet<string> typesToSkip = new HashSet<string>
         {
-            "AnimalGenetics.ColonyManager+JobsWrapper", "AutoMachineTool", "NightVision.CombatHelpers", "RJWSexperience.UI.SexStatusWindow", "AntimatterAnnihilation.Buildings.Building_MultiRefuelable", "AntimatterAnnihilation.Buildings.Building_AlloyFusionMachine", "AntimatterAnnihilation.Buildings.Building_CompositeRefiner"
+            "AnimalGenetics.ColonyManager+JobsWrapper", "AutoMachineTool", "NightVision.CombatHelpers", 
+            "RJWSexperience.UI.SexStatusWindow", "AntimatterAnnihilation.Buildings.Building_MultiRefuelable", 
+            "AntimatterAnnihilation.Buildings.Building_AlloyFusionMachine", 
+            "AntimatterAnnihilation.Buildings.Building_CompositeRefiner"
         };
 
         public static HashSet<string> methodsToSkip = new HashSet<string>
@@ -357,6 +359,27 @@ namespace PerformanceOptimizer
             public static void Clear()
             {
                 compsById.Clear();
+            }
+            public static void ResetCompCache(int key)
+            {
+                compsById.Remove(key);
+            }
+        }
+
+        //Attentions modders! If you remove or add comps from things manually, you can reset the comp cache by calling this method below. Example:
+        //public static MethodInfo ComponentCache_ResetCompCache_Info = AccessTools.Method("PerformanceOptimizer.ComponentCache:ResetCompCache");
+        //ComponentCache_ResetCompCache_Info.Invoke(null, new object[] { thing });
+        public static void ResetCompCache(ThingWithComps thingWithComps)
+        {
+            foreach (var type in typeof(ThingComp).AllSubclasses())
+            {
+                try
+                {
+                    var method = typeof(ICache_ThingComp<>).MakeGenericType(type).GetMethod("ResetCompCache", BindingFlags.Instance 
+                        | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                    method.Invoke(null, new object[] { thingWithComps.thingIDNumber });
+                }
+                catch { }
             }
         }
 
