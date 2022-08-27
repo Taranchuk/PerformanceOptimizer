@@ -68,7 +68,6 @@
     <Compile Include="Optimizations\Throttling\Optimization_Precept_RoleMulti_RecacheActivity.cs" />
     <Compile Include="Optimizations\Cache\Optimization_IdeoBuildingPresenceDemand_BuildingPresent.cs" />
     <Compile Include="Optimizations\Cache\Optimization_WorldGrid_LongLatOf.cs" />
-    <Compile Include="Optimizations\Misc\Optimization_FixDuplicateXMLNodes.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Utilities\ModCompatUtility.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_BuildCopyCommandUtility_FindAllowedDesignator.cs" />
@@ -110,15 +109,15 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Krafs.Publicizer">
-      <Version>1.0.2</Version>
+      <Version>1.0.3</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Krafs.Rimworld.Ref">
-      <Version>1.3.3287</Version>
+      <Version>1.3.3389</Version>
     </PackageReference>
     <PackageReference Include="Lib.Harmony">
-      <Version>2.2.0</Version>
+      <Version>2.2.2</Version>
       <ExcludeAssets>runtime</ExcludeAssets>
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

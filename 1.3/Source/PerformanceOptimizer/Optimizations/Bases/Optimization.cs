@@ -70,7 +70,7 @@ namespace PerformanceOptimizer
             if (prefix != null)
             {
                 patches.Add(prefix);
-                if (ProfilePerformanceImpact && prefix != null && prefix.ReturnType == typeof(bool))
+                if (ProfilePerformanceImpact && prefix != null)
                 {
                     var type = prefix.DeclaringType;
                     PerformanceOptimizerMod.harmony.Patch(prefix, prefix: new HarmonyMethod(GetMethod(nameof(MeasureBefore))));

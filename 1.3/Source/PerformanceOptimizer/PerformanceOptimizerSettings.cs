@@ -22,6 +22,10 @@ namespace PerformanceOptimizer
             Scribe_Values.Look(ref overviewLetterSent, "overviewLetterSent");
             Log_Error_Patch.suppressErrorMessages = true;
             Scribe_Collections.Look(ref optimizations, "optimizations", LookMode.Deep);
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)
+            {
+                optimizations.RemoveAll(x => x is null);
+            }
             Log_Error_Patch.suppressErrorMessages = false;
         }
 
@@ -51,7 +55,7 @@ namespace PerformanceOptimizer
 
             foreach (var optimization in optimizations)
             {
-                optimization.Apply();
+                optimization?.Apply();
             }
         }
 

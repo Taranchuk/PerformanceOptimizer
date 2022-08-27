@@ -69,7 +69,7 @@ namespace PerformanceOptimizer
             tickManager = Current.Game?.tickManager;
             foreach (var optimization in PerformanceOptimizerSettings.optimizations)
             {
-                optimization.Clear();
+                optimization?.Clear();
             }
         }
         public static KeyPrefsData keyPrefsData;

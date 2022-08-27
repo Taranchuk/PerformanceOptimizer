@@ -17,6 +17,7 @@ namespace PerformanceOptimizer
         [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(XmlNode node, XmlNode root)
         {
+            Log.Error("CheckForDuplicateNodes");
             CheckForDuplicateNodes(node, root);
             return false;
         }
@@ -32,19 +33,13 @@ namespace PerformanceOptimizer
                         var outerNode = GetFirstMatchingNode(node.ChildNodes, childNode);
                         if (!(outerNode is null))
                         {
-                            if (outerNode.ChildNodes?[0]?.NodeType == XmlNodeType.Element) // if this element is not a value
+                            if (outerNode.ChildNodes?[0]?.NodeType == XmlNodeType.Element)
                             {
-                                //Log.Warning("Fixing duplicate XML node name " + childNode.Name + " in this XML block: " + node.OuterXml + ((node != root) ? ("\n\nRoot node: " + root.OuterXml) : ""));
                                 for (var i = 0; i < childNode.ChildNodes.Count; i++)
                                 {
                                     outerNode.AppendChild(childNode.ChildNodes[i]);
                                 }
                             }
-                            //else if (outerNode.InnerText != childNode.InnerText)
-                            //{
-                            //    Log.Error("Duplicate XML node name " + childNode.Name + " - outerNode.InnerText: " + outerNode.InnerText 
-                            //        + " childNode.InnerText: " + childNode.InnerText + " in this XML block: " + node.OuterXml + ((node != root) ? ("\n\nRoot node: " + root.OuterXml) : ""));
-                            //}
                             node.RemoveChild(childNode);
                         }
                     }
