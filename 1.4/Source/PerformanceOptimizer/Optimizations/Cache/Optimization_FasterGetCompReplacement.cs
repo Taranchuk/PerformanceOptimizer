@@ -358,7 +358,7 @@ namespace PerformanceOptimizer
 
         //Attentions modders! If you remove or add comps from things manually, you can reset the comp cache by calling this method below. Example:
         //public static MethodInfo ComponentCache_ResetCompCache_Info = AccessTools.Method("PerformanceOptimizer.ComponentCache:ResetCompCache");
-        //ComponentCache_ResetCompCache_Info.Invoke(null, new object[] { thing });
+        //ComponentCache_ResetCompCache_Info?.Invoke(null, new object[] { thing });
 
         private static Dictionary<Type, MethodInfo> cachedMethods = new();
         public static void ResetCompCache(ThingWithComps thingWithComps)
