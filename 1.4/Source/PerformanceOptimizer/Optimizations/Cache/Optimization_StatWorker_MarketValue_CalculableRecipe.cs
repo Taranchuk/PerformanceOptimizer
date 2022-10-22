@@ -15,12 +15,12 @@ namespace PerformanceOptimizer
             Patch(typeof(StatWorker_MarketValue), "CalculableRecipe", GetMethod(nameof(Prefix)), GetMethod(nameof(Postfix)));
         }
 
-        public static Dictionary<BuildableDef, RecipeDef> cachedResults = new Dictionary<BuildableDef, RecipeDef>();
+        public static Dictionary<BuildableDef, RecipeDef> cachedResults = new();
 
         [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(BuildableDef def, out bool __state, ref RecipeDef __result)
         {
-            if (!cachedResults.TryGetValue(def, out var cache))
+            if (!cachedResults.TryGetValue(def, out RecipeDef cache))
             {
                 __state = true;
                 return true;

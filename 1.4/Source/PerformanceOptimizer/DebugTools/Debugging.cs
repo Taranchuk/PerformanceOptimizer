@@ -11,8 +11,8 @@ namespace PerformanceOptimizer
     {
         public int tpsActual = 0;
         public int fpsActual = 0;
-        public List<int> allTps = new List<int>();
-        public List<int> allFps = new List<int>();
+        public List<int> allTps = new();
+        public List<int> allFps = new();
         public int tpsAverageCached;
         public int fpsAverageCached;
     }
@@ -25,7 +25,7 @@ namespace PerformanceOptimizer
         private static int prevFrames;
         private static DateTime prevTime;
         private static int prevTicks = -1;
-        public static Dictionary<TimeSpeed, TPSCounter> tpsDataByTargets = new Dictionary<TimeSpeed, TPSCounter>();
+        public static Dictionary<TimeSpeed, TPSCounter> tpsDataByTargets = new();
         public static TimeSpeed curTimeSpeed;
         public static bool renderSettings = false;
         public static DateTime timeStartCollectingData;
@@ -50,12 +50,12 @@ namespace PerformanceOptimizer
                 return;
             }
             TPSCounter stats = RecordData();
-            Rect rect = new Rect(500, 500, 300, 100);
-            var mod = LoadedModManager.GetMod<PerformanceOptimizerMod>();
+            Rect rect = new(500, 500, 300, 100);
+            PerformanceOptimizerMod mod = LoadedModManager.GetMod<PerformanceOptimizerMod>();
             Find.WindowStack.ImmediateWindow(65465423, rect, WindowLayer.Super, delegate
             {
                 Text.Font = GameFont.Small;
-                var labelRect = new Rect(15, 15, rect.width - 15, 26);
+                Rect labelRect = new(15, 15, rect.width - 15, 26);
                 Widgets.Label(labelRect, $"TPS: {stats.tpsActual} - average: {stats.tpsAverageCached}");
                 labelRect.y += 26;
                 Widgets.Label(labelRect, $"FPS: {stats.fpsActual} - average: {stats.fpsAverageCached}");
@@ -70,7 +70,7 @@ namespace PerformanceOptimizer
             if (renderSettings)
             {
                 Text.Font = GameFont.Small;
-                Rect inRect2 = new Rect(0f, 40f, 900f, 700f - 40f - Window.CloseButSize.y);
+                Rect inRect2 = new(0f, 40f, 900f, 700f - 40f - Window.CloseButSize.y);
                 mod.DoSettingsWindowContents(inRect2);
             }
         }
@@ -83,11 +83,11 @@ namespace PerformanceOptimizer
 
         private static TPSCounter RecordData()
         {
-            if (!tpsDataByTargets.TryGetValue(curTimeSpeed, out var stats))
+            if (!tpsDataByTargets.TryGetValue(curTimeSpeed, out TPSCounter stats))
             {
                 tpsDataByTargets[curTimeSpeed] = stats = new TPSCounter();
             }
-            var currTime = DateTime.Now;
+            DateTime currTime = DateTime.Now;
             if (currTime > timeStartCollectingData)
             {
                 float trm = Find.TickManager.TickRateMultiplier;

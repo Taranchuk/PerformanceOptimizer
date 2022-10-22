@@ -28,7 +28,7 @@ namespace PerformanceOptimizer
 
         public override void DrawSettings(Listing_Standard section)
         {
-            var sliderName = OptimizationType == OptimizationType.CacheWithRefreshRate ? "PO.RefreshRate" : "PO.ThrottleRate";
+            string sliderName = OptimizationType == OptimizationType.CacheWithRefreshRate ? "PO.RefreshRate" : "PO.ThrottleRate";
             section.CheckboxLabeledWithSlider(Label, sliderName, ref enabled, ref refreshRate, MaxSliderValue == -1 ? RefreshRateByDefault * 10 : MaxSliderValue, actionOnClick: Apply, actionOnSlider: SetRefreshRate);
         }
         public override void ExposeData()

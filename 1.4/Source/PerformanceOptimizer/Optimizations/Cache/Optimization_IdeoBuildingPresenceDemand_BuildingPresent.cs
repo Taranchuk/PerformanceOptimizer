@@ -1,11 +1,6 @@
 ﻿using HarmonyLib;
-using Mono.Unix.Native;
 using RimWorld;
-using RimWorld.Planet;
-using System.Collections.Generic;
-using UnityEngine;
 using Verse;
-using Verse.Noise;
 
 namespace PerformanceOptimizer
 {

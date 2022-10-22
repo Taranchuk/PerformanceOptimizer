@@ -10,18 +10,10 @@ namespace PerformanceOptimizer
         public override bool EnabledByDefault => true;
         public static bool UIToggleOn = true;
         public static bool oneKeyMode = false;
-        public static bool UITogglePressed
-        {
-            get
-            {
-                if (oneKeyMode)
-                {
-                    return Input.GetKeyDown(PerformanceOptimizerMod.keyPrefsData.GetBoundKeyCode(PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.B));
-                }
-                return Input.GetKey(PerformanceOptimizerMod.keyPrefsData.GetBoundKeyCode(PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.A))
+        public static bool UITogglePressed => oneKeyMode
+                    ? Input.GetKeyDown(PerformanceOptimizerMod.keyPrefsData.GetBoundKeyCode(PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.B))
+                    : Input.GetKey(PerformanceOptimizerMod.keyPrefsData.GetBoundKeyCode(PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.A))
                     && Input.GetKeyDown(PerformanceOptimizerMod.keyPrefsData.GetBoundKeyCode(PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.B));
-            }
-        }
 
         public override void Reset()
         {
@@ -48,11 +40,11 @@ namespace PerformanceOptimizer
         public override string Label => "PO.UIToggle".Translate();
         public override void DrawSettings(Listing_Standard section)
         {
-            var keyPrefsData = KeyPrefs.KeyPrefsData;
-            var keyHidingText = Label;
-            var size = Text.CalcSize(keyHidingText);
-            var keybindingRect = new Rect(section.curX + size.x + 10, section.curY, 50, 24f);
-            var keybindingRectPlus = new Rect(keybindingRect.xMax, section.curY - 3, 24, 24);
+            KeyPrefsData keyPrefsData = KeyPrefs.KeyPrefsData;
+            string keyHidingText = Label;
+            Vector2 size = Text.CalcSize(keyHidingText);
+            Rect keybindingRect = new(section.curX + size.x + 10, section.curY, 50, 24f);
+            Rect keybindingRectPlus = new(keybindingRect.xMax, section.curY - 3, 24, 24);
             if (!oneKeyMode)
             {
                 if (Widgets.ButtonText(keybindingRect, keyPrefsData.GetBoundKeyCode(PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.A).ToStringReadable()))
@@ -64,14 +56,14 @@ namespace PerformanceOptimizer
                 Widgets.Label(keybindingRectPlus, " + ");
                 Text.Font = GameFont.Small;
             }
-            var keybinding2Rect = new Rect(keybindingRectPlus.xMax, section.curY, 50, 24f);
+            Rect keybinding2Rect = new(keybindingRectPlus.xMax, section.curY, 50, 24f);
             if (Widgets.ButtonText(keybinding2Rect, keyPrefsData.GetBoundKeyCode(PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.B).ToStringReadable()))
             {
                 Find.WindowStack.Add(new Dialog_DefineBinding(keyPrefsData, PODefOf.PerformanceOptimizerKey, KeyPrefs.BindingSlot.B));
                 Event.current.Use();
             }
 
-            var checkboxOneKey = new Rect(keybinding2Rect.xMax + 10, keybinding2Rect.y, 120, 24);
+            Rect checkboxOneKey = new(keybinding2Rect.xMax + 10, keybinding2Rect.y, 120, 24);
             Widgets.CheckboxLabeled(checkboxOneKey, "PO.OneKeyMode".Translate(), ref oneKeyMode);
             section.Label(keyHidingText);
         }

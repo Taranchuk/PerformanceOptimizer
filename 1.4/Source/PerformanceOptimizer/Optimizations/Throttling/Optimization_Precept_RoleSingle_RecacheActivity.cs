@@ -26,7 +26,7 @@ namespace PerformanceOptimizer
         {
             if (!skipThrottling)
             {
-                if (!cachedResults.TryGetValue(__instance, out var cache)
+                if (!cachedResults.TryGetValue(__instance, out int cache)
                     || PerformanceOptimizerMod.tickManager.ticksGameInt > (cache + refreshRateStatic))
                 {
                     cachedResults[__instance] = PerformanceOptimizerMod.tickManager.ticksGameInt;

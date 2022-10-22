@@ -50,10 +50,7 @@ namespace PerformanceOptimizer
                 {
                     SoundDefOf.Checkbox_TurnedOff.PlayOneShotOnCamera();
                 }
-                if (actionOnClick != null)
-                {
-                    actionOnClick();
-                }
+                actionOnClick?.Invoke();
             }
             CheckboxDraw(rect.x + rect.width - 24f, rect.y, checkOn, disabled);
             Text.Anchor = anchor;
@@ -77,31 +74,28 @@ namespace PerformanceOptimizer
                 }
                 TextAnchor anchor = Text.Anchor;
                 Text.Anchor = TextAnchor.MiddleLeft;
-                var labelRect = rect;
+                Rect labelRect = rect;
                 labelRect.width /= 2;
-                var checkboxRect = rect;
+                Rect checkboxRect = rect;
                 checkboxRect.x = rect.x + rect.width - 24f;
                 checkboxRect.width = 24f;
                 Label(labelRect, label);
 
-                var sliderLabelRect = rect;
+                Rect sliderLabelRect = rect;
                 sliderLabelRect.x = labelRect.xMax;
                 sliderLabelRect.width = 140;
-                var sliderRect = rect;
+                Rect sliderRect = rect;
                 sliderRect.y += 5;
                 sliderRect.x = sliderLabelRect.xMax + 10;
                 sliderRect.width = rect.width - (labelRect.width + checkboxRect.width) - 160;
                 if (checkOn)
                 {
                     Widgets.Label(sliderLabelRect, sliderLabelKey.Translate(value.TicksToSeconds().ToString("F1") + "s"));
-                    var oldValue = value;
+                    int oldValue = value;
                     value = (int)Widgets.HorizontalSlider(sliderRect, value, 0, maxSliderValue, false);
                     if (oldValue != value)
                     {
-                        if (actionOnSlider != null)
-                        {
-                            actionOnSlider();
-                        }
+                        actionOnSlider?.Invoke();
                     }
                 }
                 if (ButtonInvisible(checkboxRect))
@@ -115,10 +109,7 @@ namespace PerformanceOptimizer
                     {
                         SoundDefOf.Checkbox_TurnedOff.PlayOneShotOnCamera();
                     }
-                    if (actionOnClick != null)
-                    {
-                        actionOnClick();
-                    }
+                    actionOnClick?.Invoke();
                 }
                 CheckboxDraw(rect.x + rect.width - 24f, rect.y, checkOn, false);
                 Text.Anchor = anchor;
@@ -227,7 +218,7 @@ namespace PerformanceOptimizer
         // Token: 0x0600002D RID: 45 RVA: 0x000039EC File Offset: 0x00001BEC
         private static List<SettingsHelper.LabeledRadioValue<string>> GenerateLabeledRadioValues(string[] labels)
         {
-            List<SettingsHelper.LabeledRadioValue<string>> list = new List<SettingsHelper.LabeledRadioValue<string>>();
+            List<SettingsHelper.LabeledRadioValue<string>> list = new();
             foreach (string text in labels)
             {
                 list.Add(new SettingsHelper.LabeledRadioValue<string>(text, text));

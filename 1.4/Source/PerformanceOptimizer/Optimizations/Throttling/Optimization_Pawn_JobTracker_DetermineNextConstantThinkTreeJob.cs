@@ -10,7 +10,7 @@ namespace PerformanceOptimizer
     {
         public static int refreshRateStatic;
 
-        public static Dictionary<Pawn, int> cachedResults = new Dictionary<Pawn, int>();
+        public static Dictionary<Pawn, int> cachedResults = new();
         public override int RefreshRateByDefault => 30;
         public override OptimizationType OptimizationType => OptimizationType.Throttle;
         public override string Label => "PO.DetermineNextConstantThinkTreeJob".Translate();
@@ -25,7 +25,7 @@ namespace PerformanceOptimizer
         {
             if (__instance.pawn.factionInt != Faction.OfPlayer)
             {
-                if (!cachedResults.TryGetValue(__instance.pawn, out var cache)
+                if (!cachedResults.TryGetValue(__instance.pawn, out int cache)
                     || PerformanceOptimizerMod.tickManager.ticksGameInt > (cache + refreshRateStatic))
                 {
                     cachedResults[__instance.pawn] = PerformanceOptimizerMod.tickManager.ticksGameInt;

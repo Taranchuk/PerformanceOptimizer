@@ -9,7 +9,7 @@ namespace PerformanceOptimizer
     {
         public static int refreshRateStatic;
 
-        public static Dictionary<Pawn, CachedValueTick<bool>> cachedResults = new Dictionary<Pawn, CachedValueTick<bool>>();
+        public static Dictionary<Pawn, CachedValueTick<bool>> cachedResults = new();
         public override int RefreshRateByDefault => 30;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Label => "PO.QuestLodger".Translate();

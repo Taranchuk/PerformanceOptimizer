@@ -17,16 +17,16 @@ namespace PerformanceOptimizer
             stopwatch.Restart();
         }
 
-        private static readonly Dictionary<Stopwatch, StopwatchData> stopwatches = new Dictionary<Stopwatch, StopwatchData>();
+        private static readonly Dictionary<Stopwatch, StopwatchData> stopwatches = new();
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LogTime(this Stopwatch stopwatch, string log, int limit = 1)
         {
-            if (!stopwatches.TryGetValue(stopwatch, out var stats))
+            if (!stopwatches.TryGetValue(stopwatch, out StopwatchData stats))
             {
                 stopwatches[stopwatch] = stats = new StopwatchData();
             }
             stopwatch.Stop();
-            var elapsed = (float)stopwatch.ElapsedTicks / Stopwatch.Frequency;
+            float elapsed = (float)stopwatch.ElapsedTicks / Stopwatch.Frequency;
             stats.count++;
             stats.total += elapsed;
             if (stats.count >= limit)

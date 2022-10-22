@@ -13,7 +13,7 @@ namespace PerformanceOptimizer
         }
         public static void ProcessAllowToolToggle(List<Gizmo> gizmos)
         {
-            foreach (var gizmo in gizmos)
+            foreach (Gizmo gizmo in gizmos)
             {
                 if (gizmo is Command_Toggle toggle && toggle.defaultLabel == "CommandAllow".TranslateWithBackup("DesignatorUnforbid"))
                 {

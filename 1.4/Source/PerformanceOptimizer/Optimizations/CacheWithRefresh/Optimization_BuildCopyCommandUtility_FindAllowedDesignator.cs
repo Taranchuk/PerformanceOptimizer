@@ -7,7 +7,7 @@ namespace PerformanceOptimizer
 {
     public class Optimization_BuildCopyCommandUtility_FindAllowedDesignator : Optimization_RefreshRate
     {
-        public static Dictionary<BuildableDef, CachedObjectTick<Designator_Build>> cachedResults = new Dictionary<BuildableDef, CachedObjectTick<Designator_Build>>();
+        public static Dictionary<BuildableDef, CachedObjectTick<Designator_Build>> cachedResults = new();
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Label => "PO.FindAllowedDesignator".Translate();
         public override int RefreshRateByDefault => 120;

@@ -42,13 +42,13 @@ namespace PerformanceOptimizer
             AlertPriority alertPriority = AlertPriority.Critical;
             bool flag = false;
             float num = 0f;
-            var activeAlerts = __instance.activeAlerts.Where(x => x.Priority == AlertPriority.Critical || x.Priority == AlertPriority.High).ToList();
+            System.Collections.Generic.List<Alert> activeAlerts = __instance.activeAlerts.Where(x => x.Priority is AlertPriority.Critical or AlertPriority.High).ToList();
             for (int i = 0; i < activeAlerts.Count; i++)
             {
                 num += activeAlerts[i].Height;
             }
             float num2 = Find.LetterStack.LastTopY - num;
-            Rect rect = new Rect(UI.screenWidth - 154f, num2, 154f, lastFinalY - num2);
+            Rect rect = new(UI.screenWidth - 154f, num2, 154f, lastFinalY - num2);
             float num3 = GenUI.BackgroundDarkAlphaForText();
             if (num3 > 0.001f)
             {

@@ -9,7 +9,7 @@ namespace PerformanceOptimizer
     {
         public static int refreshRateStatic;
 
-        public static Dictionary<int, CachedValueTick<bool>> cachedResults = new Dictionary<int, CachedValueTick<bool>>();
+        public static Dictionary<int, CachedValueTick<bool>> cachedResults = new();
         public override int RefreshRateByDefault => 60;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Label => "PO.IsInvisible".Translate();

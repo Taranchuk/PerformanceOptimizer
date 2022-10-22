@@ -2,7 +2,6 @@
 using RimWorld;
 using System.Collections.Generic;
 using Verse;
-using Verse.AI;
 
 namespace PerformanceOptimizer
 {
@@ -10,7 +9,7 @@ namespace PerformanceOptimizer
     {
         public static int refreshRateStatic;
 
-        public static Dictionary<Need_Beauty, CachedValueTick<float>> cachedResults = new Dictionary<Need_Beauty, CachedValueTick<float>>();
+        public static Dictionary<Need_Beauty, CachedValueTick<float>> cachedResults = new();
         public override int RefreshRateByDefault => 600;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
 

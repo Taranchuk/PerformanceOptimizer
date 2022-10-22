@@ -17,7 +17,7 @@ namespace PerformanceOptimizer
             Patch(typeof(PawnCollisionTweenerUtility), "PawnCollisionPosOffsetFor", GetMethod(nameof(Optimization_PawnCollisionPosOffsetFor.Prefix)), GetMethod(nameof(Optimization_PawnCollisionPosOffsetFor.Postfix)));
         }
 
-        public static Dictionary<Pawn, CachedValueTick<Vector3>> cachedResults = new Dictionary<Pawn, CachedValueTick<Vector3>>();
+        public static Dictionary<Pawn, CachedValueTick<Vector3>> cachedResults = new();
 
         [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(Pawn pawn, out CachedValueTick<Vector3> __state, ref Vector3 __result)

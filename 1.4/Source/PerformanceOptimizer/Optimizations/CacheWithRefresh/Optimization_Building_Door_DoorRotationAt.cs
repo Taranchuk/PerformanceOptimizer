@@ -29,7 +29,7 @@ namespace PerformanceOptimizer
         {
             curDoor = null;
         }
-        public static Dictionary<int, CachedValueTick<Rot4>> cachedResults = new Dictionary<int, CachedValueTick<Rot4>>();
+        public static Dictionary<int, CachedValueTick<Rot4>> cachedResults = new();
         [HarmonyPriority(int.MaxValue)]
         public static bool DoorRotationAtPrefix(out CachedValueTick<Rot4> __state, ref Rot4 __result)
         {

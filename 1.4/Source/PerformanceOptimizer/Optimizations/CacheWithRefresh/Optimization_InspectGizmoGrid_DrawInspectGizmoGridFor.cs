@@ -3,7 +3,6 @@ using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
 using Verse;
 using OpCodes = System.Reflection.Emit.OpCodes;
 
@@ -20,32 +19,27 @@ namespace PerformanceOptimizer
             base.DoPatches();
             Patch(typeof(InspectGizmoGrid), "DrawInspectGizmoGridFor", transpiler: GetMethod(nameof(InspectGizmoGrid_DrawInspectGizmoGridForTranspiler)));
 
-            var method = typeof(GizmoGridDrawer).GetMethods(AccessTools.all).FirstOrDefault(x => x.Name.Contains("<DrawGizmoGrid>") && x.Name.Contains("ProcessGizmoState"));
+            System.Reflection.MethodInfo method = typeof(GizmoGridDrawer).GetMethods(AccessTools.all).FirstOrDefault(x => x.Name.Contains("<DrawGizmoGrid>") && x.Name.Contains("ProcessGizmoState"));
             Patch(method, transpiler: GetMethod(nameof(GizmoGridDrawer_ProcessGizmoStateTranspiler)));
         }
 
-        public static Dictionary<ISelectable, CachedValueUpdate<List<Gizmo>>> cachedResults = new Dictionary<ISelectable, CachedValueUpdate<List<Gizmo>>>();
+        public static Dictionary<ISelectable, CachedValueUpdate<List<Gizmo>>> cachedResults = new();
         public static IEnumerable<CodeInstruction> InspectGizmoGrid_DrawInspectGizmoGridForTranspiler(IEnumerable<CodeInstruction> instructions)
         {
-            var codes = instructions.ToList();
-            var method = AccessTools.Method(typeof(ISelectable), "GetGizmos");
-            for (var i = 0; i < codes.Count; i++)
+            List<CodeInstruction> codes = instructions.ToList();
+            System.Reflection.MethodInfo method = AccessTools.Method(typeof(ISelectable), "GetGizmos");
+            for (int i = 0; i < codes.Count; i++)
             {
-                if (codes[i].Calls(method))
-                {
-                    yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Optimization_InspectGizmoGrid_DrawInspectGizmoGridFor), nameof(GetGizmosFast))).MoveLabelsFrom(codes[i]);
-                }
-                else
-                {
-                    yield return codes[i];
-                }
+                yield return codes[i].Calls(method)
+                    ? new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Optimization_InspectGizmoGrid_DrawInspectGizmoGridFor), nameof(GetGizmosFast))).MoveLabelsFrom(codes[i])
+                    : codes[i];
             }
         }
 
         public static List<Gizmo> GetGizmosFast(ISelectable selectable)
         {
             List<Gizmo> gizmos;
-            if (!cachedResults.TryGetValue(selectable, out var cache))
+            if (!cachedResults.TryGetValue(selectable, out CachedValueUpdate<List<Gizmo>> cache))
             {
                 gizmos = selectable.GetGizmos().ToList();
                 cachedResults[selectable] = new CachedValueUpdate<List<Gizmo>>(gizmos, refreshRateStatic);
@@ -69,10 +63,10 @@ namespace PerformanceOptimizer
 
         public static IEnumerable<CodeInstruction> GizmoGridDrawer_ProcessGizmoStateTranspiler(IEnumerable<CodeInstruction> instructions)
         {
-            var codes = instructions.ToList();
-            var method = AccessTools.Method(typeof(ISelectable), "GetGizmos");
+            List<CodeInstruction> codes = instructions.ToList();
+            System.Reflection.MethodInfo method = AccessTools.Method(typeof(ISelectable), "GetGizmos");
             bool found = false;
-            for (var i = 0; i < codes.Count; i++)
+            for (int i = 0; i < codes.Count; i++)
             {
                 yield return codes[i];
                 if (!found && codes[i].opcode == OpCodes.Stfld)
@@ -84,7 +78,7 @@ namespace PerformanceOptimizer
             }
         }
         public static void ResetSelectable(Gizmo giz)
-{
+        {
             if (giz is Command_Toggle toggle && toggle.defaultLabel == "CommandAllow".TranslateWithBackup("DesignatorUnforbid") && toggle.icon == TexCommand.ForbidOff)
             {
                 Optimization_ForbidUtility_IsForbidden.cachedResults.Clear();

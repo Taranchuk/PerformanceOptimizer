@@ -56,7 +56,7 @@ namespace PerformanceOptimizer
 
         public void Patch(Type type, string methodName, MethodInfo prefix = null, MethodInfo postfix = null, MethodInfo transpiler = null)
         {
-            var originalMethod = AccessTools.Method(type, methodName);
+            MethodInfo originalMethod = AccessTools.Method(type, methodName);
             Patch(originalMethod, prefix, postfix, transpiler);
         }
 
@@ -72,17 +72,20 @@ namespace PerformanceOptimizer
                 patches.Add(prefix);
                 if (ProfilePerformanceImpact && prefix != null)
                 {
-                    var type = prefix.DeclaringType;
-                    PerformanceOptimizerMod.harmony.Patch(prefix, prefix: new HarmonyMethod(GetMethod(nameof(MeasureBefore))));
-                    if (postfix != null)
+                    if (prefix.ReturnType == typeof(bool))
                     {
-                        PerformanceOptimizerMod.harmony.Patch(postfix, prefix: new HarmonyMethod(GetMethod(nameof(ControlPostfix))), postfix: new HarmonyMethod(GetMethod(nameof(MeasureAfter))));
-                        mappedValues[postfix] = type;
-                    }
-                    else
-                    {
-                        PerformanceOptimizerMod.harmony.Patch(methodInfo, postfix: new HarmonyMethod(GetMethod(nameof(MeasureAfter))));
-                        mappedValues[methodInfo] = type;
+                        Type type = prefix.DeclaringType;
+                        PerformanceOptimizerMod.harmony.Patch(prefix, prefix: new HarmonyMethod(GetMethod(nameof(MeasureBefore))));
+                        if (postfix != null)
+                        {
+                            PerformanceOptimizerMod.harmony.Patch(postfix, prefix: new HarmonyMethod(GetMethod(nameof(ControlPostfix))), postfix: new HarmonyMethod(GetMethod(nameof(MeasureAfter))));
+                            mappedValues[postfix] = type;
+                        }
+                        else
+                        {
+                            PerformanceOptimizerMod.harmony.Patch(methodInfo, postfix: new HarmonyMethod(GetMethod(nameof(MeasureAfter))));
+                            mappedValues[methodInfo] = type;
+                        }
                     }
                 }
             }
@@ -104,8 +107,8 @@ namespace PerformanceOptimizer
         public static Stopwatch stopwatch = new();
         public virtual bool ProfilePerformanceImpact => false; // if you change it to true, don't forget to disable AggressiveInlining atribute on CachedObjectTick and CachedValueTick class methods...
                                                                // they don't get profiled with it
-        public const int PROFILINGINTERVAL = 2500;
-        struct MeasureData
+        public const int PROFILINGINTERVAL = 250;
+        private struct MeasureData
         {
             public float performanceImpactOn;
             public float performanceImpactOff;
@@ -118,14 +121,7 @@ namespace PerformanceOptimizer
 
         public static bool ControlPostfix()
         {
-            if (profileOn)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return profileOn;
         }
         public static bool MeasureBefore(ref bool __result)
         {
@@ -143,8 +139,8 @@ namespace PerformanceOptimizer
         public static void MeasureAfter(MethodBase __originalMethod)
         {
             stopwatch.Stop();
-            var elapsed = (float)stopwatch.ElapsedTicks / Stopwatch.Frequency;
-            var type = mappedValues[__originalMethod];
+            float elapsed = (float)stopwatch.ElapsedTicks / Stopwatch.Frequency;
+            Type type = mappedValues[__originalMethod];
             RegisterElapsedTicks(elapsed, type);
             if (Current.gameInt?.tickManager != null && Find.TickManager.ticksGameInt > lastProfileCheckTick + PROFILINGINTERVAL)
             {
@@ -192,14 +188,14 @@ namespace PerformanceOptimizer
                 if (performanceTweaksOff[type].Count > 1 && performanceTweaksOn[type].Count > 1)
                 {
                     Log.Message("Profiling result: -------------------");
-                    var result = new Dictionary<Type, MeasureData>();
-                    foreach (var kvp in performanceTweaksOff)
+                    Dictionary<Type, MeasureData> result = new();
+                    foreach (KeyValuePair<Type, List<float>> kvp in performanceTweaksOff)
                     {
-                        if (performanceTweaksOn.TryGetValue(kvp.Key, out var performanceOn))
+                        if (performanceTweaksOn.TryGetValue(kvp.Key, out List<float> performanceOn))
                         {
-                            var smallerListCount = kvp.Value.Count > performanceOn.Count ? performanceOn.Count : kvp.Value.Count;
-                            var performanceOnNew = performanceOn.Take(smallerListCount).ToList();
-                            var performanceOffNew = kvp.Value.Take(smallerListCount).ToList();
+                            int smallerListCount = kvp.Value.Count > performanceOn.Count ? performanceOn.Count : kvp.Value.Count;
+                            List<float> performanceOnNew = performanceOn.Take(smallerListCount).ToList();
+                            List<float> performanceOffNew = kvp.Value.Take(smallerListCount).ToList();
                             result[kvp.Key] = new MeasureData
                             {
                                 performanceImpactOn = performanceOnNew.Sum(),
@@ -209,9 +205,16 @@ namespace PerformanceOptimizer
                         }
                     }
 
-                    foreach (var r in result.OrderByDescending(x => x.Value.performanceImpactOff))
+                    foreach (KeyValuePair<Type, MeasureData> r in result.OrderByDescending(x => x.Value.performanceImpactOff))
                     {
-                        Log.Message("Result: " + r.Key + " - " + r.Value.Log());
+                        if (r.Value.perfRate <= 1)
+                        {
+                            Log.Message("FAIL: Result: " + r.Key + " - " + r.Value.Log());
+                        }
+                        else
+                        {
+                            Log.Message("SUCCESS: Result: " + r.Key + " - " + r.Value.Log());
+                        }
                     }
                 }
             }
@@ -221,10 +224,10 @@ namespace PerformanceOptimizer
         {
             if (patchedMethods != null)
             {
-                foreach (var kvp in patchedMethods)
+                foreach (KeyValuePair<MethodBase, List<MethodInfo>> kvp in patchedMethods)
                 {
                     MethodBase method = kvp.Key;
-                    foreach (var patch in kvp.Value)
+                    foreach (MethodInfo patch in kvp.Value)
                     {
                         PerformanceOptimizerMod.harmony.Unpatch(method, patch);
                     }

@@ -11,7 +11,7 @@ namespace PerformanceOptimizer
     {
         public static int refreshRateStatic;
 
-        public static Dictionary<int, Dictionary<Thing, CachedValueTick<bool>>> cachedResults = new Dictionary<int, Dictionary<Thing, CachedValueTick<bool>>>();
+        public static Dictionary<int, Dictionary<Thing, CachedValueTick<bool>>> cachedResults = new();
         public override int RefreshRateByDefault => 30;
         public override OptimizationType OptimizationType => OptimizationType.CacheWithRefreshRate;
         public override string Label => "PO.IsForbidden".Translate();
@@ -19,7 +19,7 @@ namespace PerformanceOptimizer
         {
             base.DoPatches();
             Patch(typeof(JobDriver), "CheckCurrentToilEndOrFail", GetMethod(nameof(CheckCurrentToilEndOrFailPrefix)), GetMethod(nameof(CheckCurrentToilEndOrFailPostfix)));
-            var forbiddedMethod = AccessTools.Method(typeof(ForbidUtility), "IsForbidden", new Type[] { typeof(Thing), typeof(Pawn) });
+            System.Reflection.MethodInfo forbiddedMethod = AccessTools.Method(typeof(ForbidUtility), "IsForbidden", new Type[] { typeof(Thing), typeof(Pawn) });
             Patch(forbiddedMethod, GetMethod(nameof(Prefix)), GetMethod(nameof(Postfix)));
         }
 
@@ -39,7 +39,7 @@ namespace PerformanceOptimizer
         {
             if (checkCurrentToilEndOrFailIsRunning)
             {
-                if (!cachedResults.TryGetValue(pawn.thingIDNumber, out var cachedResult))
+                if (!cachedResults.TryGetValue(pawn.thingIDNumber, out Dictionary<Thing, CachedValueTick<bool>> cachedResult))
                 {
                     cachedResults[pawn.thingIDNumber] = cachedResult = new Dictionary<Thing, CachedValueTick<bool>>();
                 }

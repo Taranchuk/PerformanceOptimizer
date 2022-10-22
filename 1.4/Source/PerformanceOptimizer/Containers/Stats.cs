@@ -7,8 +7,8 @@ namespace PerformanceOptimizer
 {
     public class Stats
     {
-        public List<int> getTicks = new List<int>();
-        public List<int> setTicks = new List<int>();
+        public List<int> getTicks = new();
+        public List<int> setTicks = new();
         public int lastRetrieveTick = 0;
         public int getCount;
         public int lastSetTick = 0;
@@ -21,14 +21,14 @@ namespace PerformanceOptimizer
                 return;
             }
             profile.lastLogTick = Find.TickManager.ticksGameInt;
-            var name = methodCaller?.DeclaringType?.FullName + ":" + methodCaller?.Name;
+            string name = methodCaller?.DeclaringType?.FullName + ":" + methodCaller?.Name;
             Log.ResetMessageCount();
             if (profile.lastSetTick > 0)
             {
                 if (profile.setTicks.Count > 1)
                 {
-                    var averageTick = profile.setTicks.Average();
-                    var getToSetRate = profile.getCount / (float)profile.setCount;
+                    double averageTick = profile.setTicks.Average();
+                    float getToSetRate = profile.getCount / (float)profile.setCount;
                     if (profile.setCount >= profile.getCount)
                     {
                         if (profile.getCount > 2)
@@ -46,14 +46,14 @@ namespace PerformanceOptimizer
                     }
                 }
             }
-        
+
             if (profile.lastRetrieveTick > 0)
             {
                 if (profile.getTicks.Count > 1)
                 {
-                    var averageTick = profile.getTicks.Average();
-                    var getToSetRate = profile.getCount / (float)profile.setCount;
-        
+                    double averageTick = profile.getTicks.Average();
+                    float getToSetRate = profile.getCount / (float)profile.setCount;
+
                     if (profile.setCount >= profile.getCount)
                     {
                         if (profile.getCount > 2)

@@ -19,14 +19,7 @@ namespace PerformanceOptimizer
 
         public override void Apply()
         {
-            if (hideSpeedButtons || disableSpeedButtons)
-            {
-                enabled = true;
-            }
-            else
-            {
-                enabled = false;
-            }
+            enabled = hideSpeedButtons || disableSpeedButtons;
             base.Apply();
         }
         public override void DrawSettings(Listing_Standard section)

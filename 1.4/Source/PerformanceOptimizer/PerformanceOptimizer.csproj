@@ -54,10 +54,7 @@
     <Compile Include="DebugTools\Debugging.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Designator_CreateReverseDesignationGizmo.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Frame_WorkToBuild.cs" />
-    <Compile Include="Optimizations\CacheWithRefresh\Optimization_Building_Door_TicksToOpenNow.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_GenCelestial_CurCelestialSunGlow.cs" />
-    <Compile Include="Optimizations\CacheWithRefresh\Optimization_Building_Door_FreePassage.cs" />
-    <Compile Include="Optimizations\CacheWithRefresh\Optimization_GenTemperature_AverageTemperatureAtTileForTwelfth.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_PawnUtility_IsInvisible.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_ForbidUtility_IsForbidden.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_PlantFallColors_GetFallColorFactor.cs" />
@@ -103,7 +100,6 @@
     <Compile Include="Optimizations\Throttling\Optimization_Pawn_JobTracker_DetermineNextConstantThinkTreeJob.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_QuestUtility_IsQuestLodger.cs" />
     <Compile Include="Optimizations\Bases\Optimization_RefreshRate.cs" />
-    <Compile Include="Optimizations\CacheWithRefresh\Optimization_Pawn_LabelCache.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_ThoughtHandler_TotalMoodOffset.cs" />
     <Compile Include="Utilities\SettingsHelper.cs" />
     <Compile Include="Optimizations\UITweaks\Optimization_DoPlaySettings_DoTimespeedControls.cs" />

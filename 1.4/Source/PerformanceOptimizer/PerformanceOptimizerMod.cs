@@ -23,7 +23,7 @@ namespace PerformanceOptimizer
         {
             harmony = new Harmony("PerformanceOptimizer.Main");
             harmony.PatchAll();
-            var hooks = new List<MethodInfo>
+            List<MethodInfo> hooks = new()
             {
                 AccessTools.Method(typeof(MapDeiniter), "Deinit"),
                 AccessTools.Method(typeof(Game), "AddMap"),
@@ -39,7 +39,7 @@ namespace PerformanceOptimizer
                 AccessTools.Method(typeof(SavedGameLoaderNow), "LoadGameFromSaveFileNow")
             };
 
-            foreach (var hook in hooks)
+            foreach (MethodInfo hook in hooks)
             {
                 harmony.Patch(hook, new HarmonyMethod(typeof(PerformanceOptimizerMod), nameof(PerformanceOptimizerMod.ResetStaticData)));
             }
@@ -67,7 +67,7 @@ namespace PerformanceOptimizer
         public static void ResetStaticData()
         {
             tickManager = Current.Game?.tickManager;
-            foreach (var optimization in PerformanceOptimizerSettings.optimizations)
+            foreach (Optimization optimization in PerformanceOptimizerSettings.optimizations)
             {
                 optimization?.Clear();
             }
@@ -97,11 +97,9 @@ namespace PerformanceOptimizer
         [HarmonyTargetMethod]
         public static MethodBase TargetMethod()
         {
-            if (ModsConfig.ActiveModsInLoadOrder.Any(x => x.Name == "BetterLoading"))
-            {
-                return AccessTools.Method("BetterLoading.BetterLoadingMain:CreateTimingReport");
-            }
-            return AccessTools.Method(typeof(StaticConstructorOnStartupUtility), "CallAll");
+            return ModsConfig.ActiveModsInLoadOrder.Any(x => x.Name == "BetterLoading")
+                ? AccessTools.Method("BetterLoading.BetterLoadingMain:CreateTimingReport")
+                : (MethodBase)AccessTools.Method(typeof(StaticConstructorOnStartupUtility), "CallAll");
         }
         public static void Postfix()
         {
@@ -117,11 +115,7 @@ namespace PerformanceOptimizer
         public static bool suppressErrorMessages;
         public static bool Prefix()
         {
-            if (suppressErrorMessages)
-            {
-                return false;
-            }
-            return true;
+            return !suppressErrorMessages;
         }
     }
 }

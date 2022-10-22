@@ -17,12 +17,12 @@ namespace PerformanceOptimizer
             Patch(typeof(IdeoUtility), "GetStyleDominance", GetMethod(nameof(Prefix)), GetMethod(nameof(Postfix)));
         }
 
-        public static Dictionary<int, CachedValueTick<float>> cachedResults = new Dictionary<int, CachedValueTick<float>>();
+        public static Dictionary<int, CachedValueTick<float>> cachedResults = new();
 
         [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(Thing t, Ideo ideo, out CachedValueTick<float> __state, ref float __result)
         {
-            var hashcode = 23;
+            int hashcode = 23;
             hashcode = (hashcode * 37) + t.thingIDNumber;
             hashcode = (hashcode * 37) + ideo.id;
             if (!cachedResults.TryGetValue(hashcode, out __state))

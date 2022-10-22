@@ -9,7 +9,7 @@ namespace PerformanceOptimizer
     {
         public static int refreshRateStatic;
 
-        public static Dictionary<Pawn, int> cachedResults = new Dictionary<Pawn, int>();
+        public static Dictionary<Pawn, int> cachedResults = new();
         public override int RefreshRateByDefault => 30;
         public override OptimizationType OptimizationType => OptimizationType.Throttle;
         public override string Label => "PO.JobGiver_ConfigurableHostilityResponse".Translate();
@@ -23,7 +23,7 @@ namespace PerformanceOptimizer
         [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(Pawn pawn)
         {
-            if (!cachedResults.TryGetValue(pawn, out var cache)
+            if (!cachedResults.TryGetValue(pawn, out int cache)
                 || PerformanceOptimizerMod.tickManager.ticksGameInt > (cache + refreshRateStatic))
             {
                 cachedResults[pawn] = PerformanceOptimizerMod.tickManager.ticksGameInt;

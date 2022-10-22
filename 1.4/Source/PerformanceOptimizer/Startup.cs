@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using Verse;
-
-namespace PerformanceOptimizer
+﻿namespace PerformanceOptimizer
 {
     //[StaticConstructorOnStartup]
     //public static class Startup

@@ -22,7 +22,7 @@ namespace PerformanceOptimizer
                 AccessTools.Method("DubsMintMinimap.MainTabWindow_MiniMap:DrawAllPawns"),
                 AccessTools.Method(typeof(Designation), "Draw")
             };
-            foreach (var method in methods)
+            foreach (MethodInfo method in methods)
             {
                 if (method != null)
                 {
@@ -37,7 +37,7 @@ namespace PerformanceOptimizer
             }
         }
 
-        public static Dictionary<int, CachedValueTick<Vector3>> cachedResults = new Dictionary<int, CachedValueTick<Vector3>>();
+        public static Dictionary<int, CachedValueTick<Vector3>> cachedResults = new();
 
         public static bool shouldReturnCachedValue;
 

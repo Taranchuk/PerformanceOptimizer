@@ -16,11 +16,11 @@ namespace PerformanceOptimizer
             Patch(typeof(WorldGrid), "LongLatOf", GetMethod(nameof(Prefix)), GetMethod(nameof(Postfix)));
         }
 
-        public static Dictionary<int, Vector2> cachedResults = new Dictionary<int, Vector2>();
+        public static Dictionary<int, Vector2> cachedResults = new();
         [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(int tileID, out bool __state, ref Vector2 __result)
         {
-            if (!cachedResults.TryGetValue(tileID, out var cache))
+            if (!cachedResults.TryGetValue(tileID, out Vector2 cache))
             {
                 __state = true;
                 return true;

@@ -1,10 +1,8 @@
 ﻿using HarmonyLib;
 using RimWorld;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
-using UnityEngine;
 using Verse;
 
 namespace PerformanceOptimizer
@@ -13,18 +11,18 @@ namespace PerformanceOptimizer
     {
         public static int refreshRateStatic;
 
-        public static Dictionary<int, int> cachedResults = new Dictionary<int, int>();
+        public static Dictionary<int, int> cachedResults = new();
         public override int RefreshRateByDefault => 6000;
         public override int MaxSliderValue => 10000;
         public override OptimizationType OptimizationType => OptimizationType.Throttle;
         public override string Label => "PO.Plant_TickLong".Translate();
 
-        public static HashSet<ThingDef> throttledPlants = new HashSet<ThingDef>();
+        public static HashSet<ThingDef> throttledPlants = new();
         public override void DoPatches()
         {
             base.DoPatches();
             Patch(typeof(Plant), "TickLong", GetMethod(nameof(Prefix)), transpiler: GetMethod(nameof(Transpiler)));
-            Predicate<ThingDef> predicator = delegate (ThingDef x)
+            static bool predicator(ThingDef x)
             {
                 if (x.plant != null)
                 {
@@ -39,16 +37,16 @@ namespace PerformanceOptimizer
                     }
                 }
                 return false;
-            };
+            }
             throttledPlants.AddRange(DefDatabase<ThingDef>.AllDefs.Where(x => predicator(x)));
         }
 
         [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(Plant __instance)
-{
+        {
             if (throttledPlants.Contains(__instance.def))
             {
-                if (!cachedResults.TryGetValue(__instance.thingIDNumber, out var cache) || PerformanceOptimizerMod.tickManager.ticksGameInt >= (cache + refreshRateStatic))
+                if (!cachedResults.TryGetValue(__instance.thingIDNumber, out int cache) || PerformanceOptimizerMod.tickManager.ticksGameInt >= (cache + refreshRateStatic))
                 {
                     cachedResults[__instance.thingIDNumber] = PerformanceOptimizerMod.tickManager.ticksGameInt;
                     return true;
@@ -71,8 +69,8 @@ namespace PerformanceOptimizer
 
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            var codes = instructions.ToList();
-            for (var i = 0; i < codes.Count; i++)
+            List<CodeInstruction> codes = instructions.ToList();
+            for (int i = 0; i < codes.Count; i++)
             {
                 if (codes[i].opcode == OpCodes.Ldc_I4 && codes[i].OperandIs(2000))
                 {
@@ -93,20 +91,12 @@ namespace PerformanceOptimizer
 
         public static int ThrottleRateInt(Plant plant)
         {
-            if (ShouldBeThrottled(plant))
-            {
-                return refreshRateStatic;
-            }
-            return 2000;
+            return ShouldBeThrottled(plant) ? refreshRateStatic : 2000;
         }
 
         public static float ThrottleRateFloat(Plant plant)
         {
-            if (ShouldBeThrottled(plant))
-            {
-                return refreshRateStatic;
-            }
-            return 2000f;
+            return ShouldBeThrottled(plant) ? refreshRateStatic : 2000f;
         }
 
         public static bool ShouldBeThrottled(Plant plant)

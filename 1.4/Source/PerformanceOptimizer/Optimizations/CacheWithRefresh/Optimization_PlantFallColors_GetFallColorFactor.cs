@@ -17,12 +17,12 @@ namespace PerformanceOptimizer
             Patch(typeof(PlantFallColors), "GetFallColorFactor", GetMethod(nameof(Prefix)), GetMethod(nameof(Postfix)));
         }
 
-        public static Dictionary<int, CachedValueTick<float>> cachedResults = new Dictionary<int, CachedValueTick<float>>();
+        public static Dictionary<int, CachedValueTick<float>> cachedResults = new();
 
         [HarmonyPriority(int.MaxValue)]
         public static bool Prefix(float latitude, int dayOfYear, out CachedValueTick<float> __state, ref float __result)
         {
-            var hashcode = 23;
+            int hashcode = 23;
             hashcode = (hashcode * 37) + latitude.GetHashCode();
             hashcode = (hashcode * 37) + dayOfYear;
             if (!cachedResults.TryGetValue(hashcode, out __state))

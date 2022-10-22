@@ -9,7 +9,7 @@ namespace PerformanceOptimizer
     {
         public static int refreshRateStatic;
 
-        public static Dictionary<Precept_RoleMulti, int> cachedResults = new Dictionary<Precept_RoleMulti, int>();
+        public static Dictionary<Precept_RoleMulti, int> cachedResults = new();
         public override int RefreshRateByDefault => 30;
         public override OptimizationType OptimizationType => OptimizationType.Throttle;
         public override string Label => "PO.Precept_RoleMulti_RecacheActivity".Translate();
@@ -27,7 +27,7 @@ namespace PerformanceOptimizer
         {
             if (!skipThrottling)
             {
-                if (!cachedResults.TryGetValue(__instance, out var cache)
+                if (!cachedResults.TryGetValue(__instance, out int cache)
                     || PerformanceOptimizerMod.tickManager.ticksGameInt > (cache + refreshRateStatic))
                 {
                     cachedResults[__instance] = PerformanceOptimizerMod.tickManager.ticksGameInt;
