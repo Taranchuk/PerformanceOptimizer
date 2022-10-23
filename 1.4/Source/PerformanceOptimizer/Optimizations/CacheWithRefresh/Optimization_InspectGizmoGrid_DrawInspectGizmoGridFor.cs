@@ -83,6 +83,8 @@ namespace PerformanceOptimizer
             {
                 Optimization_ForbidUtility_IsForbidden.cachedResults.Clear();
             }
+            Optimization_BuildCopyCommandUtility_FindAllowedDesignator.cachedResults.Clear();
+            Optimization_Designator_CreateReverseDesignationGizmo.cachedResults.Clear();
             cachedResults.Clear();
         }
 
