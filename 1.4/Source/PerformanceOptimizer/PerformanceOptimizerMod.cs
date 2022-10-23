@@ -10,7 +10,7 @@ using Verse;
 
 namespace PerformanceOptimizer
 {
-    internal class PerformanceOptimizerMod : Mod
+    public class PerformanceOptimizerMod : Mod
     {
         public static Harmony harmony;
 

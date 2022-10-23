@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using HarmonyLib;
+using System;
+using System.Collections.Generic;
 using Verse;
 
 namespace PerformanceOptimizer
@@ -10,6 +12,18 @@ namespace PerformanceOptimizer
         static ModCompatUtility()
         {
             AllowToolActive = ModLister.HasActiveModWithName("Allow Tool");
+            if (AllowToolActive)
+            {
+                PerformanceOptimizerMod.harmony.Patch(
+                    AccessTools.Method("AllowTool.Context.DesignatorContextMenuController:RegisterReverseDesignatorPair",
+                    new Type[] { typeof(Designator), typeof(Command) }),
+                    finalizer: new HarmonyMethod(AccessTools.Method(typeof(ModCompatUtility), nameof(Finalizer))));
+            }
+        }
+
+        public static Exception Finalizer(Exception __exception)
+        {
+            return null;
         }
         public static void ProcessAllowToolToggle(List<Gizmo> gizmos)
         {

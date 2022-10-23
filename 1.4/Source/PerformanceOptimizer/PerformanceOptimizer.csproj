@@ -34,7 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AllowTool">
-      <HintPath>..\..\..\..\..\..\..\workshop\content\294100\761421485\v1.3\Assemblies\AllowTool.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\workshop\content\294100\761421485\v1.4\Assemblies\AllowTool.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
