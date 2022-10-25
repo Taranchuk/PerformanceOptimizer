@@ -32,7 +32,8 @@ namespace PerformanceOptimizer
         public static HashSet<string> assembliesToSkip = new()
         {
             "System", "Cecil", "Multiplayer", "Prepatcher", "HeavyMelee", "0Harmony", "UnityEngine", "mscorlib",
-            "ICSharpCode", "Newtonsoft"
+            "ICSharpCode", "Newtonsoft", "ISharpZipLib", "NAudio", "Unity.TextMeshPro", "PerformanceOptimizer", "NVorbis",
+            "com.rlabrecque.steamworks.net", "Assembly-CSharp-firstpass"
         };
 
         public static HashSet<string> typesToSkip = new()
