@@ -9,7 +9,6 @@ using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Verse;
-using Verse.Sound;
 using static PerformanceOptimizer.ComponentCache;
 
 namespace PerformanceOptimizer
@@ -30,21 +29,22 @@ namespace PerformanceOptimizer
         public static MethodInfo genericThingDefCompProps = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetThingDefPropsFast));
         public static MethodInfo genericHediffDefCompProps = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetHediffDefPropsFast));
 
-        public static HashSet<string> assembliesToSkip = new HashSet<string>
+        public static HashSet<string> assembliesToSkip = new()
         {
-            "System", "Cecil", "Multiplayer", "Prepatcher", "HeavyMelee", "0Harmony", "UnityEngine", "mscorlib", 
-            "ICSharpCode", "Newtonsoft"
+            "System", "Cecil", "Multiplayer", "Prepatcher", "HeavyMelee", "0Harmony", "UnityEngine", "mscorlib",
+            "ICSharpCode", "Newtonsoft", "ISharpZipLib", "NAudio", "Unity.TextMeshPro", "PerformanceOptimizer", "NVorbis",
+            "com.rlabrecque.steamworks.net", "Assembly-CSharp-firstpass"
         };
 
-        public static HashSet<string> typesToSkip = new HashSet<string>
+        public static HashSet<string> typesToSkip = new()
         {
-            "AnimalGenetics.ColonyManager+JobsWrapper", "AutoMachineTool", "NightVision.CombatHelpers", 
-            "RJWSexperience.UI.SexStatusWindow", "AntimatterAnnihilation.Buildings.Building_MultiRefuelable", 
-            "AntimatterAnnihilation.Buildings.Building_AlloyFusionMachine", 
+            "AnimalGenetics.ColonyManager+JobsWrapper", "AutoMachineTool", "NightVision.CombatHelpers",
+            "RJWSexperience.UI.SexStatusWindow", "AntimatterAnnihilation.Buildings.Building_MultiRefuelable",
+            "AntimatterAnnihilation.Buildings.Building_AlloyFusionMachine",
             "AntimatterAnnihilation.Buildings.Building_CompositeRefiner"
         };
 
-        public static HashSet<string> methodsToSkip = new HashSet<string>
+        public static HashSet<string> methodsToSkip = new()
         {
             "Numbers.MainTabWindow_Numbers", "Numbers.OptionsMaker", "<PawnSelector>g__Action", "<AllBuildingsColonistWithComp>", "<FailOnOwnerStatus>", "Transpiler"
         };
@@ -57,23 +57,20 @@ namespace PerformanceOptimizer
         private static List<Type> types;
         public static List<Type> GetTypesToParse()
         {
-            if (types is null)
-            {
-                types = GenTypes.AllTypes.Where(type => TypeValidator(type)).Distinct().ToList();
-            }
+            types ??= GenTypes.AllTypes.Where(type => TypeValidator(type)).Distinct().ToList();
             return types;
         }
 
         public static List<MethodInfo> GetMethodsToParse(Type type)
         {
-            List<MethodInfo> methods = new List<MethodInfo>();
-            foreach (var method in AccessTools.GetDeclaredMethods(type))
+            List<MethodInfo> methods = new();
+            foreach (MethodInfo method in AccessTools.GetDeclaredMethods(type))
             {
                 if (method != null && !method.IsAbstract)
                 {
                     try
                     {
-                        var description = method.FullDescription();
+                        string description = method.FullDescription();
                         if (!methodsToSkip.Any(x => description.Contains(x)))
                         {
                             if (!method.IsGenericMethod && !method.ContainsGenericParameters && !method.IsGenericMethodDefinition)
@@ -103,20 +100,20 @@ namespace PerformanceOptimizer
         {
             try
             {
-                var instructions = PatchProcessor.GetCurrentInstructions(method);
-                foreach (var instr in instructions)
+                List<CodeInstruction> instructions = PatchProcessor.GetCurrentInstructions(method);
+                foreach (CodeInstruction instr in instructions)
                 {
                     if (instr.operand is MethodInfo mi && mi.IsGenericMethod)
                     {
-                        var parameterLength = mi.GetParameters().Length;
+                        int parameterLength = mi.GetParameters().Length;
                         if (parameterLength == 0)
                         {
                             if (instr.opcode == OpCodes.Callvirt || instr.opcode == OpCodes.Call)
                             {
-                                var miName = mi.Name;
+                                string miName = mi.Name;
                                 if (miName == "GetComponent")
                                 {
-                                    var underlyingType = mi.GetUnderlyingType();
+                                    Type underlyingType = mi.GetUnderlyingType();
                                     if (typeof(MapComponent).IsAssignableFrom(underlyingType))
                                     {
                                         AddPatchInfo(method, instr, underlyingType, genericMapGetComp);
@@ -136,7 +133,7 @@ namespace PerformanceOptimizer
                                 }
                                 else if (miName == "GetComp")
                                 {
-                                    var underlyingType = mi.GetUnderlyingType();
+                                    Type underlyingType = mi.GetUnderlyingType();
                                     if (typeof(ThingComp).IsAssignableFrom(underlyingType))
                                     {
                                         AddPatchInfo(method, instr, underlyingType, genericThingGetComp);
@@ -144,7 +141,7 @@ namespace PerformanceOptimizer
                                 }
                                 else if (miName == "GetCompProperties")
                                 {
-                                    var underlyingType = mi.GetUnderlyingType();
+                                    Type underlyingType = mi.GetUnderlyingType();
                                     if (typeof(CompProperties).IsAssignableFrom(underlyingType))
                                     {
                                         AddPatchInfo(method, instr, underlyingType, genericThingDefCompProps);
@@ -152,7 +149,7 @@ namespace PerformanceOptimizer
                                 }
                                 else if (miName == "CompProps")
                                 {
-                                    var underlyingType = mi.GetUnderlyingType();
+                                    Type underlyingType = mi.GetUnderlyingType();
                                     if (typeof(HediffCompProperties).IsAssignableFrom(underlyingType))
                                     {
                                         AddPatchInfo(method, instr, underlyingType, genericHediffDefCompProps);
@@ -166,7 +163,7 @@ namespace PerformanceOptimizer
                             {
                                 if (mi.Name == "TryGetComp")
                                 {
-                                    var underlyingType = mi.GetUnderlyingType();
+                                    Type underlyingType = mi.GetUnderlyingType();
                                     if (typeof(ThingComp).IsAssignableFrom(underlyingType))
                                     {
                                         AddPatchInfo(method, instr, underlyingType, genericThingTryGetComp);
@@ -181,7 +178,7 @@ namespace PerformanceOptimizer
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //Log.Error("Error when parsing " + method.FullDescription() + " - exception: " + ex);
             }
@@ -190,7 +187,7 @@ namespace PerformanceOptimizer
             {
                 //Log.Message("Patched " + method.FullDescription() + " - instr: " + instr);
                 //Log.ResetMessageCount();
-                var patchInfo = new PatchInfo
+                PatchInfo patchInfo = new()
                 {
                     targetMethod = targetMethod,
                     targetInstruction = instr,
@@ -232,9 +229,9 @@ namespace PerformanceOptimizer
                     ParseEverything();
                 }
             });
-            var stopwatch = new Stopwatch();
+            Stopwatch stopwatch = new();
             stopwatch.Start();
-            foreach (var kvp in patchInfos)
+            foreach (KeyValuePair<MethodBase, List<PatchInfo>> kvp in patchInfos)
             {
                 if (Harmony.GetPatchInfo(kvp.Key)?.Transpilers?.FirstOrDefault(x => x.PatchMethod == transpiler) is null) // to prevent duplicate transpilers which occurs perhaps via a mod conflict
                 {
@@ -249,16 +246,16 @@ namespace PerformanceOptimizer
         {
             try
             {
-                var methodsToParse = new HashSet<MethodInfo>();
-                var types = GetTypesToParse();
-                foreach (var type in types)
+                HashSet<MethodInfo> methodsToParse = new();
+                List<Type> types = GetTypesToParse();
+                foreach (Type type in types)
                 {
-                    foreach (var method in GetMethodsToParse(type))
+                    foreach (MethodInfo method in GetMethodsToParse(type))
                     {
                         methodsToParse.Add(method);
                     }
                 }
-                foreach (var method in methodsToParse)
+                foreach (MethodInfo method in methodsToParse)
                 {
                     ParseMethod(method);
                 }
@@ -271,19 +268,17 @@ namespace PerformanceOptimizer
 
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, MethodBase method)
         {
-            var curPatchInfos = patchInfos[method];
-            bool patchedSomething = false;
-            foreach (var instr in instructions)
+            List<PatchInfo> curPatchInfos = patchInfos[method];
+            foreach (CodeInstruction instr in instructions)
             {
-                for (var j = 0; j < curPatchInfos.Count; j++)
+                for (int j = 0; j < curPatchInfos.Count; j++)
                 {
-                    var patchInfo = curPatchInfos[j];
+                    PatchInfo patchInfo = curPatchInfos[j];
                     if (patchInfo.targetInstruction.opcode == instr.opcode && patchInfo.targetInstruction.operand == instr.operand)
                     {
                         instr.opcode = OpCodes.Call;
                         instr.operand = patchInfo.methodToReplace;
                         //Log.Message("Patched: " + patchInfo.targetMethod.FullDescription() + " - Replaced " + instr);
-                        patchedSomething = true;
                         break;
                     }
                 }
@@ -302,11 +297,8 @@ namespace PerformanceOptimizer
         private static List<MethodInfo> clearMethods;
         public override void Clear()
         {
-            if (clearMethods is null)
-            {
-                clearMethods = GetClearMethods().ToList();
-            }
-            foreach (var method in clearMethods)
+            clearMethods ??= GetClearMethods().ToList();
+            foreach (MethodInfo method in clearMethods)
             {
                 try
                 {
@@ -318,32 +310,32 @@ namespace PerformanceOptimizer
 
         private static IEnumerable<MethodInfo> GetClearMethods()
         {
-            foreach (var type in typeof(ThingComp).AllSubclasses())
+            foreach (Type type in typeof(ThingComp).AllSubclasses())
             {
                 yield return ClearMethod(typeof(ICache_ThingComp<>), type);
             }
-            foreach (var type in typeof(HediffComp).AllSubclasses())
+            foreach (Type type in typeof(HediffComp).AllSubclasses())
             {
                 yield return ClearMethod(typeof(ICache_HediffComp<>), type);
             }
-            foreach (var type in typeof(WorldObjectComp).AllSubclasses())
+            foreach (Type type in typeof(WorldObjectComp).AllSubclasses())
             {
                 yield return ClearMethod(typeof(ICache_WorldObjectComp<>), type);
             }
-            foreach (var type in typeof(GameComponent).AllSubclasses())
+            foreach (Type type in typeof(GameComponent).AllSubclasses())
             {
                 yield return ClearMethod(typeof(ICache_GameComponent<>), type);
             }
-            foreach (var type in typeof(WorldComponent).AllSubclasses())
+            foreach (Type type in typeof(WorldComponent).AllSubclasses())
             {
                 yield return ClearMethod(typeof(ICache_WorldComponent<>), type);
             }
-            foreach (var type in typeof(MapComponent).AllSubclasses())
+            foreach (Type type in typeof(MapComponent).AllSubclasses())
             {
                 yield return ClearMethod(typeof(ICache_MapComponent<>), type);
             }
 
-            MethodInfo ClearMethod(Type genericType, Type genericParam)
+            static MethodInfo ClearMethod(Type genericType, Type genericParam)
             {
                 return genericType.MakeGenericType(genericParam).GetMethod("Clear", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             }
@@ -355,7 +347,7 @@ namespace PerformanceOptimizer
     {
         public static class ICache_ThingComp<T> where T : ThingComp
         {
-            public static Dictionary<int, T> compsById = new Dictionary<int, T>();
+            public static Dictionary<int, T> compsById = new();
             public static void Clear()
             {
                 compsById.Clear();
@@ -371,11 +363,11 @@ namespace PerformanceOptimizer
         //ComponentCache_ResetCompCache_Info.Invoke(null, new object[] { thing });
         public static void ResetCompCache(ThingWithComps thingWithComps)
         {
-            foreach (var type in typeof(ThingComp).AllSubclasses())
+            foreach (Type type in typeof(ThingComp).AllSubclasses())
             {
                 try
                 {
-                    var method = typeof(ICache_ThingComp<>).MakeGenericType(type).GetMethod("ResetCompCache", BindingFlags.Instance 
+                    MethodInfo method = typeof(ICache_ThingComp<>).MakeGenericType(type).GetMethod("ResetCompCache", BindingFlags.Instance
                         | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
                     method.Invoke(null, new object[] { thingWithComps.thingIDNumber });
                 }
@@ -398,10 +390,10 @@ namespace PerformanceOptimizer
 
             for (int i = 0; i < thingWithComps.comps.Count; i++)
             {
-                var props = thingWithComps.comps[i].props;
+                CompProperties props = thingWithComps.comps[i].props;
                 if (props != null && props.compClass == typeof(T))
                 {
-                    var val2 = thingWithComps.comps[i] as T;
+                    T val2 = thingWithComps.comps[i] as T;
                     ICache_ThingComp<T>.compsById[thingWithComps.thingIDNumber] = val2;
                     return val2;
                 }
@@ -409,8 +401,7 @@ namespace PerformanceOptimizer
 
             for (int i = 0; i < thingWithComps.comps.Count; i++)
             {
-                T val3 = thingWithComps.comps[i] as T;
-                if (val3 != null)
+                if (thingWithComps.comps[i] is T val3)
                 {
                     ICache_ThingComp<T>.compsById[thingWithComps.thingIDNumber] = val3;
                     return val3;
@@ -422,17 +413,12 @@ namespace PerformanceOptimizer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T TryGetThingCompFast<T>(this Thing thing) where T : ThingComp
         {
-            ThingWithComps thingWithComps = thing as ThingWithComps;
-            if (thingWithComps == null)
-            {
-                return null;
-            }
-            return thingWithComps.GetThingCompFast<T>();
+            return thing is not ThingWithComps thingWithComps ? null : thingWithComps.GetThingCompFast<T>();
         }
 
         public static class ICache_HediffComp<T> where T : HediffComp
         {
-            public static Dictionary<int, T> compsById = new Dictionary<int, T>();
+            public static Dictionary<int, T> compsById = new();
             public static void Clear()
             {
                 compsById.Clear();
@@ -446,8 +432,7 @@ namespace PerformanceOptimizer
             {
                 return val;
             }
-            HediffWithComps hediffWithComps = hd as HediffWithComps;
-            if (hediffWithComps == null)
+            if (hd is not HediffWithComps hediffWithComps)
             {
                 return null;
             }
@@ -458,10 +443,10 @@ namespace PerformanceOptimizer
 
             for (int i = 0; i < hediffWithComps.comps.Count; i++)
             {
-                var props = hediffWithComps.comps[i].props;
+                HediffCompProperties props = hediffWithComps.comps[i].props;
                 if (props != null && props.compClass == typeof(T))
                 {
-                    var val2 = hediffWithComps.comps[i] as T;
+                    T val2 = hediffWithComps.comps[i] as T;
                     ICache_HediffComp<T>.compsById[hd.loadID] = val2;
                     return val2;
                 }
@@ -469,8 +454,7 @@ namespace PerformanceOptimizer
 
             for (int i = 0; i < hediffWithComps.comps.Count; i++)
             {
-                T val3 = hediffWithComps.comps[i] as T;
-                if (val3 != null)
+                if (hediffWithComps.comps[i] is T val3)
                 {
                     ICache_HediffComp<T>.compsById[hd.loadID] = val3;
                     return val3;
@@ -480,7 +464,7 @@ namespace PerformanceOptimizer
         }
         public static class ICache_WorldObjectComp<T> where T : WorldObjectComp
         {
-            public static Dictionary<int, T> compsById = new Dictionary<int, T>();
+            public static Dictionary<int, T> compsById = new();
             public static void Clear()
             {
                 compsById.Clear();
@@ -502,7 +486,7 @@ namespace PerformanceOptimizer
             {
                 if (worldObject.comps[i].GetType() == typeof(T))
                 {
-                    var val2 = worldObject.comps[i] as T;
+                    T val2 = worldObject.comps[i] as T;
                     ICache_WorldObjectComp<T>.compsById[worldObject.ID] = val2;
                     return val2;
                 }
@@ -510,8 +494,7 @@ namespace PerformanceOptimizer
 
             for (int i = 0; i < worldObject.comps.Count; i++)
             {
-                T val3 = worldObject.comps[i] as T;
-                if (val3 != null)
+                if (worldObject.comps[i] is T val3)
                 {
                     ICache_WorldObjectComp<T>.compsById[worldObject.ID] = val3;
                     return val3;
@@ -521,7 +504,7 @@ namespace PerformanceOptimizer
         }
         public static class ICache_ThingDefProps<T> where T : CompProperties
         {
-            public static Dictionary<ushort, T> compPropsById = new Dictionary<ushort, T>();
+            public static Dictionary<ushort, T> compPropsById = new();
             public static void Clear()
             {
                 compPropsById.Clear();
@@ -543,8 +526,7 @@ namespace PerformanceOptimizer
 
             for (int i = 0; i < thingDef.comps.Count; i++)
             {
-                T val3 = thingDef.comps[i] as T;
-                if (val3 != null)
+                if (thingDef.comps[i] is T val3)
                 {
                     ICache_ThingDefProps<T>.compPropsById[thingDef.shortHash] = val3;
                     return val3;
@@ -554,7 +536,7 @@ namespace PerformanceOptimizer
         }
         public static class ICache_HediffDefProps<T> where T : HediffCompProperties
         {
-            public static Dictionary<ushort, T> compPropsById = new Dictionary<ushort, T>();
+            public static Dictionary<ushort, T> compPropsById = new();
             public static void Clear()
             {
                 compPropsById.Clear();
@@ -576,8 +558,7 @@ namespace PerformanceOptimizer
 
             for (int i = 0; i < hediffDef.comps.Count; i++)
             {
-                T val3 = hediffDef.comps[i] as T;
-                if (val3 != null)
+                if (hediffDef.comps[i] is T val3)
                 {
                     ICache_HediffDefProps<T>.compPropsById[hediffDef.shortHash] = val3;
                     return val3;
@@ -589,7 +570,7 @@ namespace PerformanceOptimizer
 
         public static class ICache_DefModExtension<T> where T : DefModExtension
         {
-            public static Dictionary<ushort, T> modExtensionsById = new Dictionary<ushort, T>();
+            public static Dictionary<ushort, T> modExtensionsById = new();
             public static void Clear()
             {
                 modExtensionsById.Clear();
@@ -598,7 +579,7 @@ namespace PerformanceOptimizer
 
         public static class ICache_MapComponent<T>
         {
-            public static Dictionary<Map, T> compsByMap = new Dictionary<Map, T>();
+            public static Dictionary<Map, T> compsByMap = new();
             public static void Clear()
             {
                 compsByMap.Clear();
@@ -610,7 +591,7 @@ namespace PerformanceOptimizer
         {
             if (!ICache_MapComponent<T>.compsByMap.TryGetValue(map, out T mapComp))
             {
-                var comp = map.GetComponent<T>();
+                T comp = map.GetComponent<T>();
                 if (comp != null)
                 {
                     ICache_MapComponent<T>.compsByMap[map] = mapComp = comp;
@@ -630,7 +611,7 @@ namespace PerformanceOptimizer
             {
                 if (world != curWorld)
                 {
-                    var comp = curWorld.GetComponent<T>();
+                    T comp = curWorld.GetComponent<T>();
                     if (comp != null)
                     {
                         component = comp;
@@ -663,7 +644,7 @@ namespace PerformanceOptimizer
             {
                 if (game != curGame)
                 {
-                    var comp = curGame.GetComponent<T>();
+                    T comp = curGame.GetComponent<T>();
                     if (comp != null)
                     {
                         component = comp;
