@@ -97,7 +97,6 @@
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_PawnCollisionPosOffsetFor.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_PawnUtility_IsTeetotaler.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Pawn_DrawPos.cs" />
-    <Compile Include="Optimizations\Throttling\Optimization_Pawn_JobTracker_DetermineNextConstantThinkTreeJob.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_QuestUtility_IsQuestLodger.cs" />
     <Compile Include="Optimizations\Bases\Optimization_RefreshRate.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_ThoughtHandler_TotalMoodOffset.cs" />
