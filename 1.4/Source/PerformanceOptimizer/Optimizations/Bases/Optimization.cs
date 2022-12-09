@@ -63,9 +63,10 @@ namespace PerformanceOptimizer
         public static Dictionary<MethodBase, Type> mappedValues = new();
         public void Patch(MethodBase methodInfo, MethodInfo prefix = null, MethodInfo postfix = null, MethodInfo transpiler = null)
         {
-            PerformanceOptimizerMod.harmony.Patch(methodInfo, prefix != null ? new HarmonyMethod(prefix) : null, postfix != null ? new HarmonyMethod(postfix) : null, transpiler != null ? new HarmonyMethod(transpiler) : null);
-            //Log.Message(this.GetType() +  " - Patching " + methodInfo.FullDescription());
-            //Log.ResetMessageCount();
+            var harmonyPrefix = prefix != null ? new HarmonyMethod(prefix) : null;
+            var harmonyPostfix = postfix != null ? new HarmonyMethod(postfix) : null;
+            var harmonyTranspiler = transpiler != null ? new HarmonyMethod(transpiler) : null;
+            PerformanceOptimizerMod.harmony.Patch(methodInfo, prefix: harmonyPrefix, postfix: harmonyPostfix, transpiler: harmonyTranspiler);
             List<MethodInfo> patches = new();
             if (prefix != null)
             {

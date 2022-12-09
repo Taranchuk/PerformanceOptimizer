@@ -105,12 +105,12 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Krafs.Publicizer">
-      <Version>2.0.1</Version>
+      <Version>2.1.0</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Krafs.Rimworld.Ref">
-      <Version>1.4.3509-beta</Version>
+      <Version>1.4.3566-beta</Version>
     </PackageReference>
     <PackageReference Include="Lib.Harmony">
       <Version>2.2.2</Version>

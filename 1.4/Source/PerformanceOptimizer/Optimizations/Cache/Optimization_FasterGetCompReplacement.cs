@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Verse;
 using static PerformanceOptimizer.ComponentCache;
@@ -33,7 +34,7 @@ namespace PerformanceOptimizer
         {
             "System", "Cecil", "Multiplayer", "Prepatcher", "HeavyMelee", "0Harmony", "UnityEngine", "mscorlib",
             "ICSharpCode", "Newtonsoft", "ISharpZipLib", "NAudio", "Unity.TextMeshPro", "PerformanceOptimizer", "NVorbis",
-            "com.rlabrecque.steamworks.net", "Assembly-CSharp-firstpass"
+            "com.rlabrecque.steamworks.net", "Assembly-CSharp-firstpass", "CombatAI"
         };
 
         public static HashSet<string> typesToSkip = new()
@@ -237,7 +238,8 @@ namespace PerformanceOptimizer
             });
             Stopwatch stopwatch = new();
             stopwatch.Start();
-            foreach (KeyValuePair<MethodBase, List<PatchInfo>> kvp in patchInfos)
+            var list = patchInfos.ToList();
+            foreach (var kvp in list)
             {
                 if (Harmony.GetPatchInfo(kvp.Key)?.Transpilers?.FirstOrDefault(x => x.PatchMethod == transpiler) is null) // to prevent duplicate transpilers which occurs perhaps via a mod conflict
                 {
