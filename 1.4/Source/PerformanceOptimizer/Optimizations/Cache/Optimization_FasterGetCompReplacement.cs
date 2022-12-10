@@ -2,6 +2,7 @@
 using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -219,8 +220,18 @@ namespace PerformanceOptimizer
             }
             DoPatchesAsync(parse);
             Patch(AccessTools.Method(typeof(CompGlower), nameof(CompGlower.SetGlowColorInternal)), GetMethod(nameof(SetGlowColorInternalPrefix)));
+            Patch(AccessTools.Method(typeof(PatchProcessor), nameof(PatchProcessor.GetPatchInfo)), postfix: GetMethod(nameof(StripPOPatchesInfo)));
         }
 
+        public static void StripPOPatchesInfo(ref Patches __result)
+        {
+            var filtered = __result.Transpilers.Where(x => x.PatchMethod != transpiler).ToList();
+            var transpilerList = new ReadOnlyCollection<Patch>(filtered);
+            if (transpilerList.Count != __result.Transpilers.Count)
+            {
+                Traverse.Create(__result).Field("Transpilers").SetValue(transpilerList);
+            }
+        }
         public static void SetGlowColorInternalPrefix(CompGlower __instance)
         {
             ResetCompCache(__instance.parent);
