@@ -225,13 +225,17 @@ namespace PerformanceOptimizer
 
         public static void StripPOPatchesInfo(ref Patches __result)
         {
-            var filtered = __result.Transpilers.Where(x => x.PatchMethod != transpiler).ToList();
-            var transpilerList = new ReadOnlyCollection<Patch>(filtered);
-            if (transpilerList.Count != __result.Transpilers.Count)
+            if (__result != null)
             {
-                Traverse.Create(__result).Field("Transpilers").SetValue(transpilerList);
+                var filtered = __result.Transpilers.Where(x => x.PatchMethod != transpiler).ToList();
+                var transpilerList = new ReadOnlyCollection<Patch>(filtered);
+                if (transpilerList.Count != __result.Transpilers.Count)
+                {
+                    Traverse.Create(__result).Field("Transpilers").SetValue(transpilerList);
+                }
             }
         }
+
         public static void SetGlowColorInternalPrefix(CompGlower __instance)
         {
             ResetCompCache(__instance.parent);
