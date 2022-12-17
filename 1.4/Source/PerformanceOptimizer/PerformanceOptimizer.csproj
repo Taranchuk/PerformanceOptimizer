@@ -53,6 +53,7 @@
     <Compile Include="Containers\Stats.cs" />
     <Compile Include="DebugTools\Debugging.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Designator_CreateReverseDesignationGizmo.cs" />
+    <Compile Include="Optimizations\CacheWithRefresh\Optimization_FormCaravanComp_AnyActiveThreatNow.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Frame_WorkToBuild.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_GenCelestial_CurCelestialSunGlow.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_PawnUtility_IsInvisible.cs" />

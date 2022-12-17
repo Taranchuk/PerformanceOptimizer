@@ -52,6 +52,7 @@
     <Compile Include="Containers\CachedValueUpdate.cs" />
     <Compile Include="Containers\Stats.cs" />
     <Compile Include="DebugTools\Debugging.cs" />
+    <Compile Include="Optimizations\CacheWithRefresh\Optimization_FormCaravanComp_AnyActiveThreatNow.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Frame_WorkToBuild.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Building_Door_TicksToOpenNow.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_GenCelestial_CurCelestialSunGlow.cs" />
