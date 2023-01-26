@@ -265,10 +265,9 @@ namespace PerformanceOptimizer
             Stopwatch stopwatch = new();
             stopwatch.Start();
             var list = patchInfos.ToList();
-            var harmonyTranspiler = new HarmonyMethod(transpiler);
             foreach (var kvp in list)
             {
-                PerformanceOptimizerMod.harmony.Patch(kvp.Key, transpiler: harmonyTranspiler);
+                Patch(kvp.Key, transpiler: transpiler);
             }
             stopwatch.Stop();
             stopwatch.LogTime("Transpiled " + patchedMethods.Count + " methods");
