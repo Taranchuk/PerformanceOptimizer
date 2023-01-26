@@ -25,7 +25,7 @@ namespace PerformanceOptimizer
             harmony.PatchAll();
             List<MethodInfo> hooks = new()
             {
-                AccessTools.Method(typeof(MapDeiniter), "Deinit"),
+                AccessTools.Method(typeof(MapDeiniter), "Deinit_NewTemp"),
                 AccessTools.Method(typeof(Game), "AddMap"),
                 AccessTools.Method(typeof(World), "FillComponents"),
                 AccessTools.Method(typeof(Game), "FillComponents"),

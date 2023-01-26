@@ -220,20 +220,31 @@ namespace PerformanceOptimizer
             }
             DoPatchesAsync(parse);
             Patch(AccessTools.Method(typeof(CompGlower), nameof(CompGlower.SetGlowColorInternal)), GetMethod(nameof(SetGlowColorInternalPrefix)));
-            Patch(AccessTools.Method(typeof(PatchProcessor), nameof(PatchProcessor.GetPatchInfo)), postfix: GetMethod(nameof(StripPOPatchesInfo)));
+            var hugslibHarmonyUtility = AccessTools.TypeByName("HugsLib.Utils.HarmonyUtility");
+            if (hugslibHarmonyUtility != null)
+            {
+                var AppendPatchList = AccessTools.Method(hugslibHarmonyUtility, "HasActivePatches");
+                Patch(AppendPatchList, prefix: GetMethod(nameof(StripPOPatchesInfo)));
+            }
         }
 
-        public static void StripPOPatchesInfo(ref Patches __result)
+        public static void StripPOPatchesInfo(ref Patches patches)
         {
-            if (__result != null)
+            patches = StripPatches(patches);
+        }
+
+        private static Patches StripPatches(Patches patches)
+        {
+            if (patches != null)
             {
-                var filtered = __result.Transpilers.Where(x => x.PatchMethod != transpiler).ToList();
+                var filtered = patches.Transpilers.Where(x => x.PatchMethod != transpiler).ToList();
                 var transpilerList = new ReadOnlyCollection<Patch>(filtered);
-                if (transpilerList.Count != __result.Transpilers.Count)
+                if (transpilerList.Count != patches.Transpilers.Count)
                 {
-                    Traverse.Create(__result).Field("Transpilers").SetValue(transpilerList);
+                    Traverse.Create(patches).Field("Transpilers").SetValue(transpilerList);
                 }
             }
+            return patches;
         }
 
         public static void SetGlowColorInternalPrefix(CompGlower __instance)
@@ -254,12 +265,10 @@ namespace PerformanceOptimizer
             Stopwatch stopwatch = new();
             stopwatch.Start();
             var list = patchInfos.ToList();
+            var harmonyTranspiler = new HarmonyMethod(transpiler);
             foreach (var kvp in list)
             {
-                if (Harmony.GetPatchInfo(kvp.Key)?.Transpilers?.FirstOrDefault(x => x.PatchMethod == transpiler) is null) // to prevent duplicate transpilers which occurs perhaps via a mod conflict
-                {
-                    Patch(kvp.Key, transpiler: transpiler);
-                }
+                PerformanceOptimizerMod.harmony.Patch(kvp.Key, transpiler: harmonyTranspiler);
             }
             stopwatch.Stop();
             stopwatch.LogTime("Transpiled " + patchedMethods.Count + " methods");
