@@ -2,7 +2,9 @@
 using RimWorld;
 using RimWorld.Planet;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -19,6 +21,7 @@ namespace PerformanceOptimizer
         public static TickManager tickManager;
 
         public static bool DubsPerformanceAnalyzerLoaded;
+        public static PerformPatchesPerFrames performPatchesPerFrames;
         public PerformanceOptimizerMod(ModContentPack mod) : base(mod)
         {
             harmony = new Harmony("PerformanceOptimizer.Main");
@@ -44,6 +47,7 @@ namespace PerformanceOptimizer
                 harmony.Patch(hook, new HarmonyMethod(typeof(PerformanceOptimizerMod), nameof(PerformanceOptimizerMod.ResetStaticData)));
             }
 
+            performPatchesPerFrames = UnityEngine.Object.FindObjectOfType<Root_Entry>().gameObject.AddComponent<PerformPatchesPerFrames>();
             settings = GetSettings<PerformanceOptimizerSettings>();
         }
 

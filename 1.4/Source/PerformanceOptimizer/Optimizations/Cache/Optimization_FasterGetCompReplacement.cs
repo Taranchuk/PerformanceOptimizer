@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using RimWorld.Planet;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -10,11 +11,39 @@ using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 using Verse;
 using static PerformanceOptimizer.ComponentCache;
 
 namespace PerformanceOptimizer
 {
+    public class PerformPatchesPerFrames : MonoBehaviour
+    {
+        public Optimization_FasterGetCompReplacement optimization;
+        public IEnumerator PerformPatches()
+        {
+            Stopwatch stopwatch = new();
+            stopwatch.Start();
+            var totalElapsed = 0f;
+            Log.Message("Starting patches: " + optimization.patchesToPerform.Count + " - " + DateTime.Now.ToString());
+            while (optimization.patchesToPerform.Any())
+            {
+                var patch = optimization.patchesToPerform.Pop();
+                optimization.Patch(patch.Key, transpiler: Optimization_FasterGetCompReplacement.transpiler);
+                float elapsed = (float)stopwatch.ElapsedTicks / Stopwatch.Frequency;
+                totalElapsed += elapsed;
+                if (elapsed >= 0.01f)
+                {
+                    yield return new WaitForSeconds(0.01f);
+                    stopwatch.Restart();
+                }
+            }
+            stopwatch.Stop();
+            Log.Message("Finishing transpiling " + optimization.patchedMethods.Count + " methods - " + DateTime.Now.ToString());
+            yield return null;
+        }
+    }
+
     public class Optimization_FasterGetCompReplacement : Optimization
     {
         public override OptimizationType OptimizationType => OptimizationType.Optimization;
@@ -102,7 +131,7 @@ namespace PerformanceOptimizer
         {
             try
             {
-                List<CodeInstruction> instructions = PatchProcessor.GetCurrentInstructions(method);
+                List<CodeInstruction> instructions = PatchProcessor.GetOriginalInstructions(method);
                 foreach (CodeInstruction instr in instructions)
                 {
                     if (instr.operand is MethodInfo mi && mi.IsGenericMethod)
@@ -252,7 +281,9 @@ namespace PerformanceOptimizer
             ResetCompCache(__instance.parent);
         }
 
-        private static readonly MethodInfo transpiler = AccessTools.Method(typeof(Optimization_FasterGetCompReplacement), nameof(Optimization_FasterGetCompReplacement.Transpiler));
+        public static readonly MethodInfo transpiler = AccessTools.Method(typeof(Optimization_FasterGetCompReplacement), nameof(Optimization_FasterGetCompReplacement.Transpiler));
+
+        public List<KeyValuePair<MethodBase, List<PatchInfo>>> patchesToPerform;
         public async void DoPatchesAsync(bool parse)
         {
             await Task.Run(() =>
@@ -262,15 +293,9 @@ namespace PerformanceOptimizer
                     ParseEverything();
                 }
             });
-            Stopwatch stopwatch = new();
-            stopwatch.Start();
-            var list = patchInfos.ToList();
-            foreach (var kvp in list)
-            {
-                Patch(kvp.Key, transpiler: transpiler);
-            }
-            stopwatch.Stop();
-            stopwatch.LogTime("Transpiled " + patchedMethods.Count + " methods");
+            PerformanceOptimizerMod.performPatchesPerFrames.optimization = this;
+            patchesToPerform = patchInfos.ToList();
+            PerformanceOptimizerMod.performPatchesPerFrames.StartCoroutine(PerformanceOptimizerMod.performPatchesPerFrames.PerformPatches());
         }
 
         private void ParseEverything()
