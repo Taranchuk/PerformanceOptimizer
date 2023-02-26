@@ -40,7 +40,7 @@ namespace PerformanceOptimizer
                 }
             }
             stopwatch.Stop();
-            Log.Message("Finishing transpiling " + optimization.patchedMethods.Count + " methods - " + DateTime.Now.ToString());
+            Log.Message("Finished transpiling " + (optimization.patchedMethods.Count - 2) + " methods - " + DateTime.Now.ToString());
             yield return null;
         }
     }
