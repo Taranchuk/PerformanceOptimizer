@@ -20,6 +20,7 @@ namespace PerformanceOptimizer
     public class PerformPatchesPerFrames : MonoBehaviour
     {
         public Optimization_FasterGetCompReplacement optimization;
+        public const float MaxTimeToLoadThisFrame = 0.001f;
         public IEnumerator PerformPatches()
         {
             Stopwatch stopwatch = new();
@@ -32,9 +33,9 @@ namespace PerformanceOptimizer
                 optimization.Patch(patch.Key, transpiler: Optimization_FasterGetCompReplacement.transpiler);
                 float elapsed = (float)stopwatch.ElapsedTicks / Stopwatch.Frequency;
                 totalElapsed += elapsed;
-                if (elapsed >= 0.01f)
+                if (elapsed >= MaxTimeToLoadThisFrame)
                 {
-                    yield return new WaitForSeconds(0.01f);
+                    yield return 0;
                     stopwatch.Restart();
                 }
             }
@@ -292,9 +293,9 @@ namespace PerformanceOptimizer
                 {
                     ParseEverything();
                 }
+                PerformanceOptimizerMod.performPatchesPerFrames.optimization = this;
+                patchesToPerform = patchInfos.ToList();
             });
-            PerformanceOptimizerMod.performPatchesPerFrames.optimization = this;
-            patchesToPerform = patchInfos.ToList();
             PerformanceOptimizerMod.performPatchesPerFrames.StartCoroutine(PerformanceOptimizerMod.performPatchesPerFrames.PerformPatches());
         }
 

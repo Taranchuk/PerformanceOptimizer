@@ -46,8 +46,9 @@ namespace PerformanceOptimizer
             {
                 harmony.Patch(hook, new HarmonyMethod(typeof(PerformanceOptimizerMod), nameof(PerformanceOptimizerMod.ResetStaticData)));
             }
-
-            performPatchesPerFrames = UnityEngine.Object.FindObjectOfType<Root_Entry>().gameObject.AddComponent<PerformPatchesPerFrames>();
+            var gameObject = new GameObject("PerformanceOptimizerMod");
+            UnityEngine.Object.DontDestroyOnLoad(gameObject);
+            performPatchesPerFrames = gameObject.AddComponent<PerformPatchesPerFrames>();
             settings = GetSettings<PerformanceOptimizerSettings>();
         }
 
