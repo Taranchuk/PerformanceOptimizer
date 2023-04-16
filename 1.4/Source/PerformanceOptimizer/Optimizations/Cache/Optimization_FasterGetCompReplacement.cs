@@ -65,7 +65,7 @@ namespace PerformanceOptimizer
         {
             "System", "Cecil", "Multiplayer", "Prepatcher", "HeavyMelee", "0Harmony", "UnityEngine", "mscorlib",
             "ICSharpCode", "Newtonsoft", "ISharpZipLib", "NAudio", "Unity.TextMeshPro", "PerformanceOptimizer", "NVorbis",
-            "com.rlabrecque.steamworks.net", "Assembly-CSharp-firstpass", "CombatAI"
+            "com.rlabrecque.steamworks.net", "Assembly-CSharp-firstpass", "CombatAI", "MonoMod"
         };
 
         public static HashSet<string> typesToSkip = new()
