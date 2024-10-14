@@ -63,6 +63,7 @@
     <Compile Include="Optimizations\Cache\Optimization_HediffDef_PossibleToDevelopImmunityNaturally.cs" />
     <Compile Include="Optimizations\Cache\Optimization_StatWorker_MarketValue_CalculableRecipe.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_SkillRecord_LearnRateFactor.cs" />
+    <Compile Include="Optimizations\Throttling\Optimization_Building_Door_CheckClearReachabilityCacheBecauseOpenedOrClosed.cs" />
     <Compile Include="Optimizations\Throttling\Optimization_Precept_RoleSingle_RecacheActivity.cs" />
     <Compile Include="Optimizations\Throttling\Optimization_Precept_RoleMulti_RecacheActivity.cs" />
     <Compile Include="Optimizations\Cache\Optimization_IdeoBuildingPresenceDemand_BuildingPresent.cs" />
