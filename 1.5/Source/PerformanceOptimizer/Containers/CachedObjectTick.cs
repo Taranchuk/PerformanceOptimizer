@@ -11,7 +11,7 @@ namespace PerformanceOptimizer
     //    public int refreshTick;
     //
     //    public T valueIntInt;
-    //    public T valueInt 
+    //    public T cachedValue 
     //    {
     //        get { return GetValue(); }
     //        set { }
@@ -83,51 +83,41 @@ namespace PerformanceOptimizer
 
     public class CachedObjectTick<T> where T : class
     {
-        public bool cached;
-        public bool refreshNow;
+        public bool isRefreshRequired;
         public int refreshTick;
-        public T valueInt;
+        public T cachedValue;
+
         public CachedObjectTick()
         {
-            refreshNow = true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetValue(T value, int resetInTicks)
-        {
-            valueInt = value;
-            refreshTick = Find.TickManager.TicksGame + (resetInTicks - 1);
-            refreshNow = false;
+            isRefreshRequired = true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool SetOrRefresh(ref T __result)
         {
-            if (PerformanceOptimizerMod.tickManager.ticksGameInt > this.refreshTick)
+            if (PerformanceOptimizerMod.tickManager.ticksGameInt > refreshTick)
             {
-                this.refreshNow = true;
+                isRefreshRequired = true;
                 return true;
             }
-            else
-            {
-                __result = this.valueInt;
-                this.refreshNow = false;
-                this.cached = true;
-                return false;
-            }
+            __result = cachedValue;
+            return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ProcessResult(ref T __result, int refreshRate)
         {
-            if (this.refreshNow)
+            if (isRefreshRequired)
             {
-                this.SetValue(__result, refreshRate);
+                cachedValue = __result;
+                refreshTick = PerformanceOptimizerMod.tickManager.ticksGameInt + (refreshRate - 1);
+                isRefreshRequired = false;
             }
-            else if (this.cached && this.valueInt != __result)
+            else
             {
-                __result = this.valueInt;
+                __result = cachedValue;
             }
         }
     }
+
 }
