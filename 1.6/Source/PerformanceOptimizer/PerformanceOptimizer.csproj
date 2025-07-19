@@ -53,7 +53,6 @@
     <Compile Include="Containers\Stats.cs" />
     <Compile Include="DebugTools\Debugging.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Designator_CreateReverseDesignationGizmo.cs" />
-    <Compile Include="Optimizations\CacheWithRefresh\Optimization_FormCaravanComp_AnyActiveThreatNow.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Frame_WorkToBuild.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_GenCelestial_CurCelestialSunGlow.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_PawnUtility_IsInvisible.cs" />
@@ -63,11 +62,8 @@
     <Compile Include="Optimizations\Cache\Optimization_HediffDef_PossibleToDevelopImmunityNaturally.cs" />
     <Compile Include="Optimizations\Cache\Optimization_StatWorker_MarketValue_CalculableRecipe.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_SkillRecord_LearnRateFactor.cs" />
-    <Compile Include="Optimizations\Throttling\Optimization_Building_Door_CheckClearReachabilityCacheBecauseOpenedOrClosed.cs" />
     <Compile Include="Optimizations\Throttling\Optimization_Precept_RoleSingle_RecacheActivity.cs" />
     <Compile Include="Optimizations\Throttling\Optimization_Precept_RoleMulti_RecacheActivity.cs" />
-    <Compile Include="Optimizations\Cache\Optimization_IdeoBuildingPresenceDemand_BuildingPresent.cs" />
-    <Compile Include="Optimizations\Cache\Optimization_WorldGrid_LongLatOf.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Utilities\ModCompatUtility.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_BuildCopyCommandUtility_FindAllowedDesignator.cs" />
@@ -92,8 +88,6 @@
     <Compile Include="Optimizations\Bases\OptimizationType.cs" />
     <Compile Include="Optimizations\Throttling\Optimization_JobGiver_ConfigurableHostilityResponse.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_MentalBreaker_BreakThresholdExtreme.cs" />
-    <Compile Include="Optimizations\CacheWithRefresh\Optimization_MentalBreaker_BreakThresholdMajor.cs" />
-    <Compile Include="Optimizations\CacheWithRefresh\Optimization_MentalBreaker_BreakThresholdMinor.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Need_Beauty_CurrentInstantBeauty.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_PawnCollisionPosOffsetFor.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_PawnUtility_IsTeetotaler.cs" />
