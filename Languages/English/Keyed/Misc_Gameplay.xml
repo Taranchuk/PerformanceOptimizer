@@ -71,4 +71,5 @@
 	<PO.CreateReverseDesignationGizmo>Designator:CreateReverseDesignationGizmo</PO.CreateReverseDesignationGizmo>
 	<PO.FormCaravanComp_AnyActiveThreatNow>FormCaravanComp:AnyActiveThreatNow</PO.FormCaravanComp_AnyActiveThreatNow>
 	<PO.Building_Door_CheckClearReachabilityCacheBecauseOpenedOrClosed>Building_Door:ClearReachabilityCache</PO.Building_Door_CheckClearReachabilityCacheBecauseOpenedOrClosed>
+	<PO.CanGoFeral>CompOverseerSubject:CanGoFeral</PO.CanGoFeral>
 </LanguageData>

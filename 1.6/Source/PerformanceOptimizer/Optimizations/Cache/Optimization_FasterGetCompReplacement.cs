@@ -54,8 +54,6 @@ namespace PerformanceOptimizer
         public static MethodInfo genericMapGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetMapComponentFast));
         public static MethodInfo genericWorldGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetWorldComponentFast));
         public static MethodInfo genericGameGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetGameComponentFast));
-        public static MethodInfo genericThingGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetThingCompFast));
-        public static MethodInfo genericThingTryGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.TryGetThingCompFast));
         public static MethodInfo genericHediffTryGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.TryGetHediffCompFast));
         public static MethodInfo genericWorldObjectGetComp = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetWorldObjectCompFast));
         public static MethodInfo genericThingDefCompProps = AccessTools.Method(typeof(ComponentCache), nameof(ComponentCache.GetThingDefPropsFast));
@@ -163,14 +161,6 @@ namespace PerformanceOptimizer
                                         AddPatchInfo(method, instr, underlyingType, genericWorldObjectGetComp);
                                     }
                                 }
-                                else if (miName == "GetComp")
-                                {
-                                    Type underlyingType = mi.GetUnderlyingType();
-                                    if (typeof(ThingComp).IsAssignableFrom(underlyingType))
-                                    {
-                                        AddPatchInfo(method, instr, underlyingType, genericThingGetComp);
-                                    }
-                                }
                                 else if (miName == "GetCompProperties")
                                 {
                                     Type underlyingType = mi.GetUnderlyingType();
@@ -196,11 +186,7 @@ namespace PerformanceOptimizer
                                 if (mi.Name == "TryGetComp")
                                 {
                                     Type underlyingType = mi.GetUnderlyingType();
-                                    if (typeof(ThingComp).IsAssignableFrom(underlyingType))
-                                    {
-                                        AddPatchInfo(method, instr, underlyingType, genericThingTryGetComp);
-                                    }
-                                    else if (typeof(HediffComp).IsAssignableFrom(underlyingType))
+                                    if (typeof(HediffComp).IsAssignableFrom(underlyingType))
                                     {
                                         AddPatchInfo(method, instr, underlyingType, genericHediffTryGetComp);
                                     }

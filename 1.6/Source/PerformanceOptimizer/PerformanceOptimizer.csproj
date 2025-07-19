@@ -52,9 +52,11 @@
     <Compile Include="Containers\CachedValueUpdate.cs" />
     <Compile Include="Containers\Stats.cs" />
     <Compile Include="DebugTools\Debugging.cs" />
+    <Compile Include="Optimizations\CacheWithRefresh\Optimization_CompOverseerSubject_CanGoFeral.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Designator_CreateReverseDesignationGizmo.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_Frame_WorkToBuild.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_GenCelestial_CurCelestialSunGlow.cs" />
+    <Compile Include="Optimizations\CacheWithRefresh\Optimization_MoodThresholdExtensions_CurrentMoodThresholdFor.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_PawnUtility_IsInvisible.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_ForbidUtility_IsForbidden.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_PlantFallColors_GetFallColorFactor.cs" />
@@ -62,6 +64,7 @@
     <Compile Include="Optimizations\Cache\Optimization_HediffDef_PossibleToDevelopImmunityNaturally.cs" />
     <Compile Include="Optimizations\Cache\Optimization_StatWorker_MarketValue_CalculableRecipe.cs" />
     <Compile Include="Optimizations\CacheWithRefresh\Optimization_SkillRecord_LearnRateFactor.cs" />
+    <Compile Include="Optimizations\UITweaks\Optimization_ColonistBarColonistDrawer_DrawIcons.cs" />
     <Compile Include="Optimizations\Throttling\Optimization_Precept_RoleSingle_RecacheActivity.cs" />
     <Compile Include="Optimizations\Throttling\Optimization_Precept_RoleMulti_RecacheActivity.cs" />
     <Compile Include="Startup.cs" />
