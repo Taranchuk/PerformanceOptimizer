@@ -235,7 +235,6 @@ namespace PerformanceOptimizer
                 parse = true;
             }
             DoPatchesAsync(parse);
-            Patch(AccessTools.Method(typeof(CompGlower), nameof(CompGlower.SetGlowColorInternal)), GetMethod(nameof(SetGlowColorInternalPrefix)));
             var hugslibHarmonyUtility = AccessTools.TypeByName("HugsLib.Utils.HarmonyUtility");
             if (hugslibHarmonyUtility != null)
             {
@@ -261,11 +260,6 @@ namespace PerformanceOptimizer
                 }
             }
             return patches;
-        }
-
-        public static void SetGlowColorInternalPrefix(CompGlower __instance)
-        {
-            ResetCompCache(__instance.parent);
         }
 
         public static readonly MethodInfo transpiler = AccessTools.Method(typeof(Optimization_FasterGetCompReplacement), nameof(Optimization_FasterGetCompReplacement.Transpiler));
@@ -351,10 +345,6 @@ namespace PerformanceOptimizer
 
         private static IEnumerable<MethodInfo> GetClearMethods()
         {
-            foreach (Type type in typeof(ThingComp).AllSubclasses())
-            {
-                yield return ClearMethod(typeof(ICache_ThingComp<>), type);
-            }
             foreach (Type type in typeof(HediffComp).AllSubclasses())
             {
                 yield return ClearMethod(typeof(ICache_HediffComp<>), type);
@@ -386,81 +376,12 @@ namespace PerformanceOptimizer
     [StaticConstructorOnStartup]
     public static class ComponentCache
     {
-        public static class ICache_ThingComp<T> where T : ThingComp
-        {
-            public static Dictionary<int, T> compsById = new();
-            public static void Clear()
-            {
-                compsById.Clear();
-            }
-            public static void ResetCompCache(int key)
-            {
-                compsById.Remove(key);
-            }
-        }
 
         //Attentions modders! If you remove or add comps from things manually, you can reset the comp cache by calling this method below. Example:
         //public static MethodInfo ComponentCache_ResetCompCache_Info = AccessTools.Method("PerformanceOptimizer.ComponentCache:ResetCompCache");
         //ComponentCache_ResetCompCache_Info?.Invoke(null, new object[] { thing });
 
         private static readonly Dictionary<Type, MethodInfo> cachedMethods = new();
-        public static void ResetCompCache(ThingWithComps thingWithComps)
-        {
-            foreach (Type type in typeof(ThingComp).AllSubclasses())
-            {
-                try
-                {
-                    if (!cachedMethods.TryGetValue(type, out MethodInfo method))
-                    {
-                        cachedMethods[type] = method = typeof(ICache_ThingComp<>).MakeGenericType(type)
-                            .GetMethod("ResetCompCache", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-                    }
-                    method.Invoke(null, new object[] { thingWithComps.thingIDNumber });
-                }
-                catch { }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T GetThingCompFast<T>(this ThingWithComps thingWithComps) where T : ThingComp
-        {
-            if (ICache_ThingComp<T>.compsById.TryGetValue(thingWithComps.thingIDNumber, out T val))
-            {
-                return val;
-            }
-
-            if (thingWithComps.comps == null)
-            {
-                return null;
-            }
-
-            for (int i = 0; i < thingWithComps.comps.Count; i++)
-            {
-                CompProperties props = thingWithComps.comps[i].props;
-                if (props != null && props.compClass == typeof(T))
-                {
-                    T val2 = thingWithComps.comps[i] as T;
-                    ICache_ThingComp<T>.compsById[thingWithComps.thingIDNumber] = val2;
-                    return val2;
-                }
-            }
-
-            for (int i = 0; i < thingWithComps.comps.Count; i++)
-            {
-                if (thingWithComps.comps[i] is T val3)
-                {
-                    ICache_ThingComp<T>.compsById[thingWithComps.thingIDNumber] = val3;
-                    return val3;
-                }
-            }
-            return null;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T TryGetThingCompFast<T>(this Thing thing) where T : ThingComp
-        {
-            return thing is not ThingWithComps thingWithComps ? null : thingWithComps.GetThingCompFast<T>();
-        }
 
         public static class ICache_HediffComp<T> where T : HediffComp
         {
@@ -474,7 +395,7 @@ namespace PerformanceOptimizer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T TryGetHediffCompFast<T>(this Hediff hd) where T : HediffComp
         {
-            if (ICache_HediffComp<T>.compsById.TryGetValue(hd.loadID, out T val))
+            if (hd != null && ICache_HediffComp<T>.compsById.TryGetValue(hd.loadID, out T val))
             {
                 return val;
             }
