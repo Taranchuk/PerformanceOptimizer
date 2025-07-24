@@ -395,7 +395,8 @@ namespace PerformanceOptimizer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T TryGetHediffCompFast<T>(this Hediff hd) where T : HediffComp
         {
-            if (hd != null && ICache_HediffComp<T>.compsById.TryGetValue(hd.loadID, out T val))
+            if (hd is null) return null;
+            if (ICache_HediffComp<T>.compsById.TryGetValue(hd.loadID, out T val))
             {
                 return val;
             }
