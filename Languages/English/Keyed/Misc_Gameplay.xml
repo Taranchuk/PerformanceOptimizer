@@ -39,6 +39,7 @@
 	<PO.GridsUtilityGetRoom>GridsUtility:GetRoom</PO.GridsUtilityGetRoom>
 	<PO.GridsUtilityFogged>GridsUtility:Fogged</PO.GridsUtilityFogged>
 	<PO.PawnCollisionPosOffsetFor>PawnCollisionTweenerUtility:PawnCollisionPosOffsetFor</PO.PawnCollisionPosOffsetFor>
+	<PO.GetPlayerGravEngine>GravshipUtility:GetPlayerGravEngine</PO.GetPlayerGravEngine>
 	<PO.RefreshRate>refresh rate {0}</PO.RefreshRate>
 	<PO.ThrottleRate>throttle rate {0}</PO.ThrottleRate>
 	
